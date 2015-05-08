@@ -1,3 +1,11 @@
+/**
+ * Hero Gallery
+ */
+
+div#hero_gallery {
+	width: 50px;
+	height: 50px;	
+}
 
 /* define the horizontal menu label */
 
@@ -6,9 +14,4 @@ nav li {
 	margin: 0px 5px;
 }
 
-.browsehappy {
-  margin: 0.2em 0;
-  background: #ccc;
-  color: #000;
-  padding: 0.2em 0;
-}
+
