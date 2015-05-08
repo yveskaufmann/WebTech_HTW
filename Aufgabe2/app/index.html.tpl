@@ -23,29 +23,8 @@
 	
     <div id="wrapper">
     	
-        <header>
-    <img src="images/logo.png" alt="logo">
-    <hgroup>
-        <h1> Supero Un.Ltd  </h1>
-        <h2> Die Superhelden Vermittlung </h2>
-    </hgroup>	
-    <nav>
-		<ul>
-			<li> 
-                <a href="#">Über Uns</a>
-			</li>
-			<li>
-				<a href="#">Helden</a>
-			</li>
-			<li>
-				<a href="#">Kontakt</a>
-			</li>
-			<li>
-				<a href="#">Faq</a>
-			</li>
-		</ul>
-	</nav>
-</header>
+        <!-- build:include templates/header.html -->
+        <!-- /build -->
         
         <div class="content">
             <article>
@@ -199,9 +178,8 @@
             </article>
         </div>
 
-            <footer>
-	<b> It works2 </b>
-</footer>
+            <!-- build:include templates/footer.html -->
+            <!-- /build -->
     </div>
    
 

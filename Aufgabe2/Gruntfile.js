@@ -32,7 +32,7 @@ module.exports = function (grunt) {
     watch: {
       bower: {
         files: ['bower.json'],
-        tasks: ['wiredep']
+        tasks: ['processhtml', 'wiredep']
       },
       js: {
         files: ['<%= config.app %>/scripts/{,*/}*.js'],
@@ -52,6 +52,10 @@ module.exports = function (grunt) {
         files: ['<%= config.app %>/styles/{,*/}*.css'],
         tasks: ['newer:copy:styles', 'autoprefixer']
       },
+      templates: {
+      files: ['<%= config.app %>/{,*/}*.html', '<%= config.app %>/{,*/}*.html.tpl'],
+        tasks: ['processhtml', 'wiredep']
+      },
       livereload: {
         options: {
           livereload: '<%= connect.options.livereload %>'
@@ -61,6 +65,15 @@ module.exports = function (grunt) {
           '.tmp/styles/{,*/}*.css',
           '<%= config.app %>/images/{,*/}*'
         ]
+      }
+    },
+
+    // Asssemble the html files.
+    processhtml: {
+      dist: { 
+        files: {       
+          '<%= config.app %>/index.html': ['<%= config.app %>/index.html.tpl']
+        }
       }
     },
 
@@ -164,7 +177,7 @@ module.exports = function (grunt) {
     wiredep: {
       app: {
         ignorePath: /^\/|\.\.\//,
-        src: ['<%= config.app %>/index.html'],
+        src: ['<%= config.dist %>/index.html'],
         exclude: ['bower_components/bootstrap/dist/js/bootstrap.js']
       }
     },
@@ -339,6 +352,7 @@ module.exports = function (grunt) {
 
     grunt.task.run([
       'clean:server',
+      'processhtml',
       'wiredep',
       'concurrent:server',
       'autoprefixer',
@@ -369,6 +383,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
+    'processhtml',
     'wiredep',
     'useminPrepare',
     'concurrent:dist',
