@@ -69,7 +69,11 @@
 						<% for (var hero_id in heroes) { %>
 						<% var hero = heroes[hero_id]; %>
 							<tr>
-								<td><img src="<%=hero.image_url %>" alt="<%=hero.name %>"></td>
+								<td>
+									<a href="#<%=hero_id %>">
+										<img src="<%=hero.image_url %>" alt="<%=hero.name %>">
+									</a>		
+								</td>
 								<td><%=hero.name %></td>
 								<td><%=hero.price_per_hour %> €</td>
 							</tr>

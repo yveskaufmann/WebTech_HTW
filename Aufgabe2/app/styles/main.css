@@ -267,7 +267,7 @@ table.price-list tr:nth-child(2n) {
 	vertical-align: middle; 
 }
  
-.price-list td > img {
+.price-list td  img {
 	height: 60px;
 }
 
