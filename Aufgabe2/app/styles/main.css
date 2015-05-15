@@ -110,6 +110,9 @@ nav li a  {
 	color: #fff;
 	z-index: 999999;
 }
+a:active {
+	color:#fff;
+}
 
 /******************************************************************************
  * Content
@@ -120,6 +123,7 @@ nav li a  {
 	background: rgba(87, 92, 104, 0.8);
 	text-align: center;
 	vertical-align: top;
+	border-bottom: 2px solid #1f1f1f;
 	
 }
 
@@ -146,6 +150,7 @@ nav li a  {
 footer.page-footer {
 	height: 4em; 
 	bottom: 0;
+	background: #1f1f1f;
 }
 
 /******************************************************************************
@@ -178,7 +183,7 @@ footer.page-footer {
 }
 
 .hero-gallery-item-border {
-	box-shadow: inset 0 0 60px rgba(0,0,0,0.5);
+	box-shadow: inset 0 0 60px rgba(0,0,0,0.8);
 	position: absolute;
 	left: 0;
 	bottom: 0;
@@ -196,10 +201,14 @@ footer.page-footer {
 	    -ms-transition: border .2s linear;
 	     -o-transition: border .2s linear;
 	        transition: border .2s linear;
-	z-index: 2;
+	z-index: 5;
 },
-.hero-gallery-item-border:hover {
+
+.hero-gallery-item a:hover 
+.hero-gallery-item-border {
 	border-width: 10px;
+	background-color: red;
+	content: "sdasdsa";
 }
 
 .hero-gallery-item img {
@@ -210,4 +219,90 @@ footer.page-footer {
 	border-radius: 50%;
 	z-index:1;
 	box-shadow: 3px 5px 20px rgba(0, 0, 0, 0.8)
+}
+
+/******************************************************************************
+ * Price Table
+ *****************************************************************************/
+
+table.price-list {
+	margin: 1.5em 0;
+	background: none;
+  	border-collapse: separate; 
+  	border-spacing: 0;
+  	width: 100%;
+
+}
+
+.price-list th, td {
+	padding: .3em .7em;
+	vertical-align: top;
+	text-align: left;
+	border-bottom: 2px solid #d8d8d8;
+}
+table.price-list thead tr,
+table.price-list tr:nth-child(2n) {
+	background-color: rgba(0, 0, 0, 0.1);
+	box-shadow: inset 0 0 60px rgba(0,0,0,0.8);
+} 
+
+.price-list tbody td {
+	vertical-align: middle; 
+}
+ 
+.price-list td > img {
+	height: 60px;
+}
+
+/******************************************************************************
+ * Kontakt-Formular
+ *****************************************************************************/
+
+
+.formLayout {
+	margin: 0 auto;
+    padding: 10px;
+    width: 300px;
+}
+    
+.formLayout label {
+    display: block;
+    width: 300px;
+    float: left;
+    margin-bottom: 10px;
+}
+ 
+.formLayout label,
+.formLayout select,
+.formLayout textarea,
+.formLayout input {
+    text-align: left;
+    padding-right: 20px;
+}
+
+label::after,
+select::after,
+textarea::after,
+input::after {
+    content: "";
+    clear:left;
+}
+label::after {
+	content: ": "
+}
+
+h3 {
+	font-size: 2em;
+  	
+	border-bottom: solid 5px rgba(41, 36, 36, 0.4);
+	box-shadow: 0 20px 10px -10px rgba(88, 88, 88, 0.5);
+	text-transform: uppercase;
+	margin-top: 2em;
+	margin-bottom: 3em;
+	padding: 0 1em;
+	line-height: 1.2em;
+	background-color: rgba(87, 92, 104, 0.5);
+	color: white;
+	font-family: 'Roboto Slab',serif;
+	
 }

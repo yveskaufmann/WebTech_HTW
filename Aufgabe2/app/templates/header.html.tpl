@@ -3,7 +3,7 @@
 		
 		<!-- Logo -->
 		<h1 class="logo">
-			<a href="#home">Supero Un.Ltd</a>
+			<a href="#about">Supero Un.Ltd</a>
 		</h1>
 		
 		<!-- Main Menu -->
@@ -11,6 +11,9 @@
 			<ul>
 				<li> 
 					<a href="#hereos">Helden</a>
+				</li>
+				<li>
+					<a href="#prices">Preise</a>
 				</li>
 				<li>
 					<a href="#order">Ordern</a>
