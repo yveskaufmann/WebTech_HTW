@@ -24,7 +24,6 @@ module.exports = function (grunt) {
 
   // Define the configuration for all the tasks
   grunt.initConfig({
-
     // Project settings
     config: config,
 
@@ -53,7 +52,7 @@ module.exports = function (grunt) {
         tasks: ['newer:copy:styles', 'autoprefixer']
       },
       templates: {
-      files: ['<%= config.app %>/{,*/}*.html', '<%= config.app %>/{,*/}*.html.tpl'],
+      files: ['<%= config.app %>/*.html.tpl', '<%= config.app %>/{,*/}*.html.tpl'],
         tasks: ['processhtml', 'wiredep']
       },
       livereload: {
@@ -70,7 +69,13 @@ module.exports = function (grunt) {
 
     // Asssemble the html files.
     processhtml: {
-      dist: { 
+      dist: {
+        options: {
+          data: {
+            heroes: grunt.file.readJSON('model/heroes.json')
+          },
+          process: true
+        },
         files: {       
           '<%= config.app %>/index.html': ['<%= config.app %>/index.html.tpl']
         }

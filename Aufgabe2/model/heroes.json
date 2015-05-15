@@ -1,0 +1,134 @@
+{
+	"aquaman": {
+		"price_per_hour": 8,
+		"name": "Aquaman",
+		"image_url": "images/Aquaman.jpg",
+		"description": ["Aquaman, mit richtigem Namen Arthur Curry, ist der Sohn des Menschen Tom Curry", 
+					   	"und Atlanna, einer Bewohnerin von Atlantis.",
+						"",
+						"Als Konsequenz seiner atlantischen Abstammung kann er unter Wasser atmen,",
+						"mit Meerestieren telepathisch kommunizieren, extrem schnell schwimmen und",
+						"auch an Land ziemlich schnell rennen. In der neuesten Auflage der Comicreihe", 
+						"verlor er seine linke Hand bei einem Kampf. Er trägt nun eine telepathisch kontrollierte Prothese.",
+						"Aquaman ist überdies der Herrscher des Königreichs von Atlantis."]
+	},
+
+	"batman": {
+		"price_per_hour": 16,
+		"name": "Batman",
+		"image_url": "images/Batman.jpg",
+		"description": [""]
+	},
+
+	"captain_america": {
+		"price_per_hour": 10,
+		"name": "Captain America",
+		"image_url": "images/Captain_America.jpg",
+		"description": [""]	
+	},
+
+	"catwoman": {
+		"price_per_hour": 16,
+		"name": "Catwoman",
+		"image_url": "images/Catwoman.jpg",
+		"description": [""]
+	},
+
+	"cyclops": {
+		"price_per_hour": 10,
+		"name": "Cyclops",
+		"image_url": "images/Cyclops.jpg",
+		"description": [""]
+	},
+
+	"deadpool": {
+		"price_per_hour": 25,
+		"name": "Deadpool",
+		"image_url": "images/Deadpool.jpg",
+		"description": [""]
+	},
+
+	"hulk": {
+		"price_per_hour": 30,
+		"name": "Hulk",
+		"image_url": "images/Hulk.jpg",
+		"description": [""]
+	},
+
+	"human_torch": {
+		"price_per_hour": 16,
+		"name": "Human Torch",
+		"image_url": "images/Human_Torch.jpg",
+		"description": [""]
+	},
+
+	"iceman": {
+		"price_per_hour": 10,
+		"name": "Iceman",
+		"image_url": "images/Iceman.jpg",
+		"description": [""]
+	},
+
+	"invisible_woman": {
+		"price_per_hour": 25,
+		"name": "Invisible Woman",
+		"image_url": "images/Invisible_Woman.jpg",
+		"description": [""]
+	},
+	
+	"Mister Fantastic": {
+		"price_per_hour": 18,
+		"name": "Mister Fantastic",
+		"image_url": "images/Mister_Fantastic.jpg",
+		"description": [""]
+	},
+
+	"catwoman": {
+		"price_per_hour": 16,
+		"name": "Catwoman",
+		"image_url": "images/Catwoman.jpg",
+		"description": [""]
+	},
+
+	"spiderman": {
+		"price_per_hour": 16,
+		"name": "Spiderman",
+		"image_url": "images/Spider_Man.jpg",
+		"description": [""]
+	},
+
+	"storm": {
+		"price_per_hour": 34,
+		"name": "Storm",
+		"image_url": "images/Storm.jpg",
+		"description": [""]
+	},
+
+	"superman": {
+		"price_per_hour": 35,
+		"name": "Superman",
+		"image_url": "images/Superman.jpg",
+		"description": [""]
+	},
+
+	"the_flash": {
+		"price_per_hour": 50,
+		"name": "The Flash",
+		"image_url": "images/The_Flash.jpg",
+		"description": [""]
+	},
+
+	"thor": {
+		"price_per_hour": 35,
+		"name": "Thor",
+		"image_url": "images/Thor.jpg",
+		"description": [""]
+	},
+
+	"wolverine": {
+		"price_per_hour": 15,
+		"name": "Wolverine",
+		"image_url": "images/Wolverine.jpg",
+		"description": [""]
+	}
+}

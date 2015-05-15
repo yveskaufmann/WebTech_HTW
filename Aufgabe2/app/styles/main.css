@@ -1,17 +1,213 @@
-/**
+/******************************************************************************
+ * Global Style settings 
+ *****************************************************************************/
+
+body {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  color: #555;
+  font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
+  -moz-font-smoothing: antialiased;
+  -o-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+  box-shadow: inset 0px 50px 20px 1px #ccc;
+}
+
+nav ol,
+nav ul {
+	list-style: none;
+}
+nav li{
+	float: left;
+}
+
+nav li a  {
+	text-decoration: none;
+}
+
+.clearfix:after,
+.clearfix:before {
+    content: "";
+    display: table
+    visibility: hidden;
+}
+.clearfix:after {
+    clear: both
+}
+
+.fixed-panel {
+	position: fixed;
+	z-index: 9999;
+	margin: 0 !important;
+	padding: 0 !important;
+	left: 0;
+	right: 0;
+	width: 100%;
+}
+
+.container {
+	position: relative;
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 0 2em;
+}
+ 
+/******************************************************************************
+ * Fixed Header Panel 
+ *****************************************************************************/
+
+.page-header {
+	top: 0;
+	background: #1f1f1f;
+	line-height: 3em;	
+}
+
+.page-header .logo {
+	// background-color: #f0141e;
+	float: left;
+	margin: 0;
+	padding: 0 2px;
+	overflow: hidden;
+}
+
+.page-header .logo a {
+	font-family: 'Marvel', sans-serif;
+	// background-color: #f0141e;
+	padding: 0 2px;
+	color: #fff;
+	text-shadow: 2px 2px 1px #ccc;
+	text-decoration: none;
+	text-transform: uppercase; 
+	letter-spacing: -2px
+}
+
+.main-menu ul {
+	float: right;
+	margin: 0;
+}
+.main-menu ul > li {
+	padding: 0 13px !important; 
+}
+.main-menu ul > li::first-child {
+	padding-right: 100px;
+}
+.main-menu li {
+	
+}
+.main-menu li>a {
+	text-transform: uppercase;
+	color: #ccc;
+	-webkit-transition: all .35s ease;
+	   -moz-transition: all .35s ease;
+	    -ms-transition: all .35s ease;
+	     -o-transition: all .35s ease;
+	        transition: all .35s ease;
+}
+.main-menu li > a:hover, 
+.main-menu li > a:hover 
+.main-menu li > a:active {
+	color: #fff;
+	z-index: 999999;
+}
+
+/******************************************************************************
+ * Content
+ *****************************************************************************/
+
+.slogan {
+	padding-top: 4em;
+	background: rgba(87, 92, 104, 0.8);
+	text-align: center;
+	vertical-align: top;
+	
+}
+
+.slogan h2 {
+	margin: 0 1em;
+	color: #fff;
+	letter-spacing: .2em;
+	font-size: 2.6em;
+	line-height: 1.2em;
+	text-transform: uppercase;
+	padding-bottom: 1em;
+	font-family: 'Roboto Slab',serif;
+}
+
+.content {
+	height: 100% !important;
+}
+
+
+/******************************************************************************
+ * Footer
+ *****************************************************************************/
+
+footer.page-footer {
+	height: 4em; 
+	bottom: 0;
+}
+
+/******************************************************************************
  * Hero Gallery
- */
+ *****************************************************************************/
 
-div#hero_gallery {
-	width: 50px;
-	height: 50px;	
+.hero-gallery {
+	margin: 0 auto;
+	text-align: center;
+	padding: 0;
 }
 
-/* define the horizontal menu label */
-
-nav li {
-	display: inline;
-	margin: 0px 5px;
+.hero-gallery-item {
+	display: inline-block;
 }
 
+.hero-gallery-item  a {
+	display: block;
+	position: relative;
+	border-radius: 50%;
+}
 
+.hero-gallery-item  h5 {
+	text-align: center;
+	margin-top: 1.5em;
+}
+
+.hero-gallery-item  figure {
+	margin: 5px;
+}
+
+.hero-gallery-item-border {
+	box-shadow: inset 0 0 60px rgba(0,0,0,0.5);
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+	border: 3px solid black;
+	border-radius: 50%;
+	-webkit-box-sizing:  border-box;
+	  -moz-box-sizing:   border-box;
+	    -ms-box-sizing:  border-box;
+		  -o-box-sizing: border-box;
+		    box-sizing: border-box;
+	-webkit-transition: border .2s linear;
+	   -moz-transition: border .2s linear;
+	    -ms-transition: border .2s linear;
+	     -o-transition: border .2s linear;
+	        transition: border .2s linear;
+	z-index: 2;
+},
+.hero-gallery-item-border:hover {
+	border-width: 10px;
+}
+
+.hero-gallery-item img {
+	width:150px;
+	height: auto;
+	position: relative;
+	display: block;
+	border-radius: 50%;
+	z-index:1;
+	box-shadow: 3px 5px 20px rgba(0, 0, 0, 0.8)
+}
