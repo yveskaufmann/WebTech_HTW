@@ -48,11 +48,27 @@ nav li a  {
 
 .container {
 	position: relative;
-	max-width: 900px;
+	max-width: 960px;
 	margin: 0 auto;
 	padding: 0 2em;
 }
- 
+
+h3 {
+	font-size: 2em;
+	border-bottom: solid 5px rgba(41, 36, 36, 0.4);
+	box-shadow: 0 20px 10px -10px rgba(88, 88, 88, 0.5);
+	text-transform: uppercase;
+	margin-top: 2em;
+	margin-bottom: 1em;
+	padding: 0 1em;
+	line-height: 1.2em;
+	background-color: rgba(87, 92, 104, 0.5);
+	color: white;
+	font-family: 'Roboto Slab',serif;
+	border-radius: 25px;
+	
+}
+
 /******************************************************************************
  * Fixed Header Panel 
  *****************************************************************************/
@@ -124,7 +140,10 @@ a:active {
 	text-align: center;
 	vertical-align: top;
 	border-bottom: 2px solid #1f1f1f;
-	
+	border-radius: 25px;
+ 	border-bottom: solid 5px rgba(41, 36, 36, 0.4);
+	box-shadow: 0 20px 10px -10px rgba(88, 88, 88, 0.5);
+	border-radius: 40px;
 }
 
 .slogan h2 {
@@ -136,6 +155,7 @@ a:active {
 	text-transform: uppercase;
 	padding-bottom: 1em;
 	font-family: 'Roboto Slab',serif;
+
 }
 
 .content {
@@ -201,14 +221,11 @@ footer.page-footer {
 	    -ms-transition: border .2s linear;
 	     -o-transition: border .2s linear;
 	        transition: border .2s linear;
-	z-index: 5;
+	z-index: 99999;
 },
 
-.hero-gallery-item a:hover 
-.hero-gallery-item-border {
-	border-width: 10px;
-	background-color: red;
-	content: "sdasdsa";
+.hero-gallery-item-border:hover {
+	border: solid 20px #111;
 }
 
 .hero-gallery-item img {
@@ -234,7 +251,7 @@ table.price-list {
 
 }
 
-.price-list th, td {
+.price-list th, .price-list td {
 	padding: .3em .7em;
 	vertical-align: top;
 	text-align: left;
@@ -267,9 +284,10 @@ table.price-list tr:nth-child(2n) {
     
 .formLayout label {
     display: block;
-    width: 300px;
+    width: 100%;
     float: left;
     margin-bottom: 10px;
+    margin-top: 10px;
 }
  
 .formLayout label,
@@ -278,6 +296,16 @@ table.price-list tr:nth-child(2n) {
 .formLayout input {
     text-align: left;
     padding-right: 20px;
+}
+
+.formLayout .buttons {
+	float: right;
+	display: inline-flex;
+}
+
+.formLayout .buttons button {
+	margin-left: 2px;
+	margin-top: 5px;
 }
 
 label::after,
@@ -291,18 +319,19 @@ label::after {
 	content: ": "
 }
 
-h3 {
-	font-size: 2em;
-  	
-	border-bottom: solid 5px rgba(41, 36, 36, 0.4);
-	box-shadow: 0 20px 10px -10px rgba(88, 88, 88, 0.5);
-	text-transform: uppercase;
-	margin-top: 2em;
-	margin-bottom: 3em;
-	padding: 0 1em;
-	line-height: 1.2em;
-	background-color: rgba(87, 92, 104, 0.5);
-	color: white;
-	font-family: 'Roboto Slab',serif;
-	
-}
+
+/******************************************************************************
+ * FAQ
+ *****************************************************************************/
+ol.faq li>p:first-child {
+ 	font-weight: bolder;
+ }
+
+ /******************************************************************************
+ * Impressum
+ *****************************************************************************/
+ 
+ .impressum td {
+ 	vertical-align: top;
+ 	padding: 15px;
+ }
