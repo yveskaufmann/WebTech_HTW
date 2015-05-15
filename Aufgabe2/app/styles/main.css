@@ -69,6 +69,14 @@ h3 {
 	
 }
 
+.noinfo {
+	cursor: default;
+}
+
+.info {
+	cursor: pointer;
+}
+
 /******************************************************************************
  * Fixed Header Panel 
  *****************************************************************************/
@@ -80,7 +88,6 @@ h3 {
 }
 
 .page-header .logo {
-	// background-color: #f0141e;
 	float: left;
 	margin: 0;
 	padding: 0 2px;
@@ -89,7 +96,6 @@ h3 {
 
 .page-header .logo a {
 	font-family: 'Marvel', sans-serif;
-	// background-color: #f0141e;
 	padding: 0 2px;
 	color: #fff;
 	text-shadow: 2px 2px 1px #ccc;
@@ -108,10 +114,11 @@ h3 {
 .main-menu ul > li::first-child {
 	padding-right: 100px;
 }
-.main-menu li {
-	
+.main-menu li a{
+	z-index: 999999;
 }
 .main-menu li>a {
+	z-index: 999999;
 	text-transform: uppercase;
 	color: #ccc;
 	-webkit-transition: all .35s ease;
@@ -124,7 +131,7 @@ h3 {
 .main-menu li > a:hover 
 .main-menu li > a:active {
 	color: #fff;
-	z-index: 999999;
+	
 }
 a:active {
 	color:#fff;

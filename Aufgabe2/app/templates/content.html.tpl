@@ -30,9 +30,10 @@
 					<div class="hero-gallery">
 						<% for (var hero_id in heroes) { %>
 						<% var hero = heroes[hero_id]; %>
+						<% var infoClass = (hero.has_info_page ? "info" : "noinfo"); %> 
 						<div class="hero-gallery-item">
 							<figure>
-								<a href="#<%= hero_id %> ">
+								<a class="<%= infoClass %>" href="#<%= hero_id %> ">
 									<div class="hero-gallery-item-border"></div>
 									<img src="<%=hero.image_url %>" alt="<%=hero.name %>">
 								</a>
@@ -68,9 +69,10 @@
 					<tbody>
 						<% for (var hero_id in heroes) { %>
 						<% var hero = heroes[hero_id]; %>
+						<% var infoClass = (hero.has_info_page ? "info" : "noinfo"); %>
 							<tr>
 								<td>
-									<a href="#<%=hero_id %>">
+									<a class="<%= infoClass %>" href="#<%=hero_id %>">
 										<img src="<%=hero.image_url %>" alt="<%=hero.name %>">
 									</a>		
 								</td>
@@ -181,7 +183,7 @@
 			</article>
 			<article>
 		    <h3 id="thor">
-		        <a>Thor</a> 
+		        <a>Thor</a>
 		    </h3>
 		    <p>
 		     	As the Norse God of thunder and lightning, Thor wields one of the greatest weapons ever made, the enchanted hammer Mjolnir.

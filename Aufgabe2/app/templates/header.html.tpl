@@ -10,6 +10,17 @@
 		<nav class="main-menu">
 			<ul>
 				<li> 
+					<select style="clear: both;" name="held_selection" title="Helden Auswahl" onchange="location = '#' +this.options[this.selectedIndex].value;">
+						<option value="">Helden Steckbriefe</option>
+						<% for (var hero_id in heroes) { %>
+						<% var hero = heroes[hero_id]; %>
+						<% var disabled = (hero.has_info_page ? "" : "disabled"); %> 
+						<% if (disabled) continue; %>
+						<option value="<%= hero_id %>" <%=disabled%>><%= hero_id %></option>
+						<% } %>
+					</select>
+				</li>
+				<li> 
 					<a href="#hereos">Helden</a>
 				</li>
 				<li>
