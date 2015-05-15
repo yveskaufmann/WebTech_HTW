@@ -8,7 +8,7 @@
 		if ( dashPos >= 0  ) {
 			title = title.slice(dashPos + 2);
 		} 
-		console.info(hash);
+		
 		if(hash != '') {
 			var hashes =  {
 				'#about': '',

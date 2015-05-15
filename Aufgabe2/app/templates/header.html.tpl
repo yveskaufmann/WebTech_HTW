@@ -16,7 +16,7 @@
 						<% var hero = heroes[hero_id]; %>
 						<% var disabled = (hero.has_info_page ? "" : "disabled"); %> 
 						<% if (disabled) continue; %>
-						<option value="<%= hero_id %>" <%=disabled%>><%= hero_id %></option>
+						<option value="<%= hero_id %>" <%=disabled%>><%= hero.name %></option>
 						<% } %>
 					</select>
 				</li>
