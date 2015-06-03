@@ -1,0 +1,15 @@
+
+CREATE TABLE Poll
+(
+    id VARCHAR(32) PRIMARY KEY NOT NULL,
+    question VARCHAR(255)
+);
+
+CREATE TABLE Poll_Answers
+(
+    id INT NOT NULL AUTO_INCREMENT,
+    poll VARCHAR(32) NOT NULL,
+    text VARCHAR(255) NOT NULL,
+    votes INT DEFAULT 0 NOT NULL,
+    PRIMARY KEY (id, poll)
+);
