@@ -11,6 +11,7 @@ namespace Poller\App\Controller;
 use \Poller\App\Model\Poll;
 use \Poller\App\Model\PollQuery;
 use \Poller\App\Model\AlreadyVotedException;
+use Poller\Core\View\ErrorView;
 use \Poller\Core\View\Template;
 use Poller\Core\View\View;
 
@@ -20,13 +21,6 @@ class PollController {
     }
 
     public function index() {
-        $template1 = new Template('header', array('title' => '' ));
-        $view = new View('error/404');
-        $view->addData('error', 'asdsdasdsa');
-        $template2 = new Template('footer');
-
-        return $template1->render().$view->render().$template2->render();
-
 
         // return $this->add();
     }

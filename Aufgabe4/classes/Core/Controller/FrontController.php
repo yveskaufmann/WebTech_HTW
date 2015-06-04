@@ -9,6 +9,8 @@
 namespace Poller\Core\Controller;
 
 use ReflectionClass;
+use InvalidArgumentException;
+use Poller\Core\View\ErrorView;
 
 class FrontController implements IFrontController {
 
@@ -19,9 +21,10 @@ class FrontController implements IFrontController {
     const OPTION_ACTION = 'action';
     const OPTIONS_PARAMS = 'params';
 
-    private $controller = '';
-    private $action = '';
-    private $params = array();
+    protected $controller = '';
+    protected $action = '';
+    protected $params = array();
+    protected $aborted = false;
 
     public function  __construct(array $options = array()) {
         if (empty($options)) {
@@ -50,6 +53,7 @@ class FrontController implements IFrontController {
     }
 
     public function run() {
+        if($this->aborted) return;
         $reflection = new ReflectionClass($this->controller);
         $controller = $reflection->newInstance();
         $method = $reflection->getMethod($this->action);
@@ -69,7 +73,7 @@ class FrontController implements IFrontController {
         $controllerClass = '\Poller\App\Controller\\'.ucfirst(strtolower($controller)).'Controller';
 
         if (! class_exists($controllerClass)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'There is no controller called "'.$controller.'".'
             );
         }
@@ -109,10 +113,18 @@ class FrontController implements IFrontController {
         if (! isset($options[self::OPTION_ACTION])) {
             $options[self::OPTION_ACTION] = array();
         }
+        try {
+            $this->setController($options[self::OPTION_CONTROLLER]);
+            $this->setAction($options[self::OPTION_ACTION]);
+            $this->setParams($options[self::OPTIONS_PARAMS]);
+        } catch(InvalidArgumentException $ex) {
+            $this->aborted = true;
+            $error = new ErrorView('404');
+            $error
+                ->addData('error', 'Requested resource not found.')
+                ->render();
 
-        $this->setController($options[self::OPTION_CONTROLLER]);
-        $this->setAction($options[self::OPTION_ACTION]);
-        $this->setParams($options[self::OPTIONS_PARAMS]);
+        }
     }
 }
 

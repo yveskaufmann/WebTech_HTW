@@ -25,6 +25,7 @@ class View {
     public function render() {
         $this->sendHeaders();
         return $this->renderTemplate($this->data);
+        return $this;
     }
 
     protected function sendHeaders() {
@@ -33,6 +34,7 @@ class View {
                 header($name . ': ' . $headValue, true);
             }
         }
+        return $this;
     }
 
     /**
@@ -73,10 +75,12 @@ class View {
                 .': '.$path_to_template
             );
         }
+        return $this;
     }
 
     public function addHeader($name, $value) {
         $this->headers[trim($name)] = trim($value);
+        return $this;
     }
 
     public function getHeaders($name, $default_value = null) {
@@ -85,6 +89,7 @@ class View {
 
     public function addData($name, $value) {
         $this->data[trim($name)] = $value;
+        return $this;
     }
 
     public function getData($name, $default_value = null) {
@@ -93,6 +98,7 @@ class View {
 
     public function clearData() {
         $this->data = array();
+        return $this;
     }
 
 };

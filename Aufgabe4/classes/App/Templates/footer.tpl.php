@@ -1,6 +1,6 @@
-<header>
+<footer>
     <p><span class="glyphicon glyphicon-heart"></span> from the Poller team</p>
-</header>
+</footer>
 
 </div>
 
