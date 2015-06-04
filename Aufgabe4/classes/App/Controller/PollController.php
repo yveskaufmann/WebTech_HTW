@@ -11,48 +11,43 @@ namespace Poller\App\Controller;
 use \Poller\App\Model\Poll;
 use \Poller\App\Model\PollQuery;
 use \Poller\App\Model\AlreadyVotedException;
+use Poller\Core\Helper\Params;
 use Poller\Core\View\ErrorView;
+use Poller\Core\View\PageView;
 use \Poller\Core\View\Template;
 use Poller\Core\View\View;
 
 class PollController {
+    const QUESTION_PARM = 'question';
+    const ANSWERS_PARAM = 'answers';
+
     public function __construct() {
 
     }
 
     public function index() {
-
-        // return $this->add();
+        return $this->add();
     }
 
-    public function add($id = '') {
+    public function add() {
+        $view = new PageView('poll/add', 'Poll - add');
+        if (Params::hasPOST(self::QUESTION_PARM) && Params::hasPOST(self::ANSWERS_PARAM)) {
+            $question = Params::getPost(self::QUESTION_PARM);
 
-        if (! isset($id)) {
-            $id = 'b40473b73c5871bffea8a06cd9b23f93';
-        }
-
-        $poll = PollQuery::create()->findOneById($id);
-        if (is_null($poll)) {
-            $poll = new Poll('Who should ... ?');
-            $poll->addAnswer('AAA');
-            $poll->addAnswer('DDD');
-            $poll->addAnswer('CCC');
-            $poll->addAnswer('HHH');
-        }
-
-        echo $poll->getTotalVoteCount();
-
-        foreach ($poll->getPollAnswers() as $answer) {
-            try {
-                $answer->vote();
-            } catch(AlreadyVotedException $ex) {
-
+            if (PollQuery::create()->hasPollWithQuestion($question)) {
+                return;
             }
-            echo "Answer: ".$answer->toJSON()."\n";
-        }
 
-        $poll->save();
-        return 'add';
+            $poll = new Poll($question);
+            $answers = Params::getPost(self::ANSWERS_PARAM);
+            $answers = explode(PHP_EOL, $answers);
+
+            foreach($answers as $answer) {
+                $poll->addAnswer($answer);
+            }
+            $poll->save();
+        }
+        $view->render();
     }
 
     public function show() {

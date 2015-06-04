@@ -8,22 +8,12 @@
 
 namespace Poller\Core\View;
 
-
-class ErrorView extends View {
+class ErrorView extends PageView {
 
     protected $error;
 
     public function __construct($error) {
-        parent::__construct('error/'.$error);
+        parent::__construct('error/'.$error, 'Error '.$error);
         $this->error = $error;
-    }
-
-    public function render() {
-        $header = new Template('header');
-        $footer = new Template('footer');
-
-        echo $header->addData('title', $this->error)->render();
-        echo parent::render();
-        echo $footer->render();
     }
 }

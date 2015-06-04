@@ -5,9 +5,9 @@
     <title><?php echo $this->data['title'] ?></title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
-    <link rel="shortcut icon" href="./favicon.ico">
-    <link rel="stylesheet" href="./public_html/scripts/vendor/bootstrap/dist/css/bootstrap.css">
-    <link rel="stylesheet" href="./public_html/styles/main.css">
+    <link rel="shortcut icon" href="public_html/favicon.ico">
+    <link rel="stylesheet" href="public_html/scripts/vendor/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="public_html/styles/main.css">
 
 </head>
 <body>

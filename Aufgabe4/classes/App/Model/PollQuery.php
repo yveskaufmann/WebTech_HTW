@@ -14,7 +14,11 @@ use Poller\App\Model\Base\PollQuery as BasePollQuery;
  * long as it does not already exist in the output directory.
  *
  */
-class PollQuery extends BasePollQuery
-{
+class PollQuery extends BasePollQuery {
+
+    public function hasPollWithQuestion($question) {
+        $id = Poll::createId($question);
+        return $this->findOneById($id) !== null;
+    }
 
 }

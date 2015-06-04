@@ -19,7 +19,7 @@ class PollAnswer extends BasePollAnswer
      */
     public function __construct($text=null) {
         if (! is_null($text)) {
-            $this->setText($text);
+            $this->setText(trim($text));
             $this->setVotes(0);
         }
     }
@@ -37,7 +37,9 @@ class PollAnswer extends BasePollAnswer
      */
     public function vote() {
         if (isset($_COOKIE[$this->getPollId()])) {
-            // throw new AlreadyVotedException();
+            if (! DEV_MODE) {
+                throw new AlreadyVotedException();
+            }
         }
         $votes = $this->getVotes();
         $this->setVotes($votes + 1);

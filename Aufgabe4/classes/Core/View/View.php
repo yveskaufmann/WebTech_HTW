@@ -10,7 +10,7 @@ namespace Poller\Core\View;
 
 use \string;
 
-class View {
+class View implements IView {
 
     protected $headers = array();
     protected $data = array();
@@ -24,8 +24,7 @@ class View {
 
     public function render() {
         $this->sendHeaders();
-        return $this->renderTemplate($this->data);
-        return $this;
+        echo $this->renderTemplate($this->data);
     }
 
     protected function sendHeaders() {

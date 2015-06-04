@@ -26,6 +26,16 @@ class FrontController implements IFrontController {
     protected $params = array();
     protected $aborted = false;
 
+    protected static $instance = null;
+
+    public static function get() {
+        if (is_null(self::$instance)) {
+            self::$instance = new FrontController();
+        }
+
+        return self::$instance;
+    }
+
     public function  __construct(array $options = array()) {
         if (empty($options)) {
             $this->handleRequest();
@@ -34,12 +44,67 @@ class FrontController implements IFrontController {
         }
     }
 
+    public function runController($controller_path, $redirect=false) {
+        if ($redirect) {
+            header('location: '.$controller_path);
+            return;
+        }
+        $this->configureByRequestUri($controller_path);
+        $this->run();
+    }
+
+    public function run() {
+        if($this->aborted) return;
+        $reflection = new ReflectionClass($this->controller);
+        $controller = $reflection->newInstance();
+        $method = $reflection->getMethod($this->action);
+        return $method->invoke($controller, $this->params);
+    }
+
     protected function handleRequest() {
         $request_URL = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $this->configureByRequestUri($request_URL);
+    }
+
+    /**
+     * Configure the auto dispatcher.
+     *
+     * @param array $options
+     */
+    public function configureByOptions(array $options) {
+
+        if (! isset($options[self::OPTION_CONTROLLER]) || strlen($options[self::OPTION_CONTROLLER]) <= 0 ) {
+            $options[self::OPTION_CONTROLLER] = self::DEFAULT_CONTROLLER;
+        }
+
+        if (! isset($options[self::OPTION_ACTION]) || strlen($options[self::OPTION_ACTION]) <= 0) {
+            $options[self::OPTION_ACTION] = self::DEFAULT_ACTION;
+        }
+
+        if (! isset($options[self::OPTION_ACTION])) {
+            $options[self::OPTION_ACTION] = array();
+        }
+        try {
+            $this->setController($options[self::OPTION_CONTROLLER]);
+            $this->setAction($options[self::OPTION_ACTION]);
+            $this->setParams($options[self::OPTIONS_PARAMS]);
+        } catch(InvalidArgumentException $ex) {
+            $this->aborted = true;
+            $error = new ErrorView('404');
+            $error
+                ->addData('error', 'Requested resource not found.')
+                ->render();
+        }
+    }
+
+    /**
+     * @param $request_URL
+     */
+    protected function configureByRequestUri($request_URL) {
         $request_URL = trim($request_URL, '/');
         $basename = basename(APP_ROOT);
 
-        if (strpos($request_URL, $basename) === 0 ) {
+        if (strpos($request_URL, $basename) === 0) {
             $request_URL = substr($request_URL, strlen($basename));
         }
         $request_URL = preg_replace('/^\//', '', $request_URL);
@@ -50,14 +115,6 @@ class FrontController implements IFrontController {
             self::OPTION_ACTION => isset($options[1]) ? $options[1] : null,
             self::OPTIONS_PARAMS => isset($options[2]) ? explode('/', $options[2]) : array(),
         ));
-    }
-
-    public function run() {
-        if($this->aborted) return;
-        $reflection = new ReflectionClass($this->controller);
-        $controller = $reflection->newInstance();
-        $method = $reflection->getMethod($this->action);
-        return $method->invoke($controller, $this->params);
     }
 
     public function setController($controller) {
@@ -93,38 +150,6 @@ class FrontController implements IFrontController {
     public function setParams(array $params) {
         $this->params = $params;
         return $this;
-    }
-
-    /**
-     * Configure the auto dispatcher.
-     *
-     * @param array $options
-     */
-    public function configureByOptions(array $options) {
-
-        if (! isset($options[self::OPTION_CONTROLLER]) || strlen($options[self::OPTION_CONTROLLER]) <= 0 ) {
-            $options[self::OPTION_CONTROLLER] = self::DEFAULT_CONTROLLER;
-        }
-
-        if (! isset($options[self::OPTION_ACTION]) || strlen($options[self::OPTION_ACTION]) <= 0) {
-            $options[self::OPTION_ACTION] = self::DEFAULT_ACTION;
-        }
-
-        if (! isset($options[self::OPTION_ACTION])) {
-            $options[self::OPTION_ACTION] = array();
-        }
-        try {
-            $this->setController($options[self::OPTION_CONTROLLER]);
-            $this->setAction($options[self::OPTION_ACTION]);
-            $this->setParams($options[self::OPTIONS_PARAMS]);
-        } catch(InvalidArgumentException $ex) {
-            $this->aborted = true;
-            $error = new ErrorView('404');
-            $error
-                ->addData('error', 'Requested resource not found.')
-                ->render();
-
-        }
     }
 }
 

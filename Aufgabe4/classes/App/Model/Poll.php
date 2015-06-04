@@ -19,7 +19,7 @@ class Poll extends BasePoll {
     public function __construct($question = null) {
         if(! is_null($question)) {
             $question = trim($question);
-            $this->setId($this->createId($question));
+            $this->setId(self::createId($question));
             $this->setQuestion($question);
         }
     }
@@ -31,16 +31,17 @@ class Poll extends BasePoll {
      * @param $question
      * @return string the generated id
      */
-    public function createId($question) {
+    public static function createId($question) {
         $id_components = array(
             "poll",
-            strtolower($question)
+            strtolower(trim($question))
         );
         return md5(join('',$id_components));
     }
 
     /**
      * Add a new answer to this poll.
+     * Empty string will be ignored.
      *
      * @param $answer the text of this answer.
      */
@@ -48,7 +49,11 @@ class Poll extends BasePoll {
         if (! is_string($answer)) {
             throw new \InvalidArgumentException('$answer must be a string');
         }
-        $this->addPollAnswer(new PollAnswer($answer));
+
+        $answer = trim($answer);
+        if ($answer !== '') {
+            $this->addPollAnswer(new PollAnswer($answer));
+        }
     }
 
     /**
