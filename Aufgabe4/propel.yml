@@ -1,0 +1,26 @@
+propel:
+    paths:
+        phpDir: 'classes/'
+        phpConfDir: 'config/'
+        sqlDir: 'assets/schema/'
+
+    database:
+        connections:
+            poller:
+                adapter: mysql
+                classname: Propel\Runtime\Connection\ConnectionWrapper
+                dsn: "mysql:host=localhost;dbname=poller"
+                user: root
+                password:
+                attributes:
+                settings:
+                    charset: utf8
+    runtime:
+        defaultConnection: poller
+        connections:
+             - poller
+    generator:
+        defaultConnection: poller
+        connections:
+            - poller
+

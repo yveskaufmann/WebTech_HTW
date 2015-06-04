@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<database name="poller" defaultIdMethod="native" defaultPhpNamingMethod="underscore" namespace="Poller\App\Model\">
+
+    <table name="Poll" idMethod="none" allowPkInsert="true" phpName="Poll">
+        <column name="id" phpName="Id" type="VARCHAR" size="32" primaryKey="true" required="true"/>
+        <column name="question" phpName="Question" type="VARCHAR" size="255" required="true"/>
+    </table>
+
+    <table name="Poll_Answer" idMethod="native" phpName="PollAnswer">
+        <column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+        <column name="poll" phpName="PollId" type="VARCHAR" size="32"  primaryKey="true"  required="true"/>
+        <column name="text" phpName="Text" type="VARCHAR" size="255" required="true"/>
+        <column name="votes" phpName="Votes" type="INTEGER" defaultValue="0"/>
+        <foreign-key foreignTable="Poll">
+            <reference local="poll" foreign="id"/>
+        </foreign-key>
+    </table>
+</database>

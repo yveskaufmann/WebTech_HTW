@@ -1,17 +1,10 @@
 <?php
 
     define('APP_ROOT', __DIR__);
+    require APP_ROOT.'/vendor/autoload.php';
+    require APP_ROOT.'/config/config.php';
 
-    $loader = require APP_ROOT.'/vendor/autoload.php';
+    use \Poller\Core\Controller\FrontController;
 
-	$newPoll = new \Poller\models\Poll('Who should ... ?');
-	$newPoll->addAnswer('AAA');
-	$newPoll->addAnswer('DDD');
-	$newPoll->addAnswer('CCC');
-	$newPoll->addAnswer('HHH');
-
-	foreach ($newPoll as $answer) {
-		echo "Answer: ".$answer->getAnswer()."\n";
-	}
-
-    $newPoll->persist();
+    $frontController = new FrontController();
+    echo $frontController->run();
