@@ -6,7 +6,14 @@
 <div class="container">
 
     <div class="row">
-        <form  autocomplete="off" role="form" class="col-md-9" action="" method="post">
+        <form
+            autocomplete="off"
+            role="form"
+            class="col-md-9"
+            action=""
+            method="post"
+            <?= $this->getData(PollController::RE_VALIDATE_PARAM) ? 'data-rerevalidate="true"' : ''; ?>
+            >
             <?php if ( $this->getData(PollController::ALREADY_EXIST_PARAM) ) {?>
                 <div class="alert alert-warning alert-dismissible" role="alert">
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">

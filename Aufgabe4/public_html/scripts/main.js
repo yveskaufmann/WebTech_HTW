@@ -1,5 +1,12 @@
 $(document).ready(function($) {
-    $('button.close').click(function() {
-        $(this).parent().hide();
-    })
+    "use strict";
+
+    // Lets trigger the form validation when the revalidation flag is set.
+    $('form[data-rerevalidate]').each(function() {
+        var form = $(this).get(0);
+        if ($.isFunction(form.reportValidity)) {
+            form.reportValidity();
+        }
+    });
+
 });

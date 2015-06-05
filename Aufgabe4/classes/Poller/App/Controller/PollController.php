@@ -16,6 +16,7 @@ class PollController {
     const ANSWERS_PARAM = 'answers';
     const ALREADY_EXIST_PARAM = 'already_exist';
     const POLL_PARAM = 'poll';
+    const RE_VALIDATE_PARAM = 'revalidate';
 
     public function index() {
          $this->add();
@@ -27,7 +28,9 @@ class PollController {
 
             $question = trim(Params::getPost(self::QUESTION_PARAM));
             $answers = trim(Params::getPost(self::ANSWERS_PARAM));
-            $emptyFields = $question === '' || $answers === '';
+
+            $revalidate = $question === '' || $answers === '';
+            $alreadyExists = PollQuery::create()->hasPollWithQuestion($question);
 
             $poll = new Poll($question);
             $poll->addAnswers(explode(PHP_EOL, $answers));
@@ -35,12 +38,12 @@ class PollController {
             $view
                 ->addData(self::POLL_PARAM, $poll)
                 ->addData(self::QUESTION_PARAM, $question)
-                ->addData(self::ANSWERS_PARAM, $answers);
+                ->addData(self::ANSWERS_PARAM, $answers)
+                ->addData(self::RE_VALIDATE_PARAM, $revalidate)
+                ->addData(self::ALREADY_EXIST_PARAM, $alreadyExists);
 
             // TODO: Proper Error Message.
-            if (PollQuery::create()->hasPollWithQuestion($question) || $emptyFields) {
-                $view->addData(self::ALREADY_EXIST_PARAM, ! $emptyFields);
-            } else {
+            if (!$revalidate && !$alreadyExists) {
                 $poll->save();
                 FrontController::get()->runController('poll', 'show', $poll->getId());
             }
