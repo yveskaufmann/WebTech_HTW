@@ -24,8 +24,10 @@ class PollController {
     public function add() {
         $view = new PageView('poll/add', 'Poll - add');
         if (Params::hasPOST(self::QUESTION_PARAM) && Params::hasPOST(self::ANSWERS_PARAM)) {
-            $question = Params::getPost(self::QUESTION_PARAM);
-            $answers = Params::getPost(self::ANSWERS_PARAM);
+
+            $question = trim(Params::getPost(self::QUESTION_PARAM));
+            $answers = trim(Params::getPost(self::ANSWERS_PARAM));
+            $emptyFields = $question === '' || $answers === '';
 
             $poll = new Poll($question);
             $poll->addAnswers(explode(PHP_EOL, $answers));
@@ -35,15 +37,15 @@ class PollController {
                 ->addData(self::QUESTION_PARAM, $question)
                 ->addData(self::ANSWERS_PARAM, $answers);
 
-            if (PollQuery::create()->hasPollWithQuestion($question)) {
-                $view->addData(self::ALREADY_EXIST_PARAM, true);
-
+            // TODO: Proper Error Message.
+            if (PollQuery::create()->hasPollWithQuestion($question) || $emptyFields) {
+                $view->addData(self::ALREADY_EXIST_PARAM, ! :q$emptyFields);
             } else {
                 $poll->save();
                 FrontController::get()->runController('poll', 'show', $poll->getId());
             }
-
         }
+
         $view->render();
     }
 
