@@ -48,8 +48,10 @@ class Params {
         }
 
         if (isset($scope[$name])) {
-            return $scope[$name];
+            $value = $scope[$name];
+            return filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         }
+
         return $defaultValue;
     }
 

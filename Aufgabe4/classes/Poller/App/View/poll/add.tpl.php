@@ -1,5 +1,6 @@
 <?php
     use \Poller\App\Controller\PollController;
+    use \Poller\Core\Helper\URL;
 ?>
 
 <div class="container">
@@ -15,7 +16,7 @@
                     <span class="sr-only">Warning:</span>
                     <div class="center-block">
                         There is already a poll with the same question as yours.
-                        Please check out the <a class="alert-link" href="poll/show/<?= $this->getData('poll')->getId(); ?>">other poll</a>
+                        Please check out the <a class="alert-link" href="<?= URL::getControllerURL('poll', 'show',$this->getData('poll')->getId()); ?>">other poll</a>
                         or change your question text.
                     </div>
                 </div>
@@ -32,9 +33,7 @@
             </div>
             <div class="form-group">
                 <label for="answers">Answers</label>
-                <textarea id="answers" name="answers" rows="5" class="form-control" required>
-                    <?= $this->getData(PollController::ANSWERS_PARAM); ?>
-                </textarea>
+                <textarea id="answers" name="answers" rows="5" class="form-control" required><?= $this->getData(PollController::ANSWERS_PARAM); ?></textarea>
             </div>
             <div class="form-group-sm pull-right">
                 <input class="btn btn-success btn-lg" type="submit" value="Add Poll">

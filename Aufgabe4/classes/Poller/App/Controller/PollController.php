@@ -66,6 +66,7 @@ class PollController {
     }
 
     public function vote($answerId) {
+        $answerId = filter_var($answerId, FILTER_SANITIZE_NUMBER_INT);
         $answer = PollAnswerQuery::create()->findOneById($answerId);
 
         if ( is_null($answer)) {

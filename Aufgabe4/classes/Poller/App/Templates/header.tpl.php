@@ -6,10 +6,10 @@
 <html class="no-js">
 <head>
     <meta charset="utf-8">
-    <title><?php echo $this->getData('title'); ?></title>
+    <title><?= $this->getData('title'); ?></title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
-    <link rel="shortcut icon" href="<?php echo URL::getPublicURL('favicon.ico'); ?>">
+    <link rel="shortcut icon" href="<?= URL::getPublicURL('favicon.ico'); ?>">
     <?php
         ViewUtil::css('bootstrap.css', 'scripts/vendor/bootstrap/dist/css');
         ViewUtil::css('main.css');

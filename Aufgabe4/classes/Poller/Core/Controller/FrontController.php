@@ -118,7 +118,7 @@ class FrontController implements IFrontController {
         $method = $reflection->getMethod($this->action);
 
         try {
-            return $method->invoke($controller, $this->params);
+            return $method->invokeArgs($controller, $this->params);
         } catch(HTTPErrorException $ex) {
             ErrorView::createFrom($ex)->render();
         }
