@@ -5,7 +5,23 @@ use Poller\Core\Helper\URL;
 $poll = $this->getData(PollController::POLL_PARAM);
 ?>
 
+
 <div class="container">
+    <?php if ($poll->getTotalVoteCount() < 3) { ?>
+        <div class="alert alert-warning alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+            <span class="sr-only">Warning:</span>
+            <div class="center-block">
+                There are not enough votes please visit
+                <a
+                    class="alert-link"
+                    href="<?= URL::getControllerURL('poll', 'show',$this->getData('poll')->getId()); ?>">this site later.</a>
+            </div>
+        </div>
+    <?php } else { ?>
     <div class="row">
 
         <div class="panel panel-default">
@@ -39,4 +55,5 @@ $poll = $this->getData(PollController::POLL_PARAM);
         </div>
 
     </div>
+    <?php } ?>
 </div>
