@@ -39,7 +39,7 @@ class PollController {
 
             // TODO: Proper Error Message.
             if (PollQuery::create()->hasPollWithQuestion($question) || $emptyFields) {
-                $view->addData(self::ALREADY_EXIST_PARAM, ! :q$emptyFields);
+                $view->addData(self::ALREADY_EXIST_PARAM, ! $emptyFields);
             } else {
                 $poll->save();
                 FrontController::get()->runController('poll', 'show', $poll->getId());
