@@ -118,6 +118,9 @@ class FrontController implements IFrontController {
         $method = $reflection->getMethod($this->action);
 
         try {
+            if (count($this->params) < $method->getNumberOfRequiredParameters()) {
+                throw new HTTPErrorException('404');
+            }
             return $method->invokeArgs($controller, $this->params);
         } catch(HTTPErrorException $ex) {
             ErrorView::createFrom($ex)->render();
