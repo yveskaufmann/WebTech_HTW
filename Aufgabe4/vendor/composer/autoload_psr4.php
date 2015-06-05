@@ -13,5 +13,5 @@ return array(
     'Symfony\\Component\\Filesystem\\' => array($vendorDir . '/symfony/filesystem'),
     'Symfony\\Component\\Console\\' => array($vendorDir . '/symfony/console'),
     'Symfony\\Component\\Config\\' => array($vendorDir . '/symfony/config'),
-    'Poller\\' => array($baseDir . '/classes'),
+    '' => array($baseDir . '/classes'),
 );
