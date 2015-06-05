@@ -9,6 +9,7 @@ use \Poller\App\Model\PollQuery;
 use \Poller\Core\Controller\FrontController;
 use \Poller\Core\Helper\Params;
 use \Poller\Core\View\PageView;
+use Poller\App\Model\AlreadyVotedException;
 
 class PollController {
 
@@ -58,8 +59,7 @@ class PollController {
         if ( is_null($poll)) {
            throw new HTTPErrorException('404');
         }
-
-        if ($poll->isAlreadyVotedByUser() ||  $poll->getTotalVoteCount() > 5) {
+        if ($poll->isAlreadyVotedByUser()) {
             $view = new PageView('poll/show_result', 'Poll - results');
         } else {
             $view = new PageView('poll/show', 'Poll - show');
@@ -78,11 +78,14 @@ class PollController {
             throw new HTTPErrorException('404');
         }
 
-        if (! $answer->isVotedByUser()) {
-            $answer->vote();
-        }
+        try {
+            if (! $answer->isVotedByUser()) {
+                $answer->vote();
+            }
+        } catch(AlreadyVotedException $ex) {}
 
         FrontController::get()->runController('poll','show',$answer->getPollId());
+
     }
 
     public function export($pollId) {

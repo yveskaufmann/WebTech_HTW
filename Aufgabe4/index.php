@@ -1,6 +1,8 @@
 <?php
 
-    define('DEV_MODE', true);
+    session_start();
+
+    define('DEV_MODE', false);
     define('APP_ROOT', __DIR__);
     define('APP_BASENAME', basename(APP_ROOT));
 

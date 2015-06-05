@@ -43,7 +43,6 @@ class PollAnswer extends BasePollAnswer
 
         $votes = $this->getVotes();
         $this->setVotes($votes + 1);
-
         $this->getPoll()->markAsVotedByUser($this->getId());
         $this->save();
     }

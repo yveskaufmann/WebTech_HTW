@@ -99,14 +99,14 @@ class Poll extends BasePoll {
      * @return bool
      */
     public function isAlreadyVotedByUser() {
-        return DEV_MODE && isset($_COOKIE[$this->getId()]);
+        return isset($_SESSION[$this->getId()]);
     }
 
     /**
      * @param string $answerId
      */
     public function  markAsVotedByUser($answerId) {
-        $_COOKIE[$this->getId()] = $answerId;
+        $_SESSION[$this->getId()] =  $answerId;
     }
 
     public function getVotedAnswerId() {
@@ -123,5 +123,9 @@ class Poll extends BasePoll {
         }
 
         return implode(';', $header).PHP_EOL.implode(';', $data);
+    }
+
+    public function enoughVotes() {
+        return $this->getTotalVoteCount() >= 3;
     }
 }
