@@ -1,0 +1,20 @@
+{
+  "name": "yveskaufmann/poller",
+  "description": "A simple php based poller.",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Yves Kaufmann",
+      "email": "s0544361@htw-berlin.de"
+    }
+  ],
+  "require": {
+    "propel/propel": "~2.0@dev"
+  },
+  "autoload": {
+    "psr-4": {
+      "": "classes/"
+    }
+  }
+}
