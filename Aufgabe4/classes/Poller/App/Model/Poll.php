@@ -112,4 +112,16 @@ class Poll extends BasePoll {
     public function getVotedAnswerId() {
         return $this->isAlreadyVotedByUser() ?  $_COOKIE[$this->getId()] : null;
     }
+
+    public function toCSV() {
+        $header = array('Question', 'Total Votes');
+        $data = array($this->getQuestion(), $this->getTotalVoteCount());
+
+        foreach($this->getPollAnswers() as $answer) {
+            array_push($header, $answer->getText());
+            array_push($data, $answer->getVoteCount());
+        }
+
+        return implode(';', $header).PHP_EOL.implode(';', $data);
+    }
 }
