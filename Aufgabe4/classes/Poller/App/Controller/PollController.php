@@ -67,13 +67,13 @@ class PollController {
 
     public function vote($answerId) {
         $answer = PollAnswerQuery::create()->findOneById($answerId);
+
         if ( is_null($answer)) {
             throw new HTTPErrorException('404');
         }
 
         if (! $answer->isVotedByUser()) {
             $answer->vote();
-
         }
 
         FrontController::get()->runController('poll','show',$answer->getPollId());

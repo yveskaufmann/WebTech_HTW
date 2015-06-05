@@ -3,7 +3,6 @@ use \Poller\App\Controller\PollController;
 use Poller\Core\Helper\URL;
 
 $poll = $this->getData(PollController::POLL_PARAM);
-
 ?>
 
 <div class="container">
@@ -18,7 +17,7 @@ $poll = $this->getData(PollController::POLL_PARAM);
                     $percent = $answer->getVotesInPercent();
                     ?>
                     <li class="list-group-item">
-                        <span class="badge">
+                        <span>
                              <?= $answer->getText(); ?>
                         </span>
                         <div class="progress">
@@ -27,7 +26,7 @@ $poll = $this->getData(PollController::POLL_PARAM);
                                  aria-valuenow="<?= $percent; ?>"
                                  aria-valuemin="0" aria-valuemax="100"
                                  style="min-width: 2em;width: <?= $percent;?>%;">
-                                <?= $percent; ?>%
+                                <?= $percent; ?> %
                             </div>
                         </div>
                     </li>

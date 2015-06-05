@@ -53,7 +53,8 @@ class PollAnswer extends BasePollAnswer
     }
 
     public function getVotesInPercent() {
-        return  floor(($this->getVoteCount() * 100) / $this->getPoll()->getTotalVoteCount());
+
+        return   round(($this->getVoteCount() * 100) / $this->getPoll()->getTotalVoteCount(), 2);
     }
 }
 
