@@ -63,7 +63,8 @@ class View implements IView {
     }
 
     /**
-     * @param string $template
+     * @param $template
+     * @return $this
      */
     public function setTemplate($template) {
         $this->template = $template;

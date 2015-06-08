@@ -13,7 +13,11 @@ use ReflectionClass;
 use InvalidArgumentException;
 use Poller\Core\View\ErrorView;
 
-
+/**
+ *
+ * Class FrontController
+ * @package Poller\Core\Controller
+ */
 class FrontController implements IFrontController {
 
     const DEFAULT_CONTROLLER = 'Poll';
