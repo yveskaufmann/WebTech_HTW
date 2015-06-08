@@ -2,6 +2,7 @@
 
 namespace Poller\App\Model;
 
+use Poller\Core\Helper\Session;
 use Poller\App\Model\Base\Poll as BasePoll;
 
 /**
@@ -99,18 +100,18 @@ class Poll extends BasePoll {
      * @return bool
      */
     public function isAlreadyVotedByUser() {
-        return isset($_SESSION[$this->getId()]);
+        return Session::has($this->getId());
     }
 
     /**
      * @param string $answerId
      */
     public function  markAsVotedByUser($answerId) {
-        $_SESSION[$this->getId()] =  $answerId;
+        Session::set($this->getId(), $answerId) ;
     }
 
     public function getVotedAnswerId() {
-        return $this->isAlreadyVotedByUser() ?  $_SESSION[$this->getId()] : null;
+        return Session::get($this->getId(), null);
     }
 
     public function toCSV() {
