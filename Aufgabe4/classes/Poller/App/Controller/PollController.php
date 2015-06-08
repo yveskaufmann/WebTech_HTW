@@ -102,8 +102,6 @@ class PollController {
         header('Content-Disposition: attachment; filename='.$poll->getQuestion().'.csv');
         header('Content-Length: ' . strlen($csvFile));
 
-
-
         echo $csvFile;
     }
 

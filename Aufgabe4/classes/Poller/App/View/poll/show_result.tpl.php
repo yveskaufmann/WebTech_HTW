@@ -48,6 +48,7 @@ $poll = $this->getData(PollController::POLL_PARAM);
                     </li>
                 <?php } ?>
             </ul>
+            <div class="pull-right">Total Votes: <?= $poll->getTotalVoteCount(); ?></div>
         </div>
 
         <div class="pull-right">

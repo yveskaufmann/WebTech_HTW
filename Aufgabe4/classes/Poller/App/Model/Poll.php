@@ -110,7 +110,7 @@ class Poll extends BasePoll {
     }
 
     public function getVotedAnswerId() {
-        return $this->isAlreadyVotedByUser() ?  $_COOKIE[$this->getId()] : null;
+        return $this->isAlreadyVotedByUser() ?  $_SESSION[$this->getId()] : null;
     }
 
     public function toCSV() {

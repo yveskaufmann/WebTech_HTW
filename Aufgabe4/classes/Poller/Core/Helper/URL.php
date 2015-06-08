@@ -53,7 +53,8 @@ class URL {
     }
 
     public static function getAbsoluteUrl() {
-        return $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['SERVER_NAME'].'/'.APP_BASENAME;
+        $scheme = 'http'.(isset($_SERVER['HTTPS']) ? 's' : '').'://';
+        return $scheme.$_SERVER['SERVER_NAME'].APP_BASE_URL;
     }
 }
 

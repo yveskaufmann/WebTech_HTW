@@ -86,14 +86,13 @@ class FrontController implements IFrontController {
      */
     protected function configureByRequestUri($request_URL) {
         $request_URL = trim($request_URL, '/');
-        $basename = basename(APP_ROOT);
 
-        if (strpos($request_URL, $basename) === 0) {
-            $request_URL = substr($request_URL, strlen($basename));
+        if (($pos = strpos($request_URL, APP_BASE_URL)) !== -1) {
+            $request_URL = substr($request_URL, $pos + strlen(APP_BASE_URL));
         }
         $request_URL = preg_replace('/^\//', '', $request_URL);
-
         $options = explode('/', $request_URL, 3);
+
         $this->configureByOptions(array(
             self::OPTION_CONTROLLER => isset($options[0]) ? $options[0] : null,
             self::OPTION_ACTION => isset($options[1]) ? $options[1] : null,
