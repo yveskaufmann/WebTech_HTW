@@ -1,0 +1,383 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Splendr</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+  </head>
+  <body>
+    <!--[if lt IE 10]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+  <!--/* From http://bootsnipp.com/snippets/featured/fancy-navbar-login-sign-in-form */ -->
+    <nav class="navbar navbar-fixed-top navbar-inverse" role="navigation">
+    <div class="container-fluid container">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Splendr</a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="#product_board">Product Board</a></li>
+          <li><a href="#add_product_board">Add Product Board</a></li>
+          <li><a href="#add_product">Add Product</a></li>
+          <li><a href="#user_profile">User Profile</a></li>
+        </ul>
+        <form class="navbar-form navbar-left" role="search">
+          <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+          </div>
+          <button type="submit" class="btn btn-default">Submit</button>
+        </form>
+        <ul class="nav navbar-nav navbar-right">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>Login</b> <span class="caret"></span></a>
+        <ul id="login-dp" class="dropdown-menu">
+          <li>
+             <div class="row">
+                <div class="col-md-12">
+                  Login via
+                  <div class="social-buttons">
+                    <a href="#" class="btn btn-fb"><i class="fa fa-facebook"></i> Facebook</a>
+                    <a href="#" class="btn btn-tw"><i class="fa fa-twitter"></i> Twitter</a>
+                  </div>
+                                  or
+                   <form class="form" role="form" method="post" action="login" accept-charset="UTF-8" id="login-nav">
+                      <div class="form-group">
+                         <label class="sr-only" for="exampleInputEmail2">Email address</label>
+                         <input type="email" class="form-control" id="exampleInputEmail2" placeholder="Email address" required>
+                      </div>
+                      <div class="form-group">
+                         <label class="sr-only" for="exampleInputPassword2">Password</label>
+                         <input type="password" class="form-control" id="exampleInputPassword2" placeholder="Password" required>
+                                               <div class="help-block text-right"><a href="">Forget the password ?</a></div>
+                      </div>
+                      <div class="form-group">
+                         <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+                      </div>
+                      <div class="checkbox">
+                         <label>
+                         <input type="checkbox"> keep me logged-in
+                         </label>
+                      </div>
+                   </form>
+                </div>
+                <div class="bottom text-center">
+                  New here ? <a href="#register"><b>Join Us</b></a>
+                </div>
+             </div>
+          </li>
+        </ul>
+          </li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
+
+
+    <div class="container">
+
+      <div class="jumbotron">
+        <header><h1>About Us</h1><header>
+        <p class="lead">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        <p><a class="btn btn-primary btn-large" href="#info" role="button">Success Stories »</a></p>
+      </div>
+      <!-- Source from http://ironsummitmedia.github.io/startbootstrap-shop-item -->
+
+      <article>
+        <h3>Best-Sellers</h3>
+        <div class="col-sm-4 col-lg-4 col-md-4">
+          <div class="thumbnail">
+            <img src="http://lorempixel.com/output/technics-q-c-320-150-6.jpg" alt="">
+            <div class="caption">
+                <h4 class="pull-right">$24.99</h4>
+                <h4><a href="#">Lorem ipsum dolor sit</a></h4>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                tempor.<a target="_blank" href="http://www.bootsnipp.com">See for more Details</a>.</p>
+            </div>
+            <div class="ratings">
+                <p class="pull-right">15 reviews</p>
+                <p>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span>
+                </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4 col-lg-4 col-md-4">
+          <div class="thumbnail">
+            <img src="http://lorempixel.com/output/technics-q-c-320-150-9.jpg" alt="">
+            <div class="caption">
+                <h4 class="pull-right">$204.99</h4>
+                <h4><a href="#">Lorem ipsum dolor sit</a></h4>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                tempor.<a target="_blank" href="http://www.bootsnipp.com">See for more Details</a>.</p>
+            </div>
+            <div class="ratings">
+              <p class="pull-right">15 reviews</p>
+              <p>
+                  <span class="glyphicon glyphicon-star"></span>
+                  <span class="glyphicon glyphicon-star"></span>
+                  <span class="glyphicon glyphicon-star"></span>
+                  <span class="glyphicon glyphicon-star"></span>
+                  <span class="glyphicon glyphicon-star"></span>
+              </p>
+            </div>
+          </div>
+        </div>
+         <div class="col-sm-4 col-lg-4 col-md-4">
+          <div class="thumbnail">
+            <img src="http://lorempixel.com/output/technics-q-c-320-150-7.jpg" alt="">
+            <div class="caption">
+                <h4 class="pull-right">$24.99</h4>
+                <h4><a href="#">Lorem ipsum dolor sit</a></h4>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                tempor.<a target="_blank" href="http://www.bootsnipp.com">See for more Details</a>.</p>
+            </div>
+            <div class="ratings">
+                <p class="pull-right">15 reviews</p>
+                <p>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span>
+                </p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+     <section id="product_board">
+        <h2>Produkte</h2>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Picture</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="#prod1">Jeans 8-bit tanto sensory</a></td>
+              <td>$12.00</td>
+              <td><a href="prod1#"</a></td>
+              <td><img src="http://lorempixel.com/output/technics-q-c-100-100-9.jpg" title="product 1"/></td>
+            </tr>
+            <tr>
+              <td><a href="#prod2">Jeans 2-bit tanto sensory</a></td>
+              <td>$14.00</td>
+              <td><a href="prod1#"</a></td>
+              <td><img src="http://lorempixel.com/output/technics-q-c-100-100-2.jpg" title="product 2"/></td>
+            </tr>
+            <tr>
+              <td><a href="#prod2">Jeans 2-bit tanto sensory</a></td>
+              <td>$14.00</td>
+              <td><a href="prod1#"</a></td>
+              <td><img src="http://lorempixel.com/output/technics-q-c-100-100-1.jpg"title="product 2"/></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="add_product">
+        <h2>Add Product</h2>
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label for="product_name" class="col-sm-2 control-label">Produkt-Name</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="product_name" placeholder="Produkt-Name">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="price" class="col-sm-2 control-label">Price</label>
+            <div class="col-sm-10">
+              <input type="number" min="0.01" step="0.01" class="form-control" id="price" placeholder="Price">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="product_url" class="col-sm-2 control-label">Produkt URL</label>
+            <div class="col-sm-10">
+              <input type="url" class="form-control" id="product_url" placeholder="Produkt URL">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="product_image" class="col-sm-2 control-label">Product Image</label>
+            <div class="col-sm-10">
+              <input type="url" class="form-control" id="product_image" placeholder="Product Image">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+              <button type="submit" class="btn btn-default">Add Product</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+
+
+      <section id="register">
+        <h2>Account Sign-Up</h2>
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label for="username" class="col-sm-2 control-label">Username</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="username" placeholder="Username">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email" class="col-sm-2 control-label">Email</label>
+            <div class="col-sm-10">
+              <input type="email" class="form-control" id="email" placeholder="Email">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="surename" class="col-sm-2 control-label">Surename</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="surename" placeholder="Surename">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="lastname" class="col-sm-2 control-label">Lastname</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="lastname" placeholder="Lastname">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="password" class="col-sm-2 control-label">Password</label>
+            <div class="col-sm-10">
+              <input type="password" class="form-control" id="password" placeholder="Password">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="confirm_password" class="col-sm-2 control-label">Confirm Password</label>
+            <div class="col-sm-10">
+              <input type="password" class="form-control" id="confirm_password" placeholder="Confirm Password">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+              <button type="submit" class="btn btn-default">Sign Up</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+
+      <section id="user_profile" class="center-block">
+        <h2>User Profile</h2>
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+        <div class="container">
+          <div class="row center-box">
+            <div class="col-lg-12 col-sm-12">
+              <div class="card hovercard">
+                <div class="cardheader">
+
+                </div>
+                <div class="avatar">
+                    <img alt="" src="http://lorempixel.com/100/100/people/9/">
+                </div>
+                <div class="info">
+                    <div class="title">
+                        <a target="_blank" href="http://scripteden.com/">Script Eden</a>
+                    </div>
+                    <div class="desc">Passionate designer</div>
+                    <div class="desc">Curious developer</div>
+                    <div class="desc">Tech geek</div>
+                </div>
+                <div class="bottom">
+                    <a class="btn btn-primary btn-twitter btn-sm" href="https://twitter.com/webmaniac">
+                        <i class="fa fa-twitter"></i>
+                    </a>
+                    <a class="btn btn-danger btn-sm" rel="publisher"
+                       href="https://plus.google.com/+ahmshahnuralam">
+                        <i class="fa fa-google-plus"></i>
+                    </a>
+                    <a class="btn btn-primary btn-sm" rel="publisher"
+                       href="https://plus.google.com/shahnuralam">
+                        <i class="fa fa-facebook"></i>
+                    </a>
+                    <a class="btn btn-warning btn-sm" rel="publisher" href="https://plus.google.com/shahnuralam">
+                        <i class="fa fa-behance"></i>
+                    </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p><span class="glyphicon glyphicon-heart"></span> from the Splender team</p>
+      </footer>
+
+    </div>
+
+
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+    <script>
+      (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+      function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+      e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+      e.src='//www.google-analytics.com/analytics.js';
+      r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+      ga('create','UA-XXXXX-X');ga('send','pageview');
+    </script>
+
+        <!-- build:js(.) scripts/plugins.js -->
+        <script src="bower_components/bootstrap/js/affix.js"></script>
+        <script src="bower_components/bootstrap/js/alert.js"></script>
+        <script src="bower_components/bootstrap/js/dropdown.js"></script>
+        <script src="bower_components/bootstrap/js/tooltip.js"></script>
+        <script src="bower_components/bootstrap/js/modal.js"></script>
+        <script src="bower_components/bootstrap/js/transition.js"></script>
+        <script src="bower_components/bootstrap/js/button.js"></script>
+        <script src="bower_components/bootstrap/js/popover.js"></script>
+        <script src="bower_components/bootstrap/js/carousel.js"></script>
+        <script src="bower_components/bootstrap/js/scrollspy.js"></script>
+        <script src="bower_components/bootstrap/js/collapse.js"></script>
+        <script src="bower_components/bootstrap/js/tab.js"></script>
+        <!-- endbuild -->
+
+        <!-- build:js({app,.tmp}) scripts/main.js -->
+        <script src="scripts/main.js"></script>
+        <!-- endbuild -->
+</body>
+</html>

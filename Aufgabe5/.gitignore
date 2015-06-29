@@ -1,0 +1,7 @@
+.idea/
+composer.phar
+vendor/
+public_html/scripts/vendor
+
+*.log
+

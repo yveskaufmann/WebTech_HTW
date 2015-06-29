@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<database name="splendr" defaultIdMethod="native" defaultPhpNamingMethod="underscore" namespace="Splendr\App\Model\">
+
+    <table name="User" phpName="User">
+        <column name="id" phpName="Id"  type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+        <column name="username" type="VARCHAR" size="255" required="true"  />
+        <column name="email" type="LONGVARCHAR" size="320" required="true"/>
+        <column name="password" type="CHAR" size="32" required="true"/>
+        <column name="salt" type="CHAR" size="32" required="true"/>
+        <column name="first_name" type="VARCHAR" size="255" required="true" />
+        <column name="last_name" type="VARCHAR" size="255" required="true" />
+
+        <unique>
+            <unique-column name="username"/>
+            <unique-column name="email" size="255" />
+        </unique>
+    </table>
+
+    <table name="LoginAttempts" phpName="LoginAttempts">
+        <column name="user_id" type="INTEGER" primaryKey="true" />
+        <column name="successful_logins" type="INTEGER" defaultValue="0" required="true" />
+        <column name="failed_logins" type="INTEGER" defaultValue="0" required="true" />
+        <column name="last_login" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP" required="true" />
+        <foreign-key foreignTable="User">
+            <reference local="user_id" foreign="id"/>
+        </foreign-key>
+    </table>
+
+    <table name="Product"  phpName="Product">
+        <column name="id" phpName="Id"  type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+        <column name="name" type="VARCHAR" size="255" required="true"/>
+        <column name="price" type="NUMERIC" size="10" scale="2" required="true"/>
+        <column name="image_url" type="VARCHAR" size="255" required="true"/>
+        <column name="description" type="LONGVARCHAR" required="true"/>
+        <unique>
+            <unique-column name="name"/>
+        </unique>
+        <index>
+            <index-column name="name"/>
+        </index>
+    </table>
+
+    <table name="Product_Review" phpName="ProductReview" >
+        <column name="product_id" type="INTEGER" primaryKey="true"/>
+        <column name="user_id" type="INTEGER" primaryKey="true" />
+        <column name="review" type="LONGVARCHAR" required="true"/>
+        <column name="points" type="INTEGER" required="true"/>
+        <foreign-key foreignTable="Product">
+            <reference local="product_id" foreign="id"/>
+        </foreign-key>
+        <foreign-key foreignTable="User">
+            <reference local="user_id" foreign="id"/>
+        </foreign-key>
+    </table>
+
+</database>

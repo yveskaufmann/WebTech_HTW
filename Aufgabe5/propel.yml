@@ -1,0 +1,26 @@
+propel:
+    paths:
+        phpDir: 'classes/'
+        phpConfDir: 'config/'
+        sqlDir: 'assets/schema/'
+
+    database:
+        connections:
+            splendr:
+                adapter: mysql
+                classname: Propel\Runtime\Connection\ConnectionWrapper
+                dsn: "mysql:host=localhost;dbname=splendr"
+                user: root
+                password:
+                attributes:
+                settings:
+                    charset: utf8
+    runtime:
+        defaultConnection: splendr
+        connections:
+             - splendr
+    generator:
+        defaultConnection: splendr
+        connections:
+            - splendr
+

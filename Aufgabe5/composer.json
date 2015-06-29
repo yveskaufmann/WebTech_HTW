@@ -1,0 +1,20 @@
+{
+  "name": "yveskaufmann/splendr_mvc",
+  "description": "A simple based php mvc application.",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Yves Kaufmann",
+      "email": "s0544361@htw-berlin.de"
+    }
+  ],
+  "require": {
+    "propel/propel": "~2.0@dev"
+  },
+  "autoload": {
+    "psr-4": {
+      "": "classes/"
+    }
+  }
+}
