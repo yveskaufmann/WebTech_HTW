@@ -40,15 +40,19 @@ use Splendr\App\Model\Map\UserTableMap;
  * @method     ChildUserQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
  * @method     ChildUserQuery innerJoin($relation) Adds a INNER JOIN clause to the query
  *
- * @method     ChildUserQuery leftJoinLoginAttempts($relationAlias = null) Adds a LEFT JOIN clause to the query using the LoginAttempts relation
- * @method     ChildUserQuery rightJoinLoginAttempts($relationAlias = null) Adds a RIGHT JOIN clause to the query using the LoginAttempts relation
- * @method     ChildUserQuery innerJoinLoginAttempts($relationAlias = null) Adds a INNER JOIN clause to the query using the LoginAttempts relation
+ * @method     ChildUserQuery leftJoinLoginAttempt($relationAlias = null) Adds a LEFT JOIN clause to the query using the LoginAttempt relation
+ * @method     ChildUserQuery rightJoinLoginAttempt($relationAlias = null) Adds a RIGHT JOIN clause to the query using the LoginAttempt relation
+ * @method     ChildUserQuery innerJoinLoginAttempt($relationAlias = null) Adds a INNER JOIN clause to the query using the LoginAttempt relation
+ *
+ * @method     ChildUserQuery leftJoinProductBoard($relationAlias = null) Adds a LEFT JOIN clause to the query using the ProductBoard relation
+ * @method     ChildUserQuery rightJoinProductBoard($relationAlias = null) Adds a RIGHT JOIN clause to the query using the ProductBoard relation
+ * @method     ChildUserQuery innerJoinProductBoard($relationAlias = null) Adds a INNER JOIN clause to the query using the ProductBoard relation
  *
  * @method     ChildUserQuery leftJoinProductReview($relationAlias = null) Adds a LEFT JOIN clause to the query using the ProductReview relation
  * @method     ChildUserQuery rightJoinProductReview($relationAlias = null) Adds a RIGHT JOIN clause to the query using the ProductReview relation
  * @method     ChildUserQuery innerJoinProductReview($relationAlias = null) Adds a INNER JOIN clause to the query using the ProductReview relation
  *
- * @method     \Splendr\App\Model\LoginAttemptsQuery|\Splendr\App\Model\ProductReviewQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \Splendr\App\Model\LoginAttemptQuery|\Splendr\App\Model\ProductBoardQuery|\Splendr\App\Model\ProductReviewQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildUser findOne(ConnectionInterface $con = null) Return the first ChildUser matching the query
  * @method     ChildUser findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUser matching the query, or a new ChildUser object populated from the query conditions when no match is found
@@ -478,40 +482,40 @@ abstract class UserQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query by a related \Splendr\App\Model\LoginAttempts object
+     * Filter the query by a related \Splendr\App\Model\LoginAttempt object
      *
-     * @param \Splendr\App\Model\LoginAttempts|ObjectCollection $loginAttempts the related object to use as filter
+     * @param \Splendr\App\Model\LoginAttempt|ObjectCollection $loginAttempt the related object to use as filter
      * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return ChildUserQuery The current query, for fluid interface
      */
-    public function filterByLoginAttempts($loginAttempts, $comparison = null)
+    public function filterByLoginAttempt($loginAttempt, $comparison = null)
     {
-        if ($loginAttempts instanceof \Splendr\App\Model\LoginAttempts) {
+        if ($loginAttempt instanceof \Splendr\App\Model\LoginAttempt) {
             return $this
-                ->addUsingAlias(UserTableMap::COL_ID, $loginAttempts->getUserId(), $comparison);
-        } elseif ($loginAttempts instanceof ObjectCollection) {
+                ->addUsingAlias(UserTableMap::COL_ID, $loginAttempt->getUserId(), $comparison);
+        } elseif ($loginAttempt instanceof ObjectCollection) {
             return $this
-                ->useLoginAttemptsQuery()
-                ->filterByPrimaryKeys($loginAttempts->getPrimaryKeys())
+                ->useLoginAttemptQuery()
+                ->filterByPrimaryKeys($loginAttempt->getPrimaryKeys())
                 ->endUse();
         } else {
-            throw new PropelException('filterByLoginAttempts() only accepts arguments of type \Splendr\App\Model\LoginAttempts or Collection');
+            throw new PropelException('filterByLoginAttempt() only accepts arguments of type \Splendr\App\Model\LoginAttempt or Collection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the LoginAttempts relation
+     * Adds a JOIN clause to the query using the LoginAttempt relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return $this|ChildUserQuery The current query, for fluid interface
      */
-    public function joinLoginAttempts($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinLoginAttempt($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('LoginAttempts');
+        $relationMap = $tableMap->getRelation('LoginAttempt');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -526,14 +530,14 @@ abstract class UserQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'LoginAttempts');
+            $this->addJoinObject($join, 'LoginAttempt');
         }
 
         return $this;
     }
 
     /**
-     * Use the LoginAttempts relation LoginAttempts object
+     * Use the LoginAttempt relation LoginAttempt object
      *
      * @see useQuery()
      *
@@ -541,13 +545,86 @@ abstract class UserQuery extends ModelCriteria
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return \Splendr\App\Model\LoginAttemptsQuery A secondary query class using the current class as primary query
+     * @return \Splendr\App\Model\LoginAttemptQuery A secondary query class using the current class as primary query
      */
-    public function useLoginAttemptsQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function useLoginAttemptQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinLoginAttempts($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'LoginAttempts', '\Splendr\App\Model\LoginAttemptsQuery');
+            ->joinLoginAttempt($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'LoginAttempt', '\Splendr\App\Model\LoginAttemptQuery');
+    }
+
+    /**
+     * Filter the query by a related \Splendr\App\Model\ProductBoard object
+     *
+     * @param \Splendr\App\Model\ProductBoard|ObjectCollection $productBoard the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildUserQuery The current query, for fluid interface
+     */
+    public function filterByProductBoard($productBoard, $comparison = null)
+    {
+        if ($productBoard instanceof \Splendr\App\Model\ProductBoard) {
+            return $this
+                ->addUsingAlias(UserTableMap::COL_ID, $productBoard->getUserId(), $comparison);
+        } elseif ($productBoard instanceof ObjectCollection) {
+            return $this
+                ->useProductBoardQuery()
+                ->filterByPrimaryKeys($productBoard->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByProductBoard() only accepts arguments of type \Splendr\App\Model\ProductBoard or Collection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the ProductBoard relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this|ChildUserQuery The current query, for fluid interface
+     */
+    public function joinProductBoard($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('ProductBoard');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'ProductBoard');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the ProductBoard relation ProductBoard object
+     *
+     * @see useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return \Splendr\App\Model\ProductBoardQuery A secondary query class using the current class as primary query
+     */
+    public function useProductBoardQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinProductBoard($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'ProductBoard', '\Splendr\App\Model\ProductBoardQuery');
     }
 
     /**

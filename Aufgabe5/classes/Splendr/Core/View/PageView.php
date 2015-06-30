@@ -17,16 +17,21 @@ class PageView extends View {
 
     public function __construct($main_view, $title = '') {
         parent::__construct($main_view);
+        $this->header = new Template('header', $this);
+        $this->footer = new Template('footer', $this);
         $this->setTitle($title);
-        $this->header = new Template('header');
-        $this->header->addData('title', $this->title);
-        $this->footer = new Template('footer');
     }
 
     public function render() {
-        $this->header->render();
+        if (isset($this->header)) {
+            $this->header->render();
+        }
+
         parent::render();
-        $this->footer->render();
+
+        if (isset($this->footer)) {
+            $this->footer->render();
+        }
     }
 
     /**
@@ -42,6 +47,7 @@ class PageView extends View {
      */
     public function setTitle($title) {
         $this->title = $title;
+        $this->addData('title', $this->title);
         return $this;
     }
 
@@ -58,5 +64,7 @@ class PageView extends View {
     public function getFooter() {
         return $this->footer;
     }
+
+
 
 }

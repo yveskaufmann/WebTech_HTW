@@ -16,11 +16,11 @@ use Splendr\Core\View\ErrorView;
 /**
  *
  * Class FrontController
- * @package Poller\Core\Controller
+ * @package Splendr\Core\Controller
  */
 class FrontController implements IFrontController {
 
-    const DEFAULT_CONTROLLER = 'Poll';
+    const DEFAULT_CONTROLLER = 'Index';
     const DEFAULT_ACTION = 'index';
 
     const OPTION_CONTROLLER = 'controller';
@@ -140,7 +140,7 @@ class FrontController implements IFrontController {
             $controller = self::DEFAULT_ACTION;
         }
 
-        $controllerClass = '\Poller\App\Controller\\'.ucfirst(strtolower($controller)).'Controller';
+        $controllerClass = '\Splendr\App\Controller\\'.ucfirst(strtolower($controller)).'Controller';
 
         if (! class_exists($controllerClass)) {
             throw new InvalidArgumentException(

@@ -1,6 +1,7 @@
 <?php
 
 namespace Splendr\Core\Helper;
+use Splendr\Core\View\Template;
 
 /**
  * Helper class for sending Notifications to a VIEW.
@@ -19,7 +20,8 @@ class Notification {
         $type = $type ? $type : 'success';
 
         if ($message) {
-            require 'views/message.php';
+            $template = new Template('notifications');
+            $template->render();
             Session::clear('message');
             Session::clear('message_type');
         }

@@ -11,89 +11,89 @@ use Propel\Runtime\ActiveQuery\ModelJoin;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
-use Splendr\App\Model\LoginAttempts as ChildLoginAttempts;
-use Splendr\App\Model\LoginAttemptsQuery as ChildLoginAttemptsQuery;
-use Splendr\App\Model\Map\LoginAttemptsTableMap;
+use Splendr\App\Model\LoginAttempt as ChildLoginAttempt;
+use Splendr\App\Model\LoginAttemptQuery as ChildLoginAttemptQuery;
+use Splendr\App\Model\Map\LoginAttemptTableMap;
 
 /**
- * Base class that represents a query for the 'LoginAttempts' table.
+ * Base class that represents a query for the 'LoginAttempt' table.
  *
  *
  *
- * @method     ChildLoginAttemptsQuery orderByUserId($order = Criteria::ASC) Order by the user_id column
- * @method     ChildLoginAttemptsQuery orderBySuccessfulLogins($order = Criteria::ASC) Order by the successful_logins column
- * @method     ChildLoginAttemptsQuery orderByFailedLogins($order = Criteria::ASC) Order by the failed_logins column
- * @method     ChildLoginAttemptsQuery orderByLastLogin($order = Criteria::ASC) Order by the last_login column
+ * @method     ChildLoginAttemptQuery orderByUserId($order = Criteria::ASC) Order by the user_id column
+ * @method     ChildLoginAttemptQuery orderBySuccessfulLogins($order = Criteria::ASC) Order by the successful_logins column
+ * @method     ChildLoginAttemptQuery orderByFailedLogins($order = Criteria::ASC) Order by the failed_logins column
+ * @method     ChildLoginAttemptQuery orderByLastLogin($order = Criteria::ASC) Order by the last_login column
  *
- * @method     ChildLoginAttemptsQuery groupByUserId() Group by the user_id column
- * @method     ChildLoginAttemptsQuery groupBySuccessfulLogins() Group by the successful_logins column
- * @method     ChildLoginAttemptsQuery groupByFailedLogins() Group by the failed_logins column
- * @method     ChildLoginAttemptsQuery groupByLastLogin() Group by the last_login column
+ * @method     ChildLoginAttemptQuery groupByUserId() Group by the user_id column
+ * @method     ChildLoginAttemptQuery groupBySuccessfulLogins() Group by the successful_logins column
+ * @method     ChildLoginAttemptQuery groupByFailedLogins() Group by the failed_logins column
+ * @method     ChildLoginAttemptQuery groupByLastLogin() Group by the last_login column
  *
- * @method     ChildLoginAttemptsQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
- * @method     ChildLoginAttemptsQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
- * @method     ChildLoginAttemptsQuery innerJoin($relation) Adds a INNER JOIN clause to the query
+ * @method     ChildLoginAttemptQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
+ * @method     ChildLoginAttemptQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
+ * @method     ChildLoginAttemptQuery innerJoin($relation) Adds a INNER JOIN clause to the query
  *
- * @method     ChildLoginAttemptsQuery leftJoinUser($relationAlias = null) Adds a LEFT JOIN clause to the query using the User relation
- * @method     ChildLoginAttemptsQuery rightJoinUser($relationAlias = null) Adds a RIGHT JOIN clause to the query using the User relation
- * @method     ChildLoginAttemptsQuery innerJoinUser($relationAlias = null) Adds a INNER JOIN clause to the query using the User relation
+ * @method     ChildLoginAttemptQuery leftJoinUser($relationAlias = null) Adds a LEFT JOIN clause to the query using the User relation
+ * @method     ChildLoginAttemptQuery rightJoinUser($relationAlias = null) Adds a RIGHT JOIN clause to the query using the User relation
+ * @method     ChildLoginAttemptQuery innerJoinUser($relationAlias = null) Adds a INNER JOIN clause to the query using the User relation
  *
  * @method     \Splendr\App\Model\UserQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildLoginAttempts findOne(ConnectionInterface $con = null) Return the first ChildLoginAttempts matching the query
- * @method     ChildLoginAttempts findOneOrCreate(ConnectionInterface $con = null) Return the first ChildLoginAttempts matching the query, or a new ChildLoginAttempts object populated from the query conditions when no match is found
+ * @method     ChildLoginAttempt findOne(ConnectionInterface $con = null) Return the first ChildLoginAttempt matching the query
+ * @method     ChildLoginAttempt findOneOrCreate(ConnectionInterface $con = null) Return the first ChildLoginAttempt matching the query, or a new ChildLoginAttempt object populated from the query conditions when no match is found
  *
- * @method     ChildLoginAttempts findOneByUserId(int $user_id) Return the first ChildLoginAttempts filtered by the user_id column
- * @method     ChildLoginAttempts findOneBySuccessfulLogins(int $successful_logins) Return the first ChildLoginAttempts filtered by the successful_logins column
- * @method     ChildLoginAttempts findOneByFailedLogins(int $failed_logins) Return the first ChildLoginAttempts filtered by the failed_logins column
- * @method     ChildLoginAttempts findOneByLastLogin(string $last_login) Return the first ChildLoginAttempts filtered by the last_login column *
+ * @method     ChildLoginAttempt findOneByUserId(int $user_id) Return the first ChildLoginAttempt filtered by the user_id column
+ * @method     ChildLoginAttempt findOneBySuccessfulLogins(int $successful_logins) Return the first ChildLoginAttempt filtered by the successful_logins column
+ * @method     ChildLoginAttempt findOneByFailedLogins(int $failed_logins) Return the first ChildLoginAttempt filtered by the failed_logins column
+ * @method     ChildLoginAttempt findOneByLastLogin(string $last_login) Return the first ChildLoginAttempt filtered by the last_login column *
 
- * @method     ChildLoginAttempts requirePk($key, ConnectionInterface $con = null) Return the ChildLoginAttempts by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildLoginAttempts requireOne(ConnectionInterface $con = null) Return the first ChildLoginAttempts matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildLoginAttempt requirePk($key, ConnectionInterface $con = null) Return the ChildLoginAttempt by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildLoginAttempt requireOne(ConnectionInterface $con = null) Return the first ChildLoginAttempt matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
- * @method     ChildLoginAttempts requireOneByUserId(int $user_id) Return the first ChildLoginAttempts filtered by the user_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildLoginAttempts requireOneBySuccessfulLogins(int $successful_logins) Return the first ChildLoginAttempts filtered by the successful_logins column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildLoginAttempts requireOneByFailedLogins(int $failed_logins) Return the first ChildLoginAttempts filtered by the failed_logins column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildLoginAttempts requireOneByLastLogin(string $last_login) Return the first ChildLoginAttempts filtered by the last_login column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildLoginAttempt requireOneByUserId(int $user_id) Return the first ChildLoginAttempt filtered by the user_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildLoginAttempt requireOneBySuccessfulLogins(int $successful_logins) Return the first ChildLoginAttempt filtered by the successful_logins column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildLoginAttempt requireOneByFailedLogins(int $failed_logins) Return the first ChildLoginAttempt filtered by the failed_logins column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildLoginAttempt requireOneByLastLogin(string $last_login) Return the first ChildLoginAttempt filtered by the last_login column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
- * @method     ChildLoginAttempts[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildLoginAttempts objects based on current ModelCriteria
- * @method     ChildLoginAttempts[]|ObjectCollection findByUserId(int $user_id) Return ChildLoginAttempts objects filtered by the user_id column
- * @method     ChildLoginAttempts[]|ObjectCollection findBySuccessfulLogins(int $successful_logins) Return ChildLoginAttempts objects filtered by the successful_logins column
- * @method     ChildLoginAttempts[]|ObjectCollection findByFailedLogins(int $failed_logins) Return ChildLoginAttempts objects filtered by the failed_logins column
- * @method     ChildLoginAttempts[]|ObjectCollection findByLastLogin(string $last_login) Return ChildLoginAttempts objects filtered by the last_login column
- * @method     ChildLoginAttempts[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
+ * @method     ChildLoginAttempt[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildLoginAttempt objects based on current ModelCriteria
+ * @method     ChildLoginAttempt[]|ObjectCollection findByUserId(int $user_id) Return ChildLoginAttempt objects filtered by the user_id column
+ * @method     ChildLoginAttempt[]|ObjectCollection findBySuccessfulLogins(int $successful_logins) Return ChildLoginAttempt objects filtered by the successful_logins column
+ * @method     ChildLoginAttempt[]|ObjectCollection findByFailedLogins(int $failed_logins) Return ChildLoginAttempt objects filtered by the failed_logins column
+ * @method     ChildLoginAttempt[]|ObjectCollection findByLastLogin(string $last_login) Return ChildLoginAttempt objects filtered by the last_login column
+ * @method     ChildLoginAttempt[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
-abstract class LoginAttemptsQuery extends ModelCriteria
+abstract class LoginAttemptQuery extends ModelCriteria
 {
     protected $entityNotFoundExceptionClass = '\\Propel\\Runtime\\Exception\\EntityNotFoundException';
 
     /**
-     * Initializes internal state of \Splendr\App\Model\Base\LoginAttemptsQuery object.
+     * Initializes internal state of \Splendr\App\Model\Base\LoginAttemptQuery object.
      *
      * @param     string $dbName The database name
      * @param     string $modelName The phpName of a model, e.g. 'Book'
      * @param     string $modelAlias The alias for the model in this query, e.g. 'b'
      */
-    public function __construct($dbName = 'splendr', $modelName = '\\Splendr\\App\\Model\\LoginAttempts', $modelAlias = null)
+    public function __construct($dbName = 'splendr', $modelName = '\\Splendr\\App\\Model\\LoginAttempt', $modelAlias = null)
     {
         parent::__construct($dbName, $modelName, $modelAlias);
     }
 
     /**
-     * Returns a new ChildLoginAttemptsQuery object.
+     * Returns a new ChildLoginAttemptQuery object.
      *
      * @param     string $modelAlias The alias of a model in the query
      * @param     Criteria $criteria Optional Criteria to build the query from
      *
-     * @return ChildLoginAttemptsQuery
+     * @return ChildLoginAttemptQuery
      */
     public static function create($modelAlias = null, Criteria $criteria = null)
     {
-        if ($criteria instanceof ChildLoginAttemptsQuery) {
+        if ($criteria instanceof ChildLoginAttemptQuery) {
             return $criteria;
         }
-        $query = new ChildLoginAttemptsQuery();
+        $query = new ChildLoginAttemptQuery();
         if (null !== $modelAlias) {
             $query->setModelAlias($modelAlias);
         }
@@ -116,19 +116,19 @@ abstract class LoginAttemptsQuery extends ModelCriteria
      * @param mixed $key Primary key to use for the query
      * @param ConnectionInterface $con an optional connection object
      *
-     * @return ChildLoginAttempts|array|mixed the result, formatted by the current formatter
+     * @return ChildLoginAttempt|array|mixed the result, formatted by the current formatter
      */
     public function findPk($key, ConnectionInterface $con = null)
     {
         if ($key === null) {
             return null;
         }
-        if ((null !== ($obj = LoginAttemptsTableMap::getInstanceFromPool((string) $key))) && !$this->formatter) {
+        if ((null !== ($obj = LoginAttemptTableMap::getInstanceFromPool((string) $key))) && !$this->formatter) {
             // the object is already in the instance pool
             return $obj;
         }
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(LoginAttemptsTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(LoginAttemptTableMap::DATABASE_NAME);
         }
         $this->basePreSelect($con);
         if ($this->formatter || $this->modelAlias || $this->with || $this->select
@@ -149,11 +149,11 @@ abstract class LoginAttemptsQuery extends ModelCriteria
      *
      * @throws \Propel\Runtime\Exception\PropelException
      *
-     * @return ChildLoginAttempts A model object, or null if the key is not found
+     * @return ChildLoginAttempt A model object, or null if the key is not found
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_id, successful_logins, failed_logins, last_login FROM LoginAttempts WHERE user_id = :p0';
+        $sql = 'SELECT user_id, successful_logins, failed_logins, last_login FROM LoginAttempt WHERE user_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -164,10 +164,10 @@ abstract class LoginAttemptsQuery extends ModelCriteria
         }
         $obj = null;
         if ($row = $stmt->fetch(\PDO::FETCH_NUM)) {
-            /** @var ChildLoginAttempts $obj */
-            $obj = new ChildLoginAttempts();
+            /** @var ChildLoginAttempt $obj */
+            $obj = new ChildLoginAttempt();
             $obj->hydrate($row);
-            LoginAttemptsTableMap::addInstanceToPool($obj, (string) $key);
+            LoginAttemptTableMap::addInstanceToPool($obj, (string) $key);
         }
         $stmt->closeCursor();
 
@@ -180,7 +180,7 @@ abstract class LoginAttemptsQuery extends ModelCriteria
      * @param     mixed $key Primary key to use for the query
      * @param     ConnectionInterface $con A connection object
      *
-     * @return ChildLoginAttempts|array|mixed the result, formatted by the current formatter
+     * @return ChildLoginAttempt|array|mixed the result, formatted by the current formatter
      */
     protected function findPkComplex($key, ConnectionInterface $con)
     {
@@ -222,12 +222,12 @@ abstract class LoginAttemptsQuery extends ModelCriteria
      *
      * @param     mixed $key Primary key to use for the query
      *
-     * @return $this|ChildLoginAttemptsQuery The current query, for fluid interface
+     * @return $this|ChildLoginAttemptQuery The current query, for fluid interface
      */
     public function filterByPrimaryKey($key)
     {
 
-        return $this->addUsingAlias(LoginAttemptsTableMap::COL_USER_ID, $key, Criteria::EQUAL);
+        return $this->addUsingAlias(LoginAttemptTableMap::COL_USER_ID, $key, Criteria::EQUAL);
     }
 
     /**
@@ -235,12 +235,12 @@ abstract class LoginAttemptsQuery extends ModelCriteria
      *
      * @param     array $keys The list of primary key to use for the query
      *
-     * @return $this|ChildLoginAttemptsQuery The current query, for fluid interface
+     * @return $this|ChildLoginAttemptQuery The current query, for fluid interface
      */
     public function filterByPrimaryKeys($keys)
     {
 
-        return $this->addUsingAlias(LoginAttemptsTableMap::COL_USER_ID, $keys, Criteria::IN);
+        return $this->addUsingAlias(LoginAttemptTableMap::COL_USER_ID, $keys, Criteria::IN);
     }
 
     /**
@@ -261,18 +261,18 @@ abstract class LoginAttemptsQuery extends ModelCriteria
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return $this|ChildLoginAttemptsQuery The current query, for fluid interface
+     * @return $this|ChildLoginAttemptQuery The current query, for fluid interface
      */
     public function filterByUserId($userId = null, $comparison = null)
     {
         if (is_array($userId)) {
             $useMinMax = false;
             if (isset($userId['min'])) {
-                $this->addUsingAlias(LoginAttemptsTableMap::COL_USER_ID, $userId['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(LoginAttemptTableMap::COL_USER_ID, $userId['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($userId['max'])) {
-                $this->addUsingAlias(LoginAttemptsTableMap::COL_USER_ID, $userId['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(LoginAttemptTableMap::COL_USER_ID, $userId['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -283,7 +283,7 @@ abstract class LoginAttemptsQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(LoginAttemptsTableMap::COL_USER_ID, $userId, $comparison);
+        return $this->addUsingAlias(LoginAttemptTableMap::COL_USER_ID, $userId, $comparison);
     }
 
     /**
@@ -302,18 +302,18 @@ abstract class LoginAttemptsQuery extends ModelCriteria
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return $this|ChildLoginAttemptsQuery The current query, for fluid interface
+     * @return $this|ChildLoginAttemptQuery The current query, for fluid interface
      */
     public function filterBySuccessfulLogins($successfulLogins = null, $comparison = null)
     {
         if (is_array($successfulLogins)) {
             $useMinMax = false;
             if (isset($successfulLogins['min'])) {
-                $this->addUsingAlias(LoginAttemptsTableMap::COL_SUCCESSFUL_LOGINS, $successfulLogins['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(LoginAttemptTableMap::COL_SUCCESSFUL_LOGINS, $successfulLogins['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($successfulLogins['max'])) {
-                $this->addUsingAlias(LoginAttemptsTableMap::COL_SUCCESSFUL_LOGINS, $successfulLogins['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(LoginAttemptTableMap::COL_SUCCESSFUL_LOGINS, $successfulLogins['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -324,7 +324,7 @@ abstract class LoginAttemptsQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(LoginAttemptsTableMap::COL_SUCCESSFUL_LOGINS, $successfulLogins, $comparison);
+        return $this->addUsingAlias(LoginAttemptTableMap::COL_SUCCESSFUL_LOGINS, $successfulLogins, $comparison);
     }
 
     /**
@@ -343,18 +343,18 @@ abstract class LoginAttemptsQuery extends ModelCriteria
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return $this|ChildLoginAttemptsQuery The current query, for fluid interface
+     * @return $this|ChildLoginAttemptQuery The current query, for fluid interface
      */
     public function filterByFailedLogins($failedLogins = null, $comparison = null)
     {
         if (is_array($failedLogins)) {
             $useMinMax = false;
             if (isset($failedLogins['min'])) {
-                $this->addUsingAlias(LoginAttemptsTableMap::COL_FAILED_LOGINS, $failedLogins['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(LoginAttemptTableMap::COL_FAILED_LOGINS, $failedLogins['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($failedLogins['max'])) {
-                $this->addUsingAlias(LoginAttemptsTableMap::COL_FAILED_LOGINS, $failedLogins['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(LoginAttemptTableMap::COL_FAILED_LOGINS, $failedLogins['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -365,7 +365,7 @@ abstract class LoginAttemptsQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(LoginAttemptsTableMap::COL_FAILED_LOGINS, $failedLogins, $comparison);
+        return $this->addUsingAlias(LoginAttemptTableMap::COL_FAILED_LOGINS, $failedLogins, $comparison);
     }
 
     /**
@@ -386,18 +386,18 @@ abstract class LoginAttemptsQuery extends ModelCriteria
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return $this|ChildLoginAttemptsQuery The current query, for fluid interface
+     * @return $this|ChildLoginAttemptQuery The current query, for fluid interface
      */
     public function filterByLastLogin($lastLogin = null, $comparison = null)
     {
         if (is_array($lastLogin)) {
             $useMinMax = false;
             if (isset($lastLogin['min'])) {
-                $this->addUsingAlias(LoginAttemptsTableMap::COL_LAST_LOGIN, $lastLogin['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(LoginAttemptTableMap::COL_LAST_LOGIN, $lastLogin['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($lastLogin['max'])) {
-                $this->addUsingAlias(LoginAttemptsTableMap::COL_LAST_LOGIN, $lastLogin['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(LoginAttemptTableMap::COL_LAST_LOGIN, $lastLogin['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -408,7 +408,7 @@ abstract class LoginAttemptsQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(LoginAttemptsTableMap::COL_LAST_LOGIN, $lastLogin, $comparison);
+        return $this->addUsingAlias(LoginAttemptTableMap::COL_LAST_LOGIN, $lastLogin, $comparison);
     }
 
     /**
@@ -419,20 +419,20 @@ abstract class LoginAttemptsQuery extends ModelCriteria
      *
      * @throws \Propel\Runtime\Exception\PropelException
      *
-     * @return ChildLoginAttemptsQuery The current query, for fluid interface
+     * @return ChildLoginAttemptQuery The current query, for fluid interface
      */
     public function filterByUser($user, $comparison = null)
     {
         if ($user instanceof \Splendr\App\Model\User) {
             return $this
-                ->addUsingAlias(LoginAttemptsTableMap::COL_USER_ID, $user->getId(), $comparison);
+                ->addUsingAlias(LoginAttemptTableMap::COL_USER_ID, $user->getId(), $comparison);
         } elseif ($user instanceof ObjectCollection) {
             if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
 
             return $this
-                ->addUsingAlias(LoginAttemptsTableMap::COL_USER_ID, $user->toKeyValue('PrimaryKey', 'Id'), $comparison);
+                ->addUsingAlias(LoginAttemptTableMap::COL_USER_ID, $user->toKeyValue('PrimaryKey', 'Id'), $comparison);
         } else {
             throw new PropelException('filterByUser() only accepts arguments of type \Splendr\App\Model\User or Collection');
         }
@@ -444,7 +444,7 @@ abstract class LoginAttemptsQuery extends ModelCriteria
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return $this|ChildLoginAttemptsQuery The current query, for fluid interface
+     * @return $this|ChildLoginAttemptQuery The current query, for fluid interface
      */
     public function joinUser($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
@@ -491,21 +491,21 @@ abstract class LoginAttemptsQuery extends ModelCriteria
     /**
      * Exclude object from result
      *
-     * @param   ChildLoginAttempts $loginAttempts Object to remove from the list of results
+     * @param   ChildLoginAttempt $loginAttempt Object to remove from the list of results
      *
-     * @return $this|ChildLoginAttemptsQuery The current query, for fluid interface
+     * @return $this|ChildLoginAttemptQuery The current query, for fluid interface
      */
-    public function prune($loginAttempts = null)
+    public function prune($loginAttempt = null)
     {
-        if ($loginAttempts) {
-            $this->addUsingAlias(LoginAttemptsTableMap::COL_USER_ID, $loginAttempts->getUserId(), Criteria::NOT_EQUAL);
+        if ($loginAttempt) {
+            $this->addUsingAlias(LoginAttemptTableMap::COL_USER_ID, $loginAttempt->getUserId(), Criteria::NOT_EQUAL);
         }
 
         return $this;
     }
 
     /**
-     * Deletes all rows from the LoginAttempts table.
+     * Deletes all rows from the LoginAttempt table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
@@ -513,7 +513,7 @@ abstract class LoginAttemptsQuery extends ModelCriteria
     public function doDeleteAll(ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(LoginAttemptsTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LoginAttemptTableMap::DATABASE_NAME);
         }
 
         // use transaction because $criteria could contain info
@@ -524,8 +524,8 @@ abstract class LoginAttemptsQuery extends ModelCriteria
             // Because this db requires some delete cascade/set null emulation, we have to
             // clear the cached instance *after* the emulation has happened (since
             // instances get re-added by the select statement contained therein).
-            LoginAttemptsTableMap::clearInstancePool();
-            LoginAttemptsTableMap::clearRelatedInstancePool();
+            LoginAttemptTableMap::clearInstancePool();
+            LoginAttemptTableMap::clearRelatedInstancePool();
 
             return $affectedRows;
         });
@@ -543,26 +543,26 @@ abstract class LoginAttemptsQuery extends ModelCriteria
     public function delete(ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(LoginAttemptsTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LoginAttemptTableMap::DATABASE_NAME);
         }
 
         $criteria = $this;
 
         // Set the correct dbName
-        $criteria->setDbName(LoginAttemptsTableMap::DATABASE_NAME);
+        $criteria->setDbName(LoginAttemptTableMap::DATABASE_NAME);
 
         // use transaction because $criteria could contain info
         // for more than one table or we could emulating ON DELETE CASCADE, etc.
         return $con->transaction(function () use ($con, $criteria) {
             $affectedRows = 0; // initialize var to track total num of affected rows
 
-            LoginAttemptsTableMap::removeInstanceFromPool($criteria);
+            LoginAttemptTableMap::removeInstanceFromPool($criteria);
 
             $affectedRows += ModelCriteria::delete($con);
-            LoginAttemptsTableMap::clearRelatedInstancePool();
+            LoginAttemptTableMap::clearRelatedInstancePool();
 
             return $affectedRows;
         });
     }
 
-} // LoginAttemptsQuery
+} // LoginAttemptQuery

@@ -15,11 +15,12 @@ class View implements IView {
     protected $headers = array();
     protected $data = array();
     protected $template = '';
+    protected $parentView = null;
 
-
-    public function __construct($template, $data=array()) {
+    public function __construct($template, IView $parentView = null) {
         $this->setTemplate($template);
-        $this->data = $data;
+        $this->data = array();
+        $this->parentView = $parentView;
     }
 
     public function render() {
@@ -52,7 +53,7 @@ class View implements IView {
      * @return string
      */
     protected function getPathToTemplate() {
-        return APP_ROOT . '/classes/Poller/App/View/' . $this->template . '.tpl.php';
+        return APP_ROOT . '/classes/Splendr/App/View/' . $this->template . '.tpl.php';
     }
 
     /**
@@ -93,12 +94,20 @@ class View implements IView {
     }
 
     public function getData($name, $default_value = '') {
-        return isset($this->data[$name]) ? $this->data[$name] : $default_value;
+
+        if (isset($this->data[$name])) {
+            return $this->data[$name];
+        }
+
+        if ( $this->parentView != null ) {
+            return $this->parentView->getData($name, $default_value);
+        }
+
+        return $default_value;
     }
 
     public function clearData() {
         $this->data = array();
         return $this;
     }
-
 };

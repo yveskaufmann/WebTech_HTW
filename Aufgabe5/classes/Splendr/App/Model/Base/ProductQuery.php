@@ -24,23 +24,31 @@ use Splendr\App\Model\Map\ProductTableMap;
  * @method     ChildProductQuery orderByName($order = Criteria::ASC) Order by the name column
  * @method     ChildProductQuery orderByPrice($order = Criteria::ASC) Order by the price column
  * @method     ChildProductQuery orderByImageUrl($order = Criteria::ASC) Order by the image_url column
+ * @method     ChildProductQuery orderByProductUrl($order = Criteria::ASC) Order by the product_url column
  * @method     ChildProductQuery orderByDescription($order = Criteria::ASC) Order by the description column
+ * @method     ChildProductQuery orderByBoardId($order = Criteria::ASC) Order by the board_id column
  *
  * @method     ChildProductQuery groupById() Group by the id column
  * @method     ChildProductQuery groupByName() Group by the name column
  * @method     ChildProductQuery groupByPrice() Group by the price column
  * @method     ChildProductQuery groupByImageUrl() Group by the image_url column
+ * @method     ChildProductQuery groupByProductUrl() Group by the product_url column
  * @method     ChildProductQuery groupByDescription() Group by the description column
+ * @method     ChildProductQuery groupByBoardId() Group by the board_id column
  *
  * @method     ChildProductQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildProductQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
  * @method     ChildProductQuery innerJoin($relation) Adds a INNER JOIN clause to the query
  *
+ * @method     ChildProductQuery leftJoinProductBoard($relationAlias = null) Adds a LEFT JOIN clause to the query using the ProductBoard relation
+ * @method     ChildProductQuery rightJoinProductBoard($relationAlias = null) Adds a RIGHT JOIN clause to the query using the ProductBoard relation
+ * @method     ChildProductQuery innerJoinProductBoard($relationAlias = null) Adds a INNER JOIN clause to the query using the ProductBoard relation
+ *
  * @method     ChildProductQuery leftJoinProductReview($relationAlias = null) Adds a LEFT JOIN clause to the query using the ProductReview relation
  * @method     ChildProductQuery rightJoinProductReview($relationAlias = null) Adds a RIGHT JOIN clause to the query using the ProductReview relation
  * @method     ChildProductQuery innerJoinProductReview($relationAlias = null) Adds a INNER JOIN clause to the query using the ProductReview relation
  *
- * @method     \Splendr\App\Model\ProductReviewQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \Splendr\App\Model\ProductBoardQuery|\Splendr\App\Model\ProductReviewQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildProduct findOne(ConnectionInterface $con = null) Return the first ChildProduct matching the query
  * @method     ChildProduct findOneOrCreate(ConnectionInterface $con = null) Return the first ChildProduct matching the query, or a new ChildProduct object populated from the query conditions when no match is found
@@ -49,7 +57,9 @@ use Splendr\App\Model\Map\ProductTableMap;
  * @method     ChildProduct findOneByName(string $name) Return the first ChildProduct filtered by the name column
  * @method     ChildProduct findOneByPrice(string $price) Return the first ChildProduct filtered by the price column
  * @method     ChildProduct findOneByImageUrl(string $image_url) Return the first ChildProduct filtered by the image_url column
- * @method     ChildProduct findOneByDescription(string $description) Return the first ChildProduct filtered by the description column *
+ * @method     ChildProduct findOneByProductUrl(string $product_url) Return the first ChildProduct filtered by the product_url column
+ * @method     ChildProduct findOneByDescription(string $description) Return the first ChildProduct filtered by the description column
+ * @method     ChildProduct findOneByBoardId(int $board_id) Return the first ChildProduct filtered by the board_id column *
 
  * @method     ChildProduct requirePk($key, ConnectionInterface $con = null) Return the ChildProduct by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildProduct requireOne(ConnectionInterface $con = null) Return the first ChildProduct matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -58,14 +68,18 @@ use Splendr\App\Model\Map\ProductTableMap;
  * @method     ChildProduct requireOneByName(string $name) Return the first ChildProduct filtered by the name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildProduct requireOneByPrice(string $price) Return the first ChildProduct filtered by the price column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildProduct requireOneByImageUrl(string $image_url) Return the first ChildProduct filtered by the image_url column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requireOneByProductUrl(string $product_url) Return the first ChildProduct filtered by the product_url column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildProduct requireOneByDescription(string $description) Return the first ChildProduct filtered by the description column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildProduct requireOneByBoardId(int $board_id) Return the first ChildProduct filtered by the board_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildProduct[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildProduct objects based on current ModelCriteria
  * @method     ChildProduct[]|ObjectCollection findById(int $id) Return ChildProduct objects filtered by the id column
  * @method     ChildProduct[]|ObjectCollection findByName(string $name) Return ChildProduct objects filtered by the name column
  * @method     ChildProduct[]|ObjectCollection findByPrice(string $price) Return ChildProduct objects filtered by the price column
  * @method     ChildProduct[]|ObjectCollection findByImageUrl(string $image_url) Return ChildProduct objects filtered by the image_url column
+ * @method     ChildProduct[]|ObjectCollection findByProductUrl(string $product_url) Return ChildProduct objects filtered by the product_url column
  * @method     ChildProduct[]|ObjectCollection findByDescription(string $description) Return ChildProduct objects filtered by the description column
+ * @method     ChildProduct[]|ObjectCollection findByBoardId(int $board_id) Return ChildProduct objects filtered by the board_id column
  * @method     ChildProduct[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -158,7 +172,7 @@ abstract class ProductQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT id, name, price, image_url, description FROM Product WHERE id = :p0';
+        $sql = 'SELECT id, name, price, image_url, product_url, description, board_id FROM Product WHERE id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -389,6 +403,35 @@ abstract class ProductQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query on the product_url column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByProductUrl('fooValue');   // WHERE product_url = 'fooValue'
+     * $query->filterByProductUrl('%fooValue%'); // WHERE product_url LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $productUrl The value to use as filter.
+     *              Accepts wildcards (* and % trigger a LIKE)
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildProductQuery The current query, for fluid interface
+     */
+    public function filterByProductUrl($productUrl = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($productUrl)) {
+                $comparison = Criteria::IN;
+            } elseif (preg_match('/[\%\*]/', $productUrl)) {
+                $productUrl = str_replace('*', '%', $productUrl);
+                $comparison = Criteria::LIKE;
+            }
+        }
+
+        return $this->addUsingAlias(ProductTableMap::COL_PRODUCT_URL, $productUrl, $comparison);
+    }
+
+    /**
      * Filter the query on the description column
      *
      * Example usage:
@@ -415,6 +458,126 @@ abstract class ProductQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(ProductTableMap::COL_DESCRIPTION, $description, $comparison);
+    }
+
+    /**
+     * Filter the query on the board_id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByBoardId(1234); // WHERE board_id = 1234
+     * $query->filterByBoardId(array(12, 34)); // WHERE board_id IN (12, 34)
+     * $query->filterByBoardId(array('min' => 12)); // WHERE board_id > 12
+     * </code>
+     *
+     * @see       filterByProductBoard()
+     *
+     * @param     mixed $boardId The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildProductQuery The current query, for fluid interface
+     */
+    public function filterByBoardId($boardId = null, $comparison = null)
+    {
+        if (is_array($boardId)) {
+            $useMinMax = false;
+            if (isset($boardId['min'])) {
+                $this->addUsingAlias(ProductTableMap::COL_BOARD_ID, $boardId['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($boardId['max'])) {
+                $this->addUsingAlias(ProductTableMap::COL_BOARD_ID, $boardId['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(ProductTableMap::COL_BOARD_ID, $boardId, $comparison);
+    }
+
+    /**
+     * Filter the query by a related \Splendr\App\Model\ProductBoard object
+     *
+     * @param \Splendr\App\Model\ProductBoard|ObjectCollection $productBoard The related object(s) to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return ChildProductQuery The current query, for fluid interface
+     */
+    public function filterByProductBoard($productBoard, $comparison = null)
+    {
+        if ($productBoard instanceof \Splendr\App\Model\ProductBoard) {
+            return $this
+                ->addUsingAlias(ProductTableMap::COL_BOARD_ID, $productBoard->getId(), $comparison);
+        } elseif ($productBoard instanceof ObjectCollection) {
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+
+            return $this
+                ->addUsingAlias(ProductTableMap::COL_BOARD_ID, $productBoard->toKeyValue('Id', 'Id'), $comparison);
+        } else {
+            throw new PropelException('filterByProductBoard() only accepts arguments of type \Splendr\App\Model\ProductBoard or Collection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the ProductBoard relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this|ChildProductQuery The current query, for fluid interface
+     */
+    public function joinProductBoard($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('ProductBoard');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'ProductBoard');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the ProductBoard relation ProductBoard object
+     *
+     * @see useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return \Splendr\App\Model\ProductBoardQuery A secondary query class using the current class as primary query
+     */
+    public function useProductBoardQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinProductBoard($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'ProductBoard', '\Splendr\App\Model\ProductBoardQuery');
     }
 
     /**

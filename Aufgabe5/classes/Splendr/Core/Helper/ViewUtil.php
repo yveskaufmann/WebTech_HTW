@@ -8,7 +8,6 @@
 
 namespace Splendr\Core\Helper;
 
-
 class ViewUtil {
 
     public static function script($script) {

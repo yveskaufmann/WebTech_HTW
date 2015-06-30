@@ -9,4 +9,13 @@ $(document).ready(function($) {
         }
     });
 
+
+    $('form#search_form').submit(function(event) {
+        var query = $(this).find(':input').val();
+        var action = $(this).attr('action');
+        action = action.replace('${query}', query);
+        event.preventDefault();
+        window.location.href=action;
+    });
+
 });

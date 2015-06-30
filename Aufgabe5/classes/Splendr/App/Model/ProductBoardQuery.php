@@ -2,10 +2,10 @@
 
 namespace Splendr\App\Model;
 
-use Splendr\App\Model\Base\LoginAttempts as BaseLoginAttempts;
+use Splendr\App\Model\Base\ProductBoardQuery as BaseProductBoardQuery;
 
 /**
- * Skeleton subclass for representing a row from the 'LoginAttempts' table.
+ * Skeleton subclass for performing query and update operations on the 'ProductBoard' table.
  *
  *
  *
@@ -14,7 +14,7 @@ use Splendr\App\Model\Base\LoginAttempts as BaseLoginAttempts;
  * long as it does not already exist in the output directory.
  *
  */
-class LoginAttempts extends BaseLoginAttempts
+class ProductBoardQuery extends BaseProductBoardQuery
 {
 
 }

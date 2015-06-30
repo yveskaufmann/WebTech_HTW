@@ -1,9 +1,8 @@
 propel:
     paths:
         phpDir: 'classes/'
-        phpConfDir: 'config/'
+        phpConfDir: 'config/propel'
         sqlDir: 'assets/schema/'
-
     database:
         connections:
             splendr:

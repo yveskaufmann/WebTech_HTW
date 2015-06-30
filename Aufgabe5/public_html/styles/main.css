@@ -7,9 +7,6 @@
 
 /* Space out content a bit */
 body {
-    padding-top: 10px;
-    padding-bottom: 10px;
-
 }
 
 /* Space out the warning panel */
@@ -17,10 +14,71 @@ form > p.bg-warning {
     padding: 15px;
 }
 
-/* Responsive: Portrait tablets and up */
-@media screen and (min-width: 960px) {
-      .container {
-            max-width: 960px;
-      }
+#search-dp {
+    min-width: 280px;
+    overflow:hidden;
+    background-color:rgba(255,255,255,.8);
+    padding-left: 3px;
 }
 
+/* =============Login-View ==================================================== */
+/* From http://bootsnipp.com/snippets/featured/fancy-navbar-login-sign-in-form */
+#login-dp{
+    min-width: 250px;
+    padding: 14px 14px 0;
+    overflow:hidden;
+    background-color:rgba(255,255,255,.8);
+}
+#login-dp .help-block{
+    font-size:12px
+}
+#login-dp .bottom{
+    background-color:rgba(255,255,255,.8);
+    border-top:1px solid #ddd;
+    clear:both;
+    padding:14px;
+}
+#login-dp .social-buttons{
+    margin:12px 0
+}
+#login-dp .social-buttons a{
+    width: 49%;
+}
+#login-dp .form-group {
+    margin-bottom: 10px;
+}
+.btn-fb{
+    color: #fff;
+    background-color:#3b5998;
+}
+.btn-fb:hover{
+    color: #fff;
+    background-color:#496ebc
+}
+.btn-tw{
+    color: #fff;
+    background-color:#55acee;
+}
+.btn-tw:hover{
+    color: #fff;
+    background-color:#59b5fa;
+}
+
+
+/* ==========END-Login-View ==================================================== */
+
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+    .container {
+        max-width: 960px;
+    }
+    #login-dp{
+        background-color: inherit;
+        color: #fff;
+    }
+    #login-dp .bottom{
+        background-color: inherit;
+        border-top:0 none;
+    }
+}

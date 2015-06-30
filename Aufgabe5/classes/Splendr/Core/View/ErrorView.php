@@ -29,5 +29,6 @@ class ErrorView extends PageView {
      */
     public function __construct($error) {
         parent::__construct('error/'.$error, 'HTTP: '.$error);
+        $this->addData('navIsEnabled', false);
     }
 }

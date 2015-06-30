@@ -1,6 +1,5 @@
 <?php
 
-    define('DEV_MODE', false);
     define('APP_ROOT', __DIR__);
     define('APP_BASE_URL', dirname($_SERVER['PHP_SELF']));
 

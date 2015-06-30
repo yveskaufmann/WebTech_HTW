@@ -143,7 +143,7 @@ class ProductReviewTableMap extends TableMap
         // columns
         $this->addForeignPrimaryKey('product_id', 'ProductId', 'INTEGER' , 'Product', 'id', true, null, null);
         $this->addForeignPrimaryKey('user_id', 'UserId', 'INTEGER' , 'User', 'id', true, null, null);
-        $this->addColumn('review', 'Review', 'LONGVARCHAR', false, null, '');
+        $this->addColumn('review', 'Review', 'LONGVARCHAR', true, null, null);
         $this->addColumn('points', 'Points', 'INTEGER', true, null, null);
     } // initialize()
 

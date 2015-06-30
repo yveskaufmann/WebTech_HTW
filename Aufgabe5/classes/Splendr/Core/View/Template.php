@@ -11,6 +11,6 @@ namespace Splendr\Core\View;
 class Template extends View {
 
     protected function getPathToTemplate() {
-        return APP_ROOT . '/classes/Poller/App/Templates/' . $this->template . '.tpl.php';
+        return APP_ROOT . '/classes/Splendr/App/Templates/' . $this->template . '.tpl.php';
     }
 }

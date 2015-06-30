@@ -2,6 +2,7 @@
 
 namespace Splendr\App\Model\Base;
 
+use \DateTime;
 use \Exception;
 use \PDO;
 use Propel\Runtime\Propel;
@@ -15,26 +16,25 @@ use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
-use Splendr\App\Model\Product as ChildProduct;
-use Splendr\App\Model\ProductQuery as ChildProductQuery;
-use Splendr\App\Model\ProductReviewQuery as ChildProductReviewQuery;
+use Propel\Runtime\Util\PropelDateTime;
+use Splendr\App\Model\LoginAttemptQuery as ChildLoginAttemptQuery;
 use Splendr\App\Model\User as ChildUser;
 use Splendr\App\Model\UserQuery as ChildUserQuery;
-use Splendr\App\Model\Map\ProductReviewTableMap;
+use Splendr\App\Model\Map\LoginAttemptTableMap;
 
 /**
- * Base class that represents a row from the 'Product_Review' table.
+ * Base class that represents a row from the 'LoginAttempt' table.
  *
  *
  *
 * @package    propel.generator.Splendr.App.Model.Base
 */
-abstract class ProductReview implements ActiveRecordInterface
+abstract class LoginAttempt implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\Splendr\\App\\Model\\Map\\ProductReviewTableMap';
+    const TABLE_MAP = '\\Splendr\\App\\Model\\Map\\LoginAttemptTableMap';
 
 
     /**
@@ -64,33 +64,31 @@ abstract class ProductReview implements ActiveRecordInterface
     protected $virtualColumns = array();
 
     /**
-     * The value for the product_id field.
-     * @var        int
-     */
-    protected $product_id;
-
-    /**
      * The value for the user_id field.
      * @var        int
      */
     protected $user_id;
 
     /**
-     * The value for the review field.
-     * @var        string
-     */
-    protected $review;
-
-    /**
-     * The value for the points field.
+     * The value for the successful_logins field.
+     * Note: this column has a database default value of: 0
      * @var        int
      */
-    protected $points;
+    protected $successful_logins;
 
     /**
-     * @var        ChildProduct
+     * The value for the failed_logins field.
+     * Note: this column has a database default value of: 0
+     * @var        int
      */
-    protected $aProduct;
+    protected $failed_logins;
+
+    /**
+     * The value for the last_login field.
+     * Note: this column has a database default value of: (expression) CURRENT_TIMESTAMP
+     * @var        \DateTime
+     */
+    protected $last_login;
 
     /**
      * @var        ChildUser
@@ -106,10 +104,24 @@ abstract class ProductReview implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
-     * Initializes internal state of Splendr\App\Model\Base\ProductReview object.
+     * Applies default values to this object.
+     * This method should be called from the object's constructor (or
+     * equivalent initialization method).
+     * @see __construct()
+     */
+    public function applyDefaultValues()
+    {
+        $this->successful_logins = 0;
+        $this->failed_logins = 0;
+    }
+
+    /**
+     * Initializes internal state of Splendr\App\Model\Base\LoginAttempt object.
+     * @see applyDefaults()
      */
     public function __construct()
     {
+        $this->applyDefaultValues();
     }
 
     /**
@@ -201,9 +213,9 @@ abstract class ProductReview implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>ProductReview</code> instance.  If
-     * <code>obj</code> is an instance of <code>ProductReview</code>, delegates to
-     * <code>equals(ProductReview)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>LoginAttempt</code> instance.  If
+     * <code>obj</code> is an instance of <code>LoginAttempt</code>, delegates to
+     * <code>equals(LoginAttempt)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -269,7 +281,7 @@ abstract class ProductReview implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|ProductReview The current object, for fluid interface
+     * @return $this|LoginAttempt The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -323,16 +335,6 @@ abstract class ProductReview implements ActiveRecordInterface
     }
 
     /**
-     * Get the [product_id] column value.
-     *
-     * @return int
-     */
-    public function getProductId()
-    {
-        return $this->product_id;
-    }
-
-    /**
      * Get the [user_id] column value.
      *
      * @return int
@@ -343,54 +345,50 @@ abstract class ProductReview implements ActiveRecordInterface
     }
 
     /**
-     * Get the [review] column value.
-     *
-     * @return string
-     */
-    public function getReview()
-    {
-        return $this->review;
-    }
-
-    /**
-     * Get the [points] column value.
+     * Get the [successful_logins] column value.
      *
      * @return int
      */
-    public function getPoints()
+    public function getSuccessfulLogins()
     {
-        return $this->points;
+        return $this->successful_logins;
     }
 
     /**
-     * Set the value of [product_id] column.
+     * Get the [failed_logins] column value.
      *
-     * @param int $v new value
-     * @return $this|\Splendr\App\Model\ProductReview The current object (for fluent API support)
+     * @return int
      */
-    public function setProductId($v)
+    public function getFailedLogins()
     {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
+        return $this->failed_logins;
+    }
 
-        if ($this->product_id !== $v) {
-            $this->product_id = $v;
-            $this->modifiedColumns[ProductReviewTableMap::COL_PRODUCT_ID] = true;
+    /**
+     * Get the [optionally formatted] temporal [last_login] column value.
+     *
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw DateTime object will be returned.
+     *
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
+     */
+    public function getLastLogin($format = NULL)
+    {
+        if ($format === null) {
+            return $this->last_login;
+        } else {
+            return $this->last_login instanceof \DateTime ? $this->last_login->format($format) : null;
         }
-
-        if ($this->aProduct !== null && $this->aProduct->getId() !== $v) {
-            $this->aProduct = null;
-        }
-
-        return $this;
-    } // setProductId()
+    }
 
     /**
      * Set the value of [user_id] column.
      *
      * @param int $v new value
-     * @return $this|\Splendr\App\Model\ProductReview The current object (for fluent API support)
+     * @return $this|\Splendr\App\Model\LoginAttempt The current object (for fluent API support)
      */
     public function setUserId($v)
     {
@@ -400,7 +398,7 @@ abstract class ProductReview implements ActiveRecordInterface
 
         if ($this->user_id !== $v) {
             $this->user_id = $v;
-            $this->modifiedColumns[ProductReviewTableMap::COL_USER_ID] = true;
+            $this->modifiedColumns[LoginAttemptTableMap::COL_USER_ID] = true;
         }
 
         if ($this->aUser !== null && $this->aUser->getId() !== $v) {
@@ -411,44 +409,64 @@ abstract class ProductReview implements ActiveRecordInterface
     } // setUserId()
 
     /**
-     * Set the value of [review] column.
-     *
-     * @param string $v new value
-     * @return $this|\Splendr\App\Model\ProductReview The current object (for fluent API support)
-     */
-    public function setReview($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->review !== $v) {
-            $this->review = $v;
-            $this->modifiedColumns[ProductReviewTableMap::COL_REVIEW] = true;
-        }
-
-        return $this;
-    } // setReview()
-
-    /**
-     * Set the value of [points] column.
+     * Set the value of [successful_logins] column.
      *
      * @param int $v new value
-     * @return $this|\Splendr\App\Model\ProductReview The current object (for fluent API support)
+     * @return $this|\Splendr\App\Model\LoginAttempt The current object (for fluent API support)
      */
-    public function setPoints($v)
+    public function setSuccessfulLogins($v)
     {
         if ($v !== null) {
             $v = (int) $v;
         }
 
-        if ($this->points !== $v) {
-            $this->points = $v;
-            $this->modifiedColumns[ProductReviewTableMap::COL_POINTS] = true;
+        if ($this->successful_logins !== $v) {
+            $this->successful_logins = $v;
+            $this->modifiedColumns[LoginAttemptTableMap::COL_SUCCESSFUL_LOGINS] = true;
         }
 
         return $this;
-    } // setPoints()
+    } // setSuccessfulLogins()
+
+    /**
+     * Set the value of [failed_logins] column.
+     *
+     * @param int $v new value
+     * @return $this|\Splendr\App\Model\LoginAttempt The current object (for fluent API support)
+     */
+    public function setFailedLogins($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->failed_logins !== $v) {
+            $this->failed_logins = $v;
+            $this->modifiedColumns[LoginAttemptTableMap::COL_FAILED_LOGINS] = true;
+        }
+
+        return $this;
+    } // setFailedLogins()
+
+    /**
+     * Sets the value of [last_login] column to a normalized version of the date/time value specified.
+     *
+     * @param  mixed $v string, integer (timestamp), or \DateTime value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\Splendr\App\Model\LoginAttempt The current object (for fluent API support)
+     */
+    public function setLastLogin($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->last_login !== null || $dt !== null) {
+            if ($this->last_login === null || $dt === null || $dt->format("Y-m-d H:i:s") !== $this->last_login->format("Y-m-d H:i:s")) {
+                $this->last_login = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[LoginAttemptTableMap::COL_LAST_LOGIN] = true;
+            }
+        } // if either are not null
+
+        return $this;
+    } // setLastLogin()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -460,6 +478,14 @@ abstract class ProductReview implements ActiveRecordInterface
      */
     public function hasOnlyDefaultValues()
     {
+            if ($this->successful_logins !== 0) {
+                return false;
+            }
+
+            if ($this->failed_logins !== 0) {
+                return false;
+            }
+
         // otherwise, everything was equal, so return TRUE
         return true;
     } // hasOnlyDefaultValues()
@@ -486,17 +512,20 @@ abstract class ProductReview implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : ProductReviewTableMap::translateFieldName('ProductId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->product_id = (null !== $col) ? (int) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : ProductReviewTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : LoginAttemptTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : ProductReviewTableMap::translateFieldName('Review', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->review = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : LoginAttemptTableMap::translateFieldName('SuccessfulLogins', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->successful_logins = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : ProductReviewTableMap::translateFieldName('Points', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->points = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : LoginAttemptTableMap::translateFieldName('FailedLogins', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->failed_logins = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : LoginAttemptTableMap::translateFieldName('LastLogin', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
+            $this->last_login = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -505,10 +534,10 @@ abstract class ProductReview implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 4; // 4 = ProductReviewTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 4; // 4 = LoginAttemptTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\Splendr\\App\\Model\\ProductReview'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\Splendr\\App\\Model\\LoginAttempt'), 0, $e);
         }
     }
 
@@ -527,9 +556,6 @@ abstract class ProductReview implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aProduct !== null && $this->product_id !== $this->aProduct->getId()) {
-            $this->aProduct = null;
-        }
         if ($this->aUser !== null && $this->user_id !== $this->aUser->getId()) {
             $this->aUser = null;
         }
@@ -556,13 +582,13 @@ abstract class ProductReview implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(ProductReviewTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(LoginAttemptTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildProductReviewQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildLoginAttemptQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -572,7 +598,6 @@ abstract class ProductReview implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aProduct = null;
             $this->aUser = null;
         } // if (deep)
     }
@@ -583,8 +608,8 @@ abstract class ProductReview implements ActiveRecordInterface
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see ProductReview::setDeleted()
-     * @see ProductReview::isDeleted()
+     * @see LoginAttempt::setDeleted()
+     * @see LoginAttempt::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -593,11 +618,11 @@ abstract class ProductReview implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(ProductReviewTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LoginAttemptTableMap::DATABASE_NAME);
         }
 
         $con->transaction(function () use ($con) {
-            $deleteQuery = ChildProductReviewQuery::create()
+            $deleteQuery = ChildLoginAttemptQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -628,7 +653,7 @@ abstract class ProductReview implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(ProductReviewTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LoginAttemptTableMap::DATABASE_NAME);
         }
 
         return $con->transaction(function () use ($con) {
@@ -647,7 +672,7 @@ abstract class ProductReview implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                ProductReviewTableMap::addInstanceToPool($this);
+                LoginAttemptTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -677,13 +702,6 @@ abstract class ProductReview implements ActiveRecordInterface
             // were passed to this object by their corresponding set
             // method.  This object relates to these object(s) by a
             // foreign key reference.
-
-            if ($this->aProduct !== null) {
-                if ($this->aProduct->isModified() || $this->aProduct->isNew()) {
-                    $affectedRows += $this->aProduct->save($con);
-                }
-                $this->setProduct($this->aProduct);
-            }
 
             if ($this->aUser !== null) {
                 if ($this->aUser->isModified() || $this->aUser->isNew()) {
@@ -725,21 +743,21 @@ abstract class ProductReview implements ActiveRecordInterface
 
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(ProductReviewTableMap::COL_PRODUCT_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'product_id';
-        }
-        if ($this->isColumnModified(ProductReviewTableMap::COL_USER_ID)) {
+        if ($this->isColumnModified(LoginAttemptTableMap::COL_USER_ID)) {
             $modifiedColumns[':p' . $index++]  = 'user_id';
         }
-        if ($this->isColumnModified(ProductReviewTableMap::COL_REVIEW)) {
-            $modifiedColumns[':p' . $index++]  = 'review';
+        if ($this->isColumnModified(LoginAttemptTableMap::COL_SUCCESSFUL_LOGINS)) {
+            $modifiedColumns[':p' . $index++]  = 'successful_logins';
         }
-        if ($this->isColumnModified(ProductReviewTableMap::COL_POINTS)) {
-            $modifiedColumns[':p' . $index++]  = 'points';
+        if ($this->isColumnModified(LoginAttemptTableMap::COL_FAILED_LOGINS)) {
+            $modifiedColumns[':p' . $index++]  = 'failed_logins';
+        }
+        if ($this->isColumnModified(LoginAttemptTableMap::COL_LAST_LOGIN)) {
+            $modifiedColumns[':p' . $index++]  = 'last_login';
         }
 
         $sql = sprintf(
-            'INSERT INTO Product_Review (%s) VALUES (%s)',
+            'INSERT INTO LoginAttempt (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -748,17 +766,17 @@ abstract class ProductReview implements ActiveRecordInterface
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
-                    case 'product_id':
-                        $stmt->bindValue($identifier, $this->product_id, PDO::PARAM_INT);
-                        break;
                     case 'user_id':
                         $stmt->bindValue($identifier, $this->user_id, PDO::PARAM_INT);
                         break;
-                    case 'review':
-                        $stmt->bindValue($identifier, $this->review, PDO::PARAM_STR);
+                    case 'successful_logins':
+                        $stmt->bindValue($identifier, $this->successful_logins, PDO::PARAM_INT);
                         break;
-                    case 'points':
-                        $stmt->bindValue($identifier, $this->points, PDO::PARAM_INT);
+                    case 'failed_logins':
+                        $stmt->bindValue($identifier, $this->failed_logins, PDO::PARAM_INT);
+                        break;
+                    case 'last_login':
+                        $stmt->bindValue($identifier, $this->last_login ? $this->last_login->format("Y-m-d H:i:s") : null, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -799,7 +817,7 @@ abstract class ProductReview implements ActiveRecordInterface
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = ProductReviewTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = LoginAttemptTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -816,16 +834,16 @@ abstract class ProductReview implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                return $this->getProductId();
-                break;
-            case 1:
                 return $this->getUserId();
                 break;
+            case 1:
+                return $this->getSuccessfulLogins();
+                break;
             case 2:
-                return $this->getReview();
+                return $this->getFailedLogins();
                 break;
             case 3:
-                return $this->getPoints();
+                return $this->getLastLogin();
                 break;
             default:
                 return null;
@@ -851,38 +869,31 @@ abstract class ProductReview implements ActiveRecordInterface
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
 
-        if (isset($alreadyDumpedObjects['ProductReview'][$this->hashCode()])) {
+        if (isset($alreadyDumpedObjects['LoginAttempt'][$this->hashCode()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['ProductReview'][$this->hashCode()] = true;
-        $keys = ProductReviewTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['LoginAttempt'][$this->hashCode()] = true;
+        $keys = LoginAttemptTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getProductId(),
-            $keys[1] => $this->getUserId(),
-            $keys[2] => $this->getReview(),
-            $keys[3] => $this->getPoints(),
+            $keys[0] => $this->getUserId(),
+            $keys[1] => $this->getSuccessfulLogins(),
+            $keys[2] => $this->getFailedLogins(),
+            $keys[3] => $this->getLastLogin(),
         );
+
+        $utc = new \DateTimeZone('utc');
+        if ($result[$keys[3]] instanceof \DateTime) {
+            // When changing timezone we don't want to change existing instances
+            $dateTime = clone $result[$keys[3]];
+            $result[$keys[3]] = $dateTime->setTimezone($utc)->format('Y-m-d\TH:i:s\Z');
+        }
+
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
             $result[$key] = $virtualColumn;
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aProduct) {
-
-                switch ($keyType) {
-                    case TableMap::TYPE_CAMELNAME:
-                        $key = 'product';
-                        break;
-                    case TableMap::TYPE_FIELDNAME:
-                        $key = 'Product';
-                        break;
-                    default:
-                        $key = 'Product';
-                }
-
-                $result[$key] = $this->aProduct->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
-            }
             if (null !== $this->aUser) {
 
                 switch ($keyType) {
@@ -912,11 +923,11 @@ abstract class ProductReview implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\Splendr\App\Model\ProductReview
+     * @return $this|\Splendr\App\Model\LoginAttempt
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = ProductReviewTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = LoginAttemptTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -927,22 +938,22 @@ abstract class ProductReview implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\Splendr\App\Model\ProductReview
+     * @return $this|\Splendr\App\Model\LoginAttempt
      */
     public function setByPosition($pos, $value)
     {
         switch ($pos) {
             case 0:
-                $this->setProductId($value);
-                break;
-            case 1:
                 $this->setUserId($value);
                 break;
+            case 1:
+                $this->setSuccessfulLogins($value);
+                break;
             case 2:
-                $this->setReview($value);
+                $this->setFailedLogins($value);
                 break;
             case 3:
-                $this->setPoints($value);
+                $this->setLastLogin($value);
                 break;
         } // switch()
 
@@ -968,19 +979,19 @@ abstract class ProductReview implements ActiveRecordInterface
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = ProductReviewTableMap::getFieldNames($keyType);
+        $keys = LoginAttemptTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
-            $this->setProductId($arr[$keys[0]]);
+            $this->setUserId($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setUserId($arr[$keys[1]]);
+            $this->setSuccessfulLogins($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setReview($arr[$keys[2]]);
+            $this->setFailedLogins($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setPoints($arr[$keys[3]]);
+            $this->setLastLogin($arr[$keys[3]]);
         }
     }
 
@@ -1001,7 +1012,7 @@ abstract class ProductReview implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\Splendr\App\Model\ProductReview The current object, for fluid interface
+     * @return $this|\Splendr\App\Model\LoginAttempt The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1021,19 +1032,19 @@ abstract class ProductReview implements ActiveRecordInterface
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(ProductReviewTableMap::DATABASE_NAME);
+        $criteria = new Criteria(LoginAttemptTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(ProductReviewTableMap::COL_PRODUCT_ID)) {
-            $criteria->add(ProductReviewTableMap::COL_PRODUCT_ID, $this->product_id);
+        if ($this->isColumnModified(LoginAttemptTableMap::COL_USER_ID)) {
+            $criteria->add(LoginAttemptTableMap::COL_USER_ID, $this->user_id);
         }
-        if ($this->isColumnModified(ProductReviewTableMap::COL_USER_ID)) {
-            $criteria->add(ProductReviewTableMap::COL_USER_ID, $this->user_id);
+        if ($this->isColumnModified(LoginAttemptTableMap::COL_SUCCESSFUL_LOGINS)) {
+            $criteria->add(LoginAttemptTableMap::COL_SUCCESSFUL_LOGINS, $this->successful_logins);
         }
-        if ($this->isColumnModified(ProductReviewTableMap::COL_REVIEW)) {
-            $criteria->add(ProductReviewTableMap::COL_REVIEW, $this->review);
+        if ($this->isColumnModified(LoginAttemptTableMap::COL_FAILED_LOGINS)) {
+            $criteria->add(LoginAttemptTableMap::COL_FAILED_LOGINS, $this->failed_logins);
         }
-        if ($this->isColumnModified(ProductReviewTableMap::COL_POINTS)) {
-            $criteria->add(ProductReviewTableMap::COL_POINTS, $this->points);
+        if ($this->isColumnModified(LoginAttemptTableMap::COL_LAST_LOGIN)) {
+            $criteria->add(LoginAttemptTableMap::COL_LAST_LOGIN, $this->last_login);
         }
 
         return $criteria;
@@ -1051,9 +1062,8 @@ abstract class ProductReview implements ActiveRecordInterface
      */
     public function buildPkeyCriteria()
     {
-        $criteria = ChildProductReviewQuery::create();
-        $criteria->add(ProductReviewTableMap::COL_PRODUCT_ID, $this->product_id);
-        $criteria->add(ProductReviewTableMap::COL_USER_ID, $this->user_id);
+        $criteria = ChildLoginAttemptQuery::create();
+        $criteria->add(LoginAttemptTableMap::COL_USER_ID, $this->user_id);
 
         return $criteria;
     }
@@ -1066,20 +1076,12 @@ abstract class ProductReview implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getProductId() &&
-            null !== $this->getUserId();
+        $validPk = null !== $this->getUserId();
 
-        $validPrimaryKeyFKs = 2;
+        $validPrimaryKeyFKs = 1;
         $primaryKeyFKs = [];
 
-        //relation Product_Review_fk_0f5ed8 to table Product
-        if ($this->aProduct && $hash = spl_object_hash($this->aProduct)) {
-            $primaryKeyFKs[] = $hash;
-        } else {
-            $validPrimaryKeyFKs = false;
-        }
-
-        //relation Product_Review_fk_29554a to table User
+        //relation LoginAttempt_fk_29554a to table User
         if ($this->aUser && $hash = spl_object_hash($this->aUser)) {
             $primaryKeyFKs[] = $hash;
         } else {
@@ -1096,29 +1098,23 @@ abstract class ProductReview implements ActiveRecordInterface
     }
 
     /**
-     * Returns the composite primary key for this object.
-     * The array elements will be in same order as specified in XML.
-     * @return array
+     * Returns the primary key for this object (row).
+     * @return int
      */
     public function getPrimaryKey()
     {
-        $pks = array();
-        $pks[0] = $this->getProductId();
-        $pks[1] = $this->getUserId();
-
-        return $pks;
+        return $this->getUserId();
     }
 
     /**
-     * Set the [composite] primary key.
+     * Generic method to set the primary key (user_id column).
      *
-     * @param      array $keys The elements of the composite key (order must match the order in XML file).
+     * @param       int $key Primary key.
      * @return void
      */
-    public function setPrimaryKey($keys)
+    public function setPrimaryKey($key)
     {
-        $this->setProductId($keys[0]);
-        $this->setUserId($keys[1]);
+        $this->setUserId($key);
     }
 
     /**
@@ -1127,7 +1123,7 @@ abstract class ProductReview implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return (null === $this->getProductId()) && (null === $this->getUserId());
+        return null === $this->getUserId();
     }
 
     /**
@@ -1136,17 +1132,17 @@ abstract class ProductReview implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \Splendr\App\Model\ProductReview (or compatible) type.
+     * @param      object $copyObj An object of \Splendr\App\Model\LoginAttempt (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setProductId($this->getProductId());
         $copyObj->setUserId($this->getUserId());
-        $copyObj->setReview($this->getReview());
-        $copyObj->setPoints($this->getPoints());
+        $copyObj->setSuccessfulLogins($this->getSuccessfulLogins());
+        $copyObj->setFailedLogins($this->getFailedLogins());
+        $copyObj->setLastLogin($this->getLastLogin());
         if ($makeNew) {
             $copyObj->setNew(true);
         }
@@ -1161,7 +1157,7 @@ abstract class ProductReview implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \Splendr\App\Model\ProductReview Clone of current object.
+     * @return \Splendr\App\Model\LoginAttempt Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1175,61 +1171,10 @@ abstract class ProductReview implements ActiveRecordInterface
     }
 
     /**
-     * Declares an association between this object and a ChildProduct object.
-     *
-     * @param  ChildProduct $v
-     * @return $this|\Splendr\App\Model\ProductReview The current object (for fluent API support)
-     * @throws PropelException
-     */
-    public function setProduct(ChildProduct $v = null)
-    {
-        if ($v === null) {
-            $this->setProductId(NULL);
-        } else {
-            $this->setProductId($v->getId());
-        }
-
-        $this->aProduct = $v;
-
-        // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildProduct object, it will not be re-added.
-        if ($v !== null) {
-            $v->addProductReview($this);
-        }
-
-
-        return $this;
-    }
-
-
-    /**
-     * Get the associated ChildProduct object
-     *
-     * @param  ConnectionInterface $con Optional Connection object.
-     * @return ChildProduct The associated ChildProduct object.
-     * @throws PropelException
-     */
-    public function getProduct(ConnectionInterface $con = null)
-    {
-        if ($this->aProduct === null && ($this->product_id !== null)) {
-            $this->aProduct = ChildProductQuery::create()->findPk($this->product_id, $con);
-            /* The following can be used additionally to
-                guarantee the related object contains a reference
-                to this object.  This level of coupling may, however, be
-                undesirable since it could result in an only partially populated collection
-                in the referenced object.
-                $this->aProduct->addProductReviews($this);
-             */
-        }
-
-        return $this->aProduct;
-    }
-
-    /**
      * Declares an association between this object and a ChildUser object.
      *
      * @param  ChildUser $v
-     * @return $this|\Splendr\App\Model\ProductReview The current object (for fluent API support)
+     * @return $this|\Splendr\App\Model\LoginAttempt The current object (for fluent API support)
      * @throws PropelException
      */
     public function setUser(ChildUser $v = null)
@@ -1242,10 +1187,9 @@ abstract class ProductReview implements ActiveRecordInterface
 
         $this->aUser = $v;
 
-        // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildUser object, it will not be re-added.
+        // Add binding for other direction of this 1:1 relationship.
         if ($v !== null) {
-            $v->addProductReview($this);
+            $v->setLoginAttempt($this);
         }
 
 
@@ -1264,13 +1208,8 @@ abstract class ProductReview implements ActiveRecordInterface
     {
         if ($this->aUser === null && ($this->user_id !== null)) {
             $this->aUser = ChildUserQuery::create()->findPk($this->user_id, $con);
-            /* The following can be used additionally to
-                guarantee the related object contains a reference
-                to this object.  This level of coupling may, however, be
-                undesirable since it could result in an only partially populated collection
-                in the referenced object.
-                $this->aUser->addProductReviews($this);
-             */
+            // Because this foreign key represents a one-to-one relationship, we will create a bi-directional association.
+            $this->aUser->setLoginAttempt($this);
         }
 
         return $this->aUser;
@@ -1283,18 +1222,16 @@ abstract class ProductReview implements ActiveRecordInterface
      */
     public function clear()
     {
-        if (null !== $this->aProduct) {
-            $this->aProduct->removeProductReview($this);
-        }
         if (null !== $this->aUser) {
-            $this->aUser->removeProductReview($this);
+            $this->aUser->removeLoginAttempt($this);
         }
-        $this->product_id = null;
         $this->user_id = null;
-        $this->review = null;
-        $this->points = null;
+        $this->successful_logins = null;
+        $this->failed_logins = null;
+        $this->last_login = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
+        $this->applyDefaultValues();
         $this->resetModified();
         $this->setNew(true);
         $this->setDeleted(false);
@@ -1313,7 +1250,6 @@ abstract class ProductReview implements ActiveRecordInterface
         if ($deep) {
         } // if ($deep)
 
-        $this->aProduct = null;
         $this->aUser = null;
     }
 
@@ -1324,7 +1260,7 @@ abstract class ProductReview implements ActiveRecordInterface
      */
     public function __toString()
     {
-        return (string) $this->exportTo(ProductReviewTableMap::DEFAULT_STRING_FORMAT);
+        return (string) $this->exportTo(LoginAttemptTableMap::DEFAULT_STRING_FORMAT);
     }
 
     /**

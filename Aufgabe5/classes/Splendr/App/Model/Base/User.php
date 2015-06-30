@@ -16,8 +16,10 @@ use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
-use Splendr\App\Model\LoginAttempts as ChildLoginAttempts;
-use Splendr\App\Model\LoginAttemptsQuery as ChildLoginAttemptsQuery;
+use Splendr\App\Model\LoginAttempt as ChildLoginAttempt;
+use Splendr\App\Model\LoginAttemptQuery as ChildLoginAttemptQuery;
+use Splendr\App\Model\ProductBoard as ChildProductBoard;
+use Splendr\App\Model\ProductBoardQuery as ChildProductBoardQuery;
 use Splendr\App\Model\ProductReview as ChildProductReview;
 use Splendr\App\Model\ProductReviewQuery as ChildProductReviewQuery;
 use Splendr\App\Model\User as ChildUser;
@@ -108,9 +110,15 @@ abstract class User implements ActiveRecordInterface
     protected $last_name;
 
     /**
-     * @var        ChildLoginAttempts one-to-one related ChildLoginAttempts object
+     * @var        ChildLoginAttempt one-to-one related ChildLoginAttempt object
      */
-    protected $singleLoginAttempts;
+    protected $singleLoginAttempt;
+
+    /**
+     * @var        ObjectCollection|ChildProductBoard[] Collection to store aggregation of ChildProductBoard objects.
+     */
+    protected $collProductBoards;
+    protected $collProductBoardsPartial;
 
     /**
      * @var        ObjectCollection|ChildProductReview[] Collection to store aggregation of ChildProductReview objects.
@@ -125,6 +133,12 @@ abstract class User implements ActiveRecordInterface
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildProductBoard[]
+     */
+    protected $productBoardsScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
@@ -684,7 +698,9 @@ abstract class User implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->singleLoginAttempts = null;
+            $this->singleLoginAttempt = null;
+
+            $this->collProductBoards = null;
 
             $this->collProductReviews = null;
 
@@ -798,9 +814,26 @@ abstract class User implements ActiveRecordInterface
                 $this->resetModified();
             }
 
-            if ($this->singleLoginAttempts !== null) {
-                if (!$this->singleLoginAttempts->isDeleted() && ($this->singleLoginAttempts->isNew() || $this->singleLoginAttempts->isModified())) {
-                    $affectedRows += $this->singleLoginAttempts->save($con);
+            if ($this->singleLoginAttempt !== null) {
+                if (!$this->singleLoginAttempt->isDeleted() && ($this->singleLoginAttempt->isNew() || $this->singleLoginAttempt->isModified())) {
+                    $affectedRows += $this->singleLoginAttempt->save($con);
+                }
+            }
+
+            if ($this->productBoardsScheduledForDeletion !== null) {
+                if (!$this->productBoardsScheduledForDeletion->isEmpty()) {
+                    \Splendr\App\Model\ProductBoardQuery::create()
+                        ->filterByPrimaryKeys($this->productBoardsScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
+                    $this->productBoardsScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collProductBoards !== null) {
+                foreach ($this->collProductBoards as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
                 }
             }
 
@@ -1027,20 +1060,35 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->singleLoginAttempts) {
+            if (null !== $this->singleLoginAttempt) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'loginAttempts';
+                        $key = 'loginAttempt';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'LoginAttempts';
+                        $key = 'LoginAttempt';
                         break;
                     default:
-                        $key = 'LoginAttempts';
+                        $key = 'LoginAttempt';
                 }
 
-                $result[$key] = $this->singleLoginAttempts->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
+                $result[$key] = $this->singleLoginAttempt->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->collProductBoards) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'productBoards';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'ProductBoards';
+                        break;
+                    default:
+                        $key = 'ProductBoards';
+                }
+
+                $result[$key] = $this->collProductBoards->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
             if (null !== $this->collProductReviews) {
 
@@ -1319,9 +1367,15 @@ abstract class User implements ActiveRecordInterface
             // the getter/setter methods for fkey referrer objects.
             $copyObj->setNew(false);
 
-            $relObj = $this->getLoginAttempts();
+            $relObj = $this->getLoginAttempt();
             if ($relObj) {
-                $copyObj->setLoginAttempts($relObj->copy($deepCopy));
+                $copyObj->setLoginAttempt($relObj->copy($deepCopy));
+            }
+
+            foreach ($this->getProductBoards() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addProductBoard($relObj->copy($deepCopy));
+                }
             }
 
             foreach ($this->getProductReviews() as $relObj) {
@@ -1371,42 +1425,266 @@ abstract class User implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
+        if ('ProductBoard' == $relationName) {
+            return $this->initProductBoards();
+        }
         if ('ProductReview' == $relationName) {
             return $this->initProductReviews();
         }
     }
 
     /**
-     * Gets a single ChildLoginAttempts object, which is related to this object by a one-to-one relationship.
+     * Gets a single ChildLoginAttempt object, which is related to this object by a one-to-one relationship.
      *
      * @param  ConnectionInterface $con optional connection object
-     * @return ChildLoginAttempts
+     * @return ChildLoginAttempt
      * @throws PropelException
      */
-    public function getLoginAttempts(ConnectionInterface $con = null)
+    public function getLoginAttempt(ConnectionInterface $con = null)
     {
 
-        if ($this->singleLoginAttempts === null && !$this->isNew()) {
-            $this->singleLoginAttempts = ChildLoginAttemptsQuery::create()->findPk($this->getPrimaryKey(), $con);
+        if ($this->singleLoginAttempt === null && !$this->isNew()) {
+            $this->singleLoginAttempt = ChildLoginAttemptQuery::create()->findPk($this->getPrimaryKey(), $con);
         }
 
-        return $this->singleLoginAttempts;
+        return $this->singleLoginAttempt;
     }
 
     /**
-     * Sets a single ChildLoginAttempts object as related to this object by a one-to-one relationship.
+     * Sets a single ChildLoginAttempt object as related to this object by a one-to-one relationship.
      *
-     * @param  ChildLoginAttempts $v ChildLoginAttempts
+     * @param  ChildLoginAttempt $v ChildLoginAttempt
      * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setLoginAttempts(ChildLoginAttempts $v = null)
+    public function setLoginAttempt(ChildLoginAttempt $v = null)
     {
-        $this->singleLoginAttempts = $v;
+        $this->singleLoginAttempt = $v;
 
-        // Make sure that that the passed-in ChildLoginAttempts isn't already associated with this object
+        // Make sure that that the passed-in ChildLoginAttempt isn't already associated with this object
         if ($v !== null && $v->getUser(null, false) === null) {
             $v->setUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Clears out the collProductBoards collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addProductBoards()
+     */
+    public function clearProductBoards()
+    {
+        $this->collProductBoards = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Reset is the collProductBoards collection loaded partially.
+     */
+    public function resetPartialProductBoards($v = true)
+    {
+        $this->collProductBoardsPartial = $v;
+    }
+
+    /**
+     * Initializes the collProductBoards collection.
+     *
+     * By default this just sets the collProductBoards collection to an empty array (like clearcollProductBoards());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param      boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initProductBoards($overrideExisting = true)
+    {
+        if (null !== $this->collProductBoards && !$overrideExisting) {
+            return;
+        }
+        $this->collProductBoards = new ObjectCollection();
+        $this->collProductBoards->setModel('\Splendr\App\Model\ProductBoard');
+    }
+
+    /**
+     * Gets an array of ChildProductBoard objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildUser is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @return ObjectCollection|ChildProductBoard[] List of ChildProductBoard objects
+     * @throws PropelException
+     */
+    public function getProductBoards(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collProductBoardsPartial && !$this->isNew();
+        if (null === $this->collProductBoards || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collProductBoards) {
+                // return empty collection
+                $this->initProductBoards();
+            } else {
+                $collProductBoards = ChildProductBoardQuery::create(null, $criteria)
+                    ->filterByUser($this)
+                    ->find($con);
+
+                if (null !== $criteria) {
+                    if (false !== $this->collProductBoardsPartial && count($collProductBoards)) {
+                        $this->initProductBoards(false);
+
+                        foreach ($collProductBoards as $obj) {
+                            if (false == $this->collProductBoards->contains($obj)) {
+                                $this->collProductBoards->append($obj);
+                            }
+                        }
+
+                        $this->collProductBoardsPartial = true;
+                    }
+
+                    return $collProductBoards;
+                }
+
+                if ($partial && $this->collProductBoards) {
+                    foreach ($this->collProductBoards as $obj) {
+                        if ($obj->isNew()) {
+                            $collProductBoards[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collProductBoards = $collProductBoards;
+                $this->collProductBoardsPartial = false;
+            }
+        }
+
+        return $this->collProductBoards;
+    }
+
+    /**
+     * Sets a collection of ChildProductBoard objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param      Collection $productBoards A Propel collection.
+     * @param      ConnectionInterface $con Optional connection object
+     * @return $this|ChildUser The current object (for fluent API support)
+     */
+    public function setProductBoards(Collection $productBoards, ConnectionInterface $con = null)
+    {
+        /** @var ChildProductBoard[] $productBoardsToDelete */
+        $productBoardsToDelete = $this->getProductBoards(new Criteria(), $con)->diff($productBoards);
+
+
+        //since at least one column in the foreign key is at the same time a PK
+        //we can not just set a PK to NULL in the lines below. We have to store
+        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
+        $this->productBoardsScheduledForDeletion = clone $productBoardsToDelete;
+
+        foreach ($productBoardsToDelete as $productBoardRemoved) {
+            $productBoardRemoved->setUser(null);
+        }
+
+        $this->collProductBoards = null;
+        foreach ($productBoards as $productBoard) {
+            $this->addProductBoard($productBoard);
+        }
+
+        $this->collProductBoards = $productBoards;
+        $this->collProductBoardsPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related ProductBoard objects.
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct
+     * @param      ConnectionInterface $con
+     * @return int             Count of related ProductBoard objects.
+     * @throws PropelException
+     */
+    public function countProductBoards(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collProductBoardsPartial && !$this->isNew();
+        if (null === $this->collProductBoards || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collProductBoards) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getProductBoards());
+            }
+
+            $query = ChildProductBoardQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByUser($this)
+                ->count($con);
+        }
+
+        return count($this->collProductBoards);
+    }
+
+    /**
+     * Method called to associate a ChildProductBoard object to this object
+     * through the ChildProductBoard foreign key attribute.
+     *
+     * @param  ChildProductBoard $l ChildProductBoard
+     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
+     */
+    public function addProductBoard(ChildProductBoard $l)
+    {
+        if ($this->collProductBoards === null) {
+            $this->initProductBoards();
+            $this->collProductBoardsPartial = true;
+        }
+
+        if (!$this->collProductBoards->contains($l)) {
+            $this->doAddProductBoard($l);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ChildProductBoard $productBoard The ChildProductBoard object to add.
+     */
+    protected function doAddProductBoard(ChildProductBoard $productBoard)
+    {
+        $this->collProductBoards[]= $productBoard;
+        $productBoard->setUser($this);
+    }
+
+    /**
+     * @param  ChildProductBoard $productBoard The ChildProductBoard object to remove.
+     * @return $this|ChildUser The current object (for fluent API support)
+     */
+    public function removeProductBoard(ChildProductBoard $productBoard)
+    {
+        if ($this->getProductBoards()->contains($productBoard)) {
+            $pos = $this->collProductBoards->search($productBoard);
+            $this->collProductBoards->remove($pos);
+            if (null === $this->productBoardsScheduledForDeletion) {
+                $this->productBoardsScheduledForDeletion = clone $this->collProductBoards;
+                $this->productBoardsScheduledForDeletion->clear();
+            }
+            $this->productBoardsScheduledForDeletion[]= clone $productBoard;
+            $productBoard->setUser(null);
         }
 
         return $this;
@@ -1690,8 +1968,13 @@ abstract class User implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
-            if ($this->singleLoginAttempts) {
-                $this->singleLoginAttempts->clearAllReferences($deep);
+            if ($this->singleLoginAttempt) {
+                $this->singleLoginAttempt->clearAllReferences($deep);
+            }
+            if ($this->collProductBoards) {
+                foreach ($this->collProductBoards as $o) {
+                    $o->clearAllReferences($deep);
+                }
             }
             if ($this->collProductReviews) {
                 foreach ($this->collProductReviews as $o) {
@@ -1700,7 +1983,8 @@ abstract class User implements ActiveRecordInterface
             }
         } // if ($deep)
 
-        $this->singleLoginAttempts = null;
+        $this->singleLoginAttempt = null;
+        $this->collProductBoards = null;
         $this->collProductReviews = null;
     }
 

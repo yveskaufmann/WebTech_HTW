@@ -2,7 +2,7 @@
     use Splendr\Core\Helper\ViewUtil;
 ?>
     <footer>
-        <p><span class="glyphicon glyphicon-heart"></span> from the Poller team</p>
+        <p><span class="glyphicon glyphicon-heart"></span> from the Splendr team</p>
     </footer>
     </div>
     <?php

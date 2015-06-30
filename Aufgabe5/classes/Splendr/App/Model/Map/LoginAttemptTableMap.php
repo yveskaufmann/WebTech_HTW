@@ -11,12 +11,12 @@ use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\RelationMap;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Map\TableMapTrait;
-use Splendr\App\Model\LoginAttempts;
-use Splendr\App\Model\LoginAttemptsQuery;
+use Splendr\App\Model\LoginAttempt;
+use Splendr\App\Model\LoginAttemptQuery;
 
 
 /**
- * This class defines the structure of the 'LoginAttempts' table.
+ * This class defines the structure of the 'LoginAttempt' table.
  *
  *
  *
@@ -26,7 +26,7 @@ use Splendr\App\Model\LoginAttemptsQuery;
  * (i.e. if it's a text column type).
  *
  */
-class LoginAttemptsTableMap extends TableMap
+class LoginAttemptTableMap extends TableMap
 {
     use InstancePoolTrait;
     use TableMapTrait;
@@ -34,7 +34,7 @@ class LoginAttemptsTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'Splendr.App.Model.Map.LoginAttemptsTableMap';
+    const CLASS_NAME = 'Splendr.App.Model.Map.LoginAttemptTableMap';
 
     /**
      * The default database name for this class
@@ -44,17 +44,17 @@ class LoginAttemptsTableMap extends TableMap
     /**
      * The table name for this class
      */
-    const TABLE_NAME = 'LoginAttempts';
+    const TABLE_NAME = 'LoginAttempt';
 
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\Splendr\\App\\Model\\LoginAttempts';
+    const OM_CLASS = '\\Splendr\\App\\Model\\LoginAttempt';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'Splendr.App.Model.LoginAttempts';
+    const CLASS_DEFAULT = 'Splendr.App.Model.LoginAttempt';
 
     /**
      * The total number of columns
@@ -74,22 +74,22 @@ class LoginAttemptsTableMap extends TableMap
     /**
      * the column name for the user_id field
      */
-    const COL_USER_ID = 'LoginAttempts.user_id';
+    const COL_USER_ID = 'LoginAttempt.user_id';
 
     /**
      * the column name for the successful_logins field
      */
-    const COL_SUCCESSFUL_LOGINS = 'LoginAttempts.successful_logins';
+    const COL_SUCCESSFUL_LOGINS = 'LoginAttempt.successful_logins';
 
     /**
      * the column name for the failed_logins field
      */
-    const COL_FAILED_LOGINS = 'LoginAttempts.failed_logins';
+    const COL_FAILED_LOGINS = 'LoginAttempt.failed_logins';
 
     /**
      * the column name for the last_login field
      */
-    const COL_LAST_LOGIN = 'LoginAttempts.last_login';
+    const COL_LAST_LOGIN = 'LoginAttempt.last_login';
 
     /**
      * The default string format for model objects of the related table
@@ -105,7 +105,7 @@ class LoginAttemptsTableMap extends TableMap
     protected static $fieldNames = array (
         self::TYPE_PHPNAME       => array('UserId', 'SuccessfulLogins', 'FailedLogins', 'LastLogin', ),
         self::TYPE_CAMELNAME     => array('userId', 'successfulLogins', 'failedLogins', 'lastLogin', ),
-        self::TYPE_COLNAME       => array(LoginAttemptsTableMap::COL_USER_ID, LoginAttemptsTableMap::COL_SUCCESSFUL_LOGINS, LoginAttemptsTableMap::COL_FAILED_LOGINS, LoginAttemptsTableMap::COL_LAST_LOGIN, ),
+        self::TYPE_COLNAME       => array(LoginAttemptTableMap::COL_USER_ID, LoginAttemptTableMap::COL_SUCCESSFUL_LOGINS, LoginAttemptTableMap::COL_FAILED_LOGINS, LoginAttemptTableMap::COL_LAST_LOGIN, ),
         self::TYPE_FIELDNAME     => array('user_id', 'successful_logins', 'failed_logins', 'last_login', ),
         self::TYPE_NUM           => array(0, 1, 2, 3, )
     );
@@ -119,7 +119,7 @@ class LoginAttemptsTableMap extends TableMap
     protected static $fieldKeys = array (
         self::TYPE_PHPNAME       => array('UserId' => 0, 'SuccessfulLogins' => 1, 'FailedLogins' => 2, 'LastLogin' => 3, ),
         self::TYPE_CAMELNAME     => array('userId' => 0, 'successfulLogins' => 1, 'failedLogins' => 2, 'lastLogin' => 3, ),
-        self::TYPE_COLNAME       => array(LoginAttemptsTableMap::COL_USER_ID => 0, LoginAttemptsTableMap::COL_SUCCESSFUL_LOGINS => 1, LoginAttemptsTableMap::COL_FAILED_LOGINS => 2, LoginAttemptsTableMap::COL_LAST_LOGIN => 3, ),
+        self::TYPE_COLNAME       => array(LoginAttemptTableMap::COL_USER_ID => 0, LoginAttemptTableMap::COL_SUCCESSFUL_LOGINS => 1, LoginAttemptTableMap::COL_FAILED_LOGINS => 2, LoginAttemptTableMap::COL_LAST_LOGIN => 3, ),
         self::TYPE_FIELDNAME     => array('user_id' => 0, 'successful_logins' => 1, 'failed_logins' => 2, 'last_login' => 3, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, )
     );
@@ -134,10 +134,10 @@ class LoginAttemptsTableMap extends TableMap
     public function initialize()
     {
         // attributes
-        $this->setName('LoginAttempts');
-        $this->setPhpName('LoginAttempts');
+        $this->setName('LoginAttempt');
+        $this->setPhpName('LoginAttempt');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\Splendr\\App\\Model\\LoginAttempts');
+        $this->setClassName('\\Splendr\\App\\Model\\LoginAttempt');
         $this->setPackage('Splendr.App.Model');
         $this->setUseIdGenerator(false);
         // columns
@@ -218,7 +218,7 @@ class LoginAttemptsTableMap extends TableMap
      */
     public static function getOMClass($withPrefix = true)
     {
-        return $withPrefix ? LoginAttemptsTableMap::CLASS_DEFAULT : LoginAttemptsTableMap::OM_CLASS;
+        return $withPrefix ? LoginAttemptTableMap::CLASS_DEFAULT : LoginAttemptTableMap::OM_CLASS;
     }
 
     /**
@@ -232,22 +232,22 @@ class LoginAttemptsTableMap extends TableMap
      *
      * @throws PropelException Any exceptions caught during processing will be
      *                         rethrown wrapped into a PropelException.
-     * @return array           (LoginAttempts object, last column rank)
+     * @return array           (LoginAttempt object, last column rank)
      */
     public static function populateObject($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        $key = LoginAttemptsTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
-        if (null !== ($obj = LoginAttemptsTableMap::getInstanceFromPool($key))) {
+        $key = LoginAttemptTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        if (null !== ($obj = LoginAttemptTableMap::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $offset, true); // rehydrate
-            $col = $offset + LoginAttemptsTableMap::NUM_HYDRATE_COLUMNS;
+            $col = $offset + LoginAttemptTableMap::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = LoginAttemptsTableMap::OM_CLASS;
-            /** @var LoginAttempts $obj */
+            $cls = LoginAttemptTableMap::OM_CLASS;
+            /** @var LoginAttempt $obj */
             $obj = new $cls();
             $col = $obj->hydrate($row, $offset, false, $indexType);
-            LoginAttemptsTableMap::addInstanceToPool($obj, $key);
+            LoginAttemptTableMap::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -270,18 +270,18 @@ class LoginAttemptsTableMap extends TableMap
         $cls = static::getOMClass(false);
         // populate the object(s)
         while ($row = $dataFetcher->fetch()) {
-            $key = LoginAttemptsTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
-            if (null !== ($obj = LoginAttemptsTableMap::getInstanceFromPool($key))) {
+            $key = LoginAttemptTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            if (null !== ($obj = LoginAttemptTableMap::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
                 $results[] = $obj;
             } else {
-                /** @var LoginAttempts $obj */
+                /** @var LoginAttempt $obj */
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                LoginAttemptsTableMap::addInstanceToPool($obj, $key);
+                LoginAttemptTableMap::addInstanceToPool($obj, $key);
             } // if key exists
         }
 
@@ -302,10 +302,10 @@ class LoginAttemptsTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(LoginAttemptsTableMap::COL_USER_ID);
-            $criteria->addSelectColumn(LoginAttemptsTableMap::COL_SUCCESSFUL_LOGINS);
-            $criteria->addSelectColumn(LoginAttemptsTableMap::COL_FAILED_LOGINS);
-            $criteria->addSelectColumn(LoginAttemptsTableMap::COL_LAST_LOGIN);
+            $criteria->addSelectColumn(LoginAttemptTableMap::COL_USER_ID);
+            $criteria->addSelectColumn(LoginAttemptTableMap::COL_SUCCESSFUL_LOGINS);
+            $criteria->addSelectColumn(LoginAttemptTableMap::COL_FAILED_LOGINS);
+            $criteria->addSelectColumn(LoginAttemptTableMap::COL_LAST_LOGIN);
         } else {
             $criteria->addSelectColumn($alias . '.user_id');
             $criteria->addSelectColumn($alias . '.successful_logins');
@@ -323,7 +323,7 @@ class LoginAttemptsTableMap extends TableMap
      */
     public static function getTableMap()
     {
-        return Propel::getServiceContainer()->getDatabaseMap(LoginAttemptsTableMap::DATABASE_NAME)->getTable(LoginAttemptsTableMap::TABLE_NAME);
+        return Propel::getServiceContainer()->getDatabaseMap(LoginAttemptTableMap::DATABASE_NAME)->getTable(LoginAttemptTableMap::TABLE_NAME);
     }
 
     /**
@@ -331,16 +331,16 @@ class LoginAttemptsTableMap extends TableMap
      */
     public static function buildTableMap()
     {
-        $dbMap = Propel::getServiceContainer()->getDatabaseMap(LoginAttemptsTableMap::DATABASE_NAME);
-        if (!$dbMap->hasTable(LoginAttemptsTableMap::TABLE_NAME)) {
-            $dbMap->addTableObject(new LoginAttemptsTableMap());
+        $dbMap = Propel::getServiceContainer()->getDatabaseMap(LoginAttemptTableMap::DATABASE_NAME);
+        if (!$dbMap->hasTable(LoginAttemptTableMap::TABLE_NAME)) {
+            $dbMap->addTableObject(new LoginAttemptTableMap());
         }
     }
 
     /**
-     * Performs a DELETE on the database, given a LoginAttempts or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a LoginAttempt or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or LoginAttempts object or primary key or array of primary keys
+     * @param mixed               $values Criteria or LoginAttempt object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param  ConnectionInterface $con the connection to use
      * @return int             The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -351,27 +351,27 @@ class LoginAttemptsTableMap extends TableMap
      public static function doDelete($values, ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(LoginAttemptsTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LoginAttemptTableMap::DATABASE_NAME);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \Splendr\App\Model\LoginAttempts) { // it's a model object
+        } elseif ($values instanceof \Splendr\App\Model\LoginAttempt) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(LoginAttemptsTableMap::DATABASE_NAME);
-            $criteria->add(LoginAttemptsTableMap::COL_USER_ID, (array) $values, Criteria::IN);
+            $criteria = new Criteria(LoginAttemptTableMap::DATABASE_NAME);
+            $criteria->add(LoginAttemptTableMap::COL_USER_ID, (array) $values, Criteria::IN);
         }
 
-        $query = LoginAttemptsQuery::create()->mergeWith($criteria);
+        $query = LoginAttemptQuery::create()->mergeWith($criteria);
 
         if ($values instanceof Criteria) {
-            LoginAttemptsTableMap::clearInstancePool();
+            LoginAttemptTableMap::clearInstancePool();
         } elseif (!is_object($values)) { // it's a primary key, or an array of pks
             foreach ((array) $values as $singleval) {
-                LoginAttemptsTableMap::removeInstanceFromPool($singleval);
+                LoginAttemptTableMap::removeInstanceFromPool($singleval);
             }
         }
 
@@ -379,20 +379,20 @@ class LoginAttemptsTableMap extends TableMap
     }
 
     /**
-     * Deletes all rows from the LoginAttempts table.
+     * Deletes all rows from the LoginAttempt table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(ConnectionInterface $con = null)
     {
-        return LoginAttemptsQuery::create()->doDeleteAll($con);
+        return LoginAttemptQuery::create()->doDeleteAll($con);
     }
 
     /**
-     * Performs an INSERT on the database, given a LoginAttempts or Criteria object.
+     * Performs an INSERT on the database, given a LoginAttempt or Criteria object.
      *
-     * @param mixed               $criteria Criteria or LoginAttempts object containing data that is used to create the INSERT statement.
+     * @param mixed               $criteria Criteria or LoginAttempt object containing data that is used to create the INSERT statement.
      * @param ConnectionInterface $con the ConnectionInterface connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -401,18 +401,18 @@ class LoginAttemptsTableMap extends TableMap
     public static function doInsert($criteria, ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(LoginAttemptsTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LoginAttemptTableMap::DATABASE_NAME);
         }
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria; // rename for clarity
         } else {
-            $criteria = $criteria->buildCriteria(); // build Criteria from LoginAttempts object
+            $criteria = $criteria->buildCriteria(); // build Criteria from LoginAttempt object
         }
 
 
         // Set the correct dbName
-        $query = LoginAttemptsQuery::create()->mergeWith($criteria);
+        $query = LoginAttemptQuery::create()->mergeWith($criteria);
 
         // use transaction because $criteria could contain info
         // for more than one table (I guess, conceivably)
@@ -421,7 +421,7 @@ class LoginAttemptsTableMap extends TableMap
         });
     }
 
-} // LoginAttemptsTableMap
+} // LoginAttemptTableMap
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-LoginAttemptsTableMap::buildTableMap();
+LoginAttemptTableMap::buildTableMap();

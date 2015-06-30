@@ -5,16 +5,23 @@ namespace Splendr\App\Model;
 use Splendr\App\Model\Base\Product as BaseProduct;
 
 /**
- * Skeleton subclass for representing a row from the 'Product' table.
+ * <p>The model of a product which encapsulates
+ * a link to a specific product.</p>
+ *
+ * <p>
+ * A product includes:
+ * <ul>
+ *  <li>Name</li>
+ *  <li>Price</li>
+ *  <li>Image-URL</li>
+ *  <li>Product-URL</li>
+ * </ul>
+ * </p>
  *
  *
- *
- * You should add additional methods to this class to meet the
- * application requirements.  This class will only be generated as
- * long as it does not already exist in the output directory.
- *
+ * Class Product
+ * @package Splendr\App\Model
  */
-class Product extends BaseProduct
-{
+class Product extends BaseProduct {
 
 }

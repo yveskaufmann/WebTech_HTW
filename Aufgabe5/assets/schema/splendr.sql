@@ -23,19 +23,19 @@ CREATE TABLE `User`
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
--- LoginAttempts
+-- LoginAttempt
 -- ---------------------------------------------------------------------
 
-DROP TABLE IF EXISTS `LoginAttempts`;
+DROP TABLE IF EXISTS `LoginAttempt`;
 
-CREATE TABLE `LoginAttempts`
+CREATE TABLE `LoginAttempt`
 (
     `user_id` INTEGER NOT NULL,
     `successful_logins` INTEGER DEFAULT 0 NOT NULL,
     `failed_logins` INTEGER DEFAULT 0 NOT NULL,
     `last_login` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`user_id`),
-    CONSTRAINT `LoginAttempts_fk_29554a`
+    CONSTRAINT `LoginAttempt_fk_29554a`
         FOREIGN KEY (`user_id`)
         REFERENCES `User` (`id`)
 ) ENGINE=InnoDB;
@@ -52,10 +52,35 @@ CREATE TABLE `Product`
     `name` VARCHAR(255) NOT NULL,
     `price` DECIMAL(10,2) NOT NULL,
     `image_url` VARCHAR(255) NOT NULL,
+    `product_url` TEXT NOT NULL,
     `description` TEXT NOT NULL,
+    `board_id` INTEGER NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE INDEX `Product_u_d94269` (`name`),
-    INDEX `Product_i_d94269` (`name`)
+    INDEX `Product_i_8501d1` (`name`, `product_url`(255)),
+    INDEX `Product_fi_23b864` (`board_id`),
+    CONSTRAINT `Product_fk_23b864`
+        FOREIGN KEY (`board_id`)
+        REFERENCES `ProductBoard` (`id`)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- ProductBoard
+-- ---------------------------------------------------------------------
+
+DROP TABLE IF EXISTS `ProductBoard`;
+
+CREATE TABLE `ProductBoard`
+(
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `image_url` TEXT NOT NULL,
+    `user_id` INTEGER NOT NULL,
+    PRIMARY KEY (`id`,`user_id`),
+    INDEX `ProductBoard_fi_29554a` (`user_id`),
+    CONSTRAINT `ProductBoard_fk_29554a`
+        FOREIGN KEY (`user_id`)
+        REFERENCES `User` (`id`)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
