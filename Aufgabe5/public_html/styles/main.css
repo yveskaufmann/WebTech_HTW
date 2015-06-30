@@ -73,11 +73,11 @@ form > p.bg-warning {
     .container {
         max-width: 960px;
     }
-    #login-dp{
+    #login-dp, #search-dp{
         background-color: inherit;
         color: #fff;
     }
-    #login-dp .bottom{
+    #login-dp .bottom, #search-dp .bottom{
         background-color: inherit;
         border-top:0 none;
     }
