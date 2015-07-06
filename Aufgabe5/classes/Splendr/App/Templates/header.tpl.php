@@ -38,9 +38,9 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="nav navbar-nav">
-                    <li><a href="boards/show">Product Board</a></li>
-                    <li><a href="boards/add">Add Product Board</a></li>
-                    <li><a href="product/add">Add Product</a></li>
+                    <li><a href="<?= URL::getControllerURL('product', 'index') ?>">Product Board</a></li>
+                    <li><a href="<?= URL::getControllerURL('product', 'add') ?>">Add Product</a></li>
+                    <li><a href="<?= URL::getControllerURL('boards', 'add') ?>">Add Product Board</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown">

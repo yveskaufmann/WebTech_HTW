@@ -159,13 +159,6 @@ class ProductBoardTableMap extends TableMap
     1 => ':id',
   ),
 ), null, null, null, false);
-        $this->addRelation('Product', '\\Splendr\\App\\Model\\Product', RelationMap::ONE_TO_MANY, array (
-  0 =>
-  array (
-    0 => ':board_id',
-    1 => ':id',
-  ),
-), null, null, 'Products', false);
     } // buildRelations()
 
     /**

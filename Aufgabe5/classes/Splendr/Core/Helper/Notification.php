@@ -14,21 +14,28 @@ use Splendr\Core\View\Template;
  */
 class Notification {
 
-    public static function show($message = false, $type = false) {
-        $message = $message ? $message : Session::get('message');
-        $type = $type ? $type : Session::get('message_type');
-        $type = $type ? $type : 'success';
+    const MESSAGE_PARAM = 'message';
+    const MESSAGE_TYPE_PARAM = 'message_type';
+
+    public static function show($message = false, $type=false) {
+        $message = $message ? $message : Session::get(self::MESSAGE_PARAM);
+        $type = $type ? $type : Session::get(self::MESSAGE_TYPE_PARAM);
+        $type = $type ? $type : 'info';
 
         if ($message) {
             $template = new Template('notifications');
+            $template
+                ->addData(self::MESSAGE_PARAM, $message)
+                ->addData(self::MESSAGE_TYPE_PARAM, $type);
             $template->render();
-            Session::clear('message');
-            Session::clear('message_type');
+
+            Session::clear(self::MESSAGE_PARAM);
+            Session::clear(self::MESSAGE_TYPE_PARAM);
         }
     }
 
-    public static function set($message = false, $type = 'success') {
-        Session::set('message', $message);
-        Session::set('message_type', $type);
+    public static function set($message = false, $type = 'info') {
+        Session::set(self::MESSAGE_PARAM, $message);
+        Session::set(self::MESSAGE_TYPE_PARAM, $type);
     }
 }

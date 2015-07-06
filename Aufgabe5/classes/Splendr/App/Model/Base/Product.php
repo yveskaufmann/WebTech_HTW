@@ -17,8 +17,6 @@ use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
 use Splendr\App\Model\Product as ChildProduct;
-use Splendr\App\Model\ProductBoard as ChildProductBoard;
-use Splendr\App\Model\ProductBoardQuery as ChildProductBoardQuery;
 use Splendr\App\Model\ProductQuery as ChildProductQuery;
 use Splendr\App\Model\ProductReview as ChildProductReview;
 use Splendr\App\Model\ProductReviewQuery as ChildProductReviewQuery;
@@ -100,17 +98,6 @@ abstract class Product implements ActiveRecordInterface
      * @var        string
      */
     protected $description;
-
-    /**
-     * The value for the board_id field.
-     * @var        int
-     */
-    protected $board_id;
-
-    /**
-     * @var        ChildProductBoard
-     */
-    protected $aProductBoard;
 
     /**
      * @var        ObjectCollection|ChildProductReview[] Collection to store aggregation of ChildProductReview objects.
@@ -410,16 +397,6 @@ abstract class Product implements ActiveRecordInterface
     }
 
     /**
-     * Get the [board_id] column value.
-     *
-     * @return int
-     */
-    public function getBoardId()
-    {
-        return $this->board_id;
-    }
-
-    /**
      * Set the value of [id] column.
      *
      * @param int $v new value
@@ -540,30 +517,6 @@ abstract class Product implements ActiveRecordInterface
     } // setDescription()
 
     /**
-     * Set the value of [board_id] column.
-     *
-     * @param int $v new value
-     * @return $this|\Splendr\App\Model\Product The current object (for fluent API support)
-     */
-    public function setBoardId($v)
-    {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
-
-        if ($this->board_id !== $v) {
-            $this->board_id = $v;
-            $this->modifiedColumns[ProductTableMap::COL_BOARD_ID] = true;
-        }
-
-        if ($this->aProductBoard !== null && $this->aProductBoard->getId() !== $v) {
-            $this->aProductBoard = null;
-        }
-
-        return $this;
-    } // setBoardId()
-
-    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -616,9 +569,6 @@ abstract class Product implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : ProductTableMap::translateFieldName('Description', TableMap::TYPE_PHPNAME, $indexType)];
             $this->description = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : ProductTableMap::translateFieldName('BoardId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->board_id = (null !== $col) ? (int) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -627,7 +577,7 @@ abstract class Product implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 7; // 7 = ProductTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 6; // 6 = ProductTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\Splendr\\App\\Model\\Product'), 0, $e);
@@ -649,9 +599,6 @@ abstract class Product implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aProductBoard !== null && $this->board_id !== $this->aProductBoard->getId()) {
-            $this->aProductBoard = null;
-        }
     } // ensureConsistency
 
     /**
@@ -691,7 +638,6 @@ abstract class Product implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aProductBoard = null;
             $this->collProductReviews = null;
 
         } // if (deep)
@@ -793,18 +739,6 @@ abstract class Product implements ActiveRecordInterface
         if (!$this->alreadyInSave) {
             $this->alreadyInSave = true;
 
-            // We call the save method on the following object(s) if they
-            // were passed to this object by their corresponding set
-            // method.  This object relates to these object(s) by a
-            // foreign key reference.
-
-            if ($this->aProductBoard !== null) {
-                if ($this->aProductBoard->isModified() || $this->aProductBoard->isNew()) {
-                    $affectedRows += $this->aProductBoard->save($con);
-                }
-                $this->setProductBoard($this->aProductBoard);
-            }
-
             if ($this->isNew() || $this->isModified()) {
                 // persist changes
                 if ($this->isNew()) {
@@ -877,9 +811,6 @@ abstract class Product implements ActiveRecordInterface
         if ($this->isColumnModified(ProductTableMap::COL_DESCRIPTION)) {
             $modifiedColumns[':p' . $index++]  = 'description';
         }
-        if ($this->isColumnModified(ProductTableMap::COL_BOARD_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'board_id';
-        }
 
         $sql = sprintf(
             'INSERT INTO Product (%s) VALUES (%s)',
@@ -908,9 +839,6 @@ abstract class Product implements ActiveRecordInterface
                         break;
                     case 'description':
                         $stmt->bindValue($identifier, $this->description, PDO::PARAM_STR);
-                        break;
-                    case 'board_id':
-                        $stmt->bindValue($identifier, $this->board_id, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -992,9 +920,6 @@ abstract class Product implements ActiveRecordInterface
             case 5:
                 return $this->getDescription();
                 break;
-            case 6:
-                return $this->getBoardId();
-                break;
             default:
                 return null;
                 break;
@@ -1031,7 +956,6 @@ abstract class Product implements ActiveRecordInterface
             $keys[3] => $this->getImageUrl(),
             $keys[4] => $this->getProductUrl(),
             $keys[5] => $this->getDescription(),
-            $keys[6] => $this->getBoardId(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1039,21 +963,6 @@ abstract class Product implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aProductBoard) {
-
-                switch ($keyType) {
-                    case TableMap::TYPE_CAMELNAME:
-                        $key = 'productBoard';
-                        break;
-                    case TableMap::TYPE_FIELDNAME:
-                        $key = 'ProductBoard';
-                        break;
-                    default:
-                        $key = 'ProductBoard';
-                }
-
-                $result[$key] = $this->aProductBoard->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
-            }
             if (null !== $this->collProductReviews) {
 
                 switch ($keyType) {
@@ -1121,9 +1030,6 @@ abstract class Product implements ActiveRecordInterface
             case 5:
                 $this->setDescription($value);
                 break;
-            case 6:
-                $this->setBoardId($value);
-                break;
         } // switch()
 
         return $this;
@@ -1167,9 +1073,6 @@ abstract class Product implements ActiveRecordInterface
         }
         if (array_key_exists($keys[5], $arr)) {
             $this->setDescription($arr[$keys[5]]);
-        }
-        if (array_key_exists($keys[6], $arr)) {
-            $this->setBoardId($arr[$keys[6]]);
         }
     }
 
@@ -1229,9 +1132,6 @@ abstract class Product implements ActiveRecordInterface
         }
         if ($this->isColumnModified(ProductTableMap::COL_DESCRIPTION)) {
             $criteria->add(ProductTableMap::COL_DESCRIPTION, $this->description);
-        }
-        if ($this->isColumnModified(ProductTableMap::COL_BOARD_ID)) {
-            $criteria->add(ProductTableMap::COL_BOARD_ID, $this->board_id);
         }
 
         return $criteria;
@@ -1324,7 +1224,6 @@ abstract class Product implements ActiveRecordInterface
         $copyObj->setImageUrl($this->getImageUrl());
         $copyObj->setProductUrl($this->getProductUrl());
         $copyObj->setDescription($this->getDescription());
-        $copyObj->setBoardId($this->getBoardId());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -1365,59 +1264,6 @@ abstract class Product implements ActiveRecordInterface
         $this->copyInto($copyObj, $deepCopy);
 
         return $copyObj;
-    }
-
-    /**
-     * Declares an association between this object and a ChildProductBoard object.
-     *
-     * @param  ChildProductBoard $v
-     * @return $this|\Splendr\App\Model\Product The current object (for fluent API support)
-     * @throws PropelException
-     */
-    public function setProductBoard(ChildProductBoard $v = null)
-    {
-        if ($v === null) {
-            $this->setBoardId(NULL);
-        } else {
-            $this->setBoardId($v->getId());
-        }
-
-        $this->aProductBoard = $v;
-
-        // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildProductBoard object, it will not be re-added.
-        if ($v !== null) {
-            $v->addProduct($this);
-        }
-
-
-        return $this;
-    }
-
-
-    /**
-     * Get the associated ChildProductBoard object
-     *
-     * @param  ConnectionInterface $con Optional Connection object.
-     * @return ChildProductBoard The associated ChildProductBoard object.
-     * @throws PropelException
-     */
-    public function getProductBoard(ConnectionInterface $con = null)
-    {
-        if ($this->aProductBoard === null && ($this->board_id !== null)) {
-            $this->aProductBoard = ChildProductBoardQuery::create()
-                ->filterByProduct($this) // here
-                ->findOne($con);
-            /* The following can be used additionally to
-                guarantee the related object contains a reference
-                to this object.  This level of coupling may, however, be
-                undesirable since it could result in an only partially populated collection
-                in the referenced object.
-                $this->aProductBoard->addProducts($this);
-             */
-        }
-
-        return $this->aProductBoard;
     }
 
 
@@ -1689,16 +1535,12 @@ abstract class Product implements ActiveRecordInterface
      */
     public function clear()
     {
-        if (null !== $this->aProductBoard) {
-            $this->aProductBoard->removeProduct($this);
-        }
         $this->id = null;
         $this->name = null;
         $this->price = null;
         $this->image_url = null;
         $this->product_url = null;
         $this->description = null;
-        $this->board_id = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1725,7 +1567,6 @@ abstract class Product implements ActiveRecordInterface
         } // if ($deep)
 
         $this->collProductReviews = null;
-        $this->aProductBoard = null;
     }
 
     /**

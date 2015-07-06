@@ -38,11 +38,7 @@ use Splendr\App\Model\Map\ProductBoardTableMap;
  * @method     ChildProductBoardQuery rightJoinUser($relationAlias = null) Adds a RIGHT JOIN clause to the query using the User relation
  * @method     ChildProductBoardQuery innerJoinUser($relationAlias = null) Adds a INNER JOIN clause to the query using the User relation
  *
- * @method     ChildProductBoardQuery leftJoinProduct($relationAlias = null) Adds a LEFT JOIN clause to the query using the Product relation
- * @method     ChildProductBoardQuery rightJoinProduct($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Product relation
- * @method     ChildProductBoardQuery innerJoinProduct($relationAlias = null) Adds a INNER JOIN clause to the query using the Product relation
- *
- * @method     \Splendr\App\Model\UserQuery|\Splendr\App\Model\ProductQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \Splendr\App\Model\UserQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildProductBoard findOne(ConnectionInterface $con = null) Return the first ChildProductBoard matching the query
  * @method     ChildProductBoard findOneOrCreate(ConnectionInterface $con = null) Return the first ChildProductBoard matching the query, or a new ChildProductBoard object populated from the query conditions when no match is found
@@ -476,79 +472,6 @@ abstract class ProductBoardQuery extends ModelCriteria
         return $this
             ->joinUser($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'User', '\Splendr\App\Model\UserQuery');
-    }
-
-    /**
-     * Filter the query by a related \Splendr\App\Model\Product object
-     *
-     * @param \Splendr\App\Model\Product|ObjectCollection $product the related object to use as filter
-     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return ChildProductBoardQuery The current query, for fluid interface
-     */
-    public function filterByProduct($product, $comparison = null)
-    {
-        if ($product instanceof \Splendr\App\Model\Product) {
-            return $this
-                ->addUsingAlias(ProductBoardTableMap::COL_ID, $product->getBoardId(), $comparison);
-        } elseif ($product instanceof ObjectCollection) {
-            return $this
-                ->useProductQuery()
-                ->filterByPrimaryKeys($product->getPrimaryKeys())
-                ->endUse();
-        } else {
-            throw new PropelException('filterByProduct() only accepts arguments of type \Splendr\App\Model\Product or Collection');
-        }
-    }
-
-    /**
-     * Adds a JOIN clause to the query using the Product relation
-     *
-     * @param     string $relationAlias optional alias for the relation
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return $this|ChildProductBoardQuery The current query, for fluid interface
-     */
-    public function joinProduct($relationAlias = null, $joinType = Criteria::INNER_JOIN)
-    {
-        $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('Product');
-
-        // create a ModelJoin object for this join
-        $join = new ModelJoin();
-        $join->setJoinType($joinType);
-        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
-        if ($previousJoin = $this->getPreviousJoin()) {
-            $join->setPreviousJoin($previousJoin);
-        }
-
-        // add the ModelJoin to the current object
-        if ($relationAlias) {
-            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
-            $this->addJoinObject($join, $relationAlias);
-        } else {
-            $this->addJoinObject($join, 'Product');
-        }
-
-        return $this;
-    }
-
-    /**
-     * Use the Product relation Product object
-     *
-     * @see useQuery()
-     *
-     * @param     string $relationAlias optional alias for the relation,
-     *                                   to be used as main alias in the secondary query
-     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
-     *
-     * @return \Splendr\App\Model\ProductQuery A secondary query class using the current class as primary query
-     */
-    public function useProductQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
-    {
-        return $this
-            ->joinProduct($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'Product', '\Splendr\App\Model\ProductQuery');
     }
 
     /**

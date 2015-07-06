@@ -61,10 +61,7 @@ class Session {
      *
      */
     public static function ensureSessionIsCreated() {
-        if ( self::$sessionNotYetCreated ) {
-            session_start();
-            self::$sessionNotYetCreated = false;
-        }
+       Session::init();
     }
 
     /**
@@ -78,5 +75,13 @@ class Session {
             self::$sessionNotYetCreated = true;
         }
     }
+
+    public static function init() {
+        if ( self::$sessionNotYetCreated ) {
+            session_start();
+            self::$sessionNotYetCreated = false;
+        }
+    }
+
 
 }

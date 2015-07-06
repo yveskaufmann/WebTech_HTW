@@ -38,7 +38,6 @@
         <column name="image_url" type="VARCHAR" size="255" required="true"/>
         <column name="product_url"  type="LONGVARCHAR" required="true" />
         <column name="description" type="LONGVARCHAR" required="true"/>
-        <column name="board_id" type="INTEGER" required="true"/>
         <unique>
             <unique-column name="name"/>
         </unique>
@@ -46,9 +45,6 @@
             <index-column name="name"/>
             <index-column name="product_url" size="255"/>
         </index>
-        <foreign-key foreignTable="ProductBoard">
-            <reference local="board_id" foreign="id" />
-        </foreign-key>
     </table>
 
     <table name="ProductBoard" phpName="ProductBoard">

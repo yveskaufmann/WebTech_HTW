@@ -24,6 +24,7 @@ class ProductQuery extends BaseProductQuery {
      * @return \Propel\Runtime\Util\PropelModelPager|Product[]
      */
     public function searchProduct($query, $page=1, $hits_per_page=10) {
+        $page = $this->normalizePage($page);
         $query = '%' . $query .'%';
         return $this
             ->where('name like ?', $query)
@@ -34,5 +35,16 @@ class ProductQuery extends BaseProductQuery {
             ->paginate($page, $hits_per_page);
     }
 
+    public function allProducts($page=1, $hits_per_page=10) {
+        $page = $this->normalizePage($page);
+        return $this->paginate($page, $hits_per_page);
+    }
+
+    private function normalizePage($page) {
+        if ( $page < 0 ) {
+            return 1;
+        }
+        return $page;
+    }
 
 }

@@ -54,14 +54,9 @@ CREATE TABLE `Product`
     `image_url` VARCHAR(255) NOT NULL,
     `product_url` TEXT NOT NULL,
     `description` TEXT NOT NULL,
-    `board_id` INTEGER NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE INDEX `Product_u_d94269` (`name`),
-    INDEX `Product_i_8501d1` (`name`, `product_url`(255)),
-    INDEX `Product_fi_23b864` (`board_id`),
-    CONSTRAINT `Product_fk_23b864`
-        FOREIGN KEY (`board_id`)
-        REFERENCES `ProductBoard` (`id`)
+    INDEX `Product_i_8501d1` (`name`, `product_url`(255))
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
