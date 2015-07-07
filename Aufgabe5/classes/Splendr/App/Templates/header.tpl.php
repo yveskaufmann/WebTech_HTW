@@ -49,10 +49,10 @@
                             <li>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <form id="search_form" class="form form-inline" action="product/search/${query}" method="GET" role="search accept-charset="UTF-8">
+                                        <form id="search_form" class="form form-inline" action="<?= URL::getControllerURL('product', 'search', '${query}') ?>" method="GET" role="search accept-charset="UTF-8">
                                             <div class="form-group">
-                                                <input name="query" type="text" class="form-control" placeholder="Produktname und Url">
-                                                <button type="submit" class="btn btn-default">Search</button>
+                                                <input name="query" type="text" class="form-control" placeholder="Product name or url">
+                                                <button type="submit" class="btn btn-primary" title="search product" ><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
                                             </div>
                                         </form>
                                     </div>

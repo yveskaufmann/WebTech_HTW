@@ -16,11 +16,26 @@ use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
+use Propel\Runtime\Validator\Constraints\Unique;
 use Splendr\App\Model\Product as ChildProduct;
 use Splendr\App\Model\ProductQuery as ChildProductQuery;
 use Splendr\App\Model\ProductReview as ChildProductReview;
 use Splendr\App\Model\ProductReviewQuery as ChildProductReviewQuery;
 use Splendr\App\Model\Map\ProductTableMap;
+use Symfony\Component\Validator\ConstraintValidatorFactory;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\DefaultTranslator;
+use Symfony\Component\Validator\Constraints\GreaterThan;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Type;
+use Symfony\Component\Validator\Constraints\Url;
+use Symfony\Component\Validator\Context\ExecutionContextFactory;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+use Symfony\Component\Validator\Mapping\ClassMetadataFactory;
+use Symfony\Component\Validator\Mapping\Loader\StaticMethodLoader;
+use Symfony\Component\Validator\Validator\LegacyValidator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Base class that represents a row from the 'Product' table.
@@ -112,6 +127,23 @@ abstract class Product implements ActiveRecordInterface
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    // validate behavior
+
+    /**
+     * Flag to prevent endless validation loop, if this object is referenced
+     * by another object which falls in this transaction.
+     * @var        boolean
+     */
+    protected $alreadyInValidation = false;
+
+    /**
+     * ConstraintViolationList object
+     *
+     * @see     http://api.symfony.com/2.0/Symfony/Component/Validator/ConstraintViolationList.html
+     * @var     ConstraintViolationList
+     */
+    protected $validationFailures;
 
     /**
      * An array of objects scheduled for deletion.
@@ -1577,6 +1609,98 @@ abstract class Product implements ActiveRecordInterface
     public function __toString()
     {
         return (string) $this->exportTo(ProductTableMap::DEFAULT_STRING_FORMAT);
+    }
+
+    // validate behavior
+
+    /**
+     * Configure validators constraints. The Validator object uses this method
+     * to perform object validation.
+     *
+     * @param ClassMetadata $metadata
+     */
+    static public function loadValidatorMetadata(ClassMetadata $metadata)
+    {
+        $metadata->addPropertyConstraint('name', new Length(array ('max' => 255,)));
+        $metadata->addPropertyConstraint('name', new NotBlank());
+        $metadata->addPropertyConstraint('name', new Type(array ('type' => 'string',)));
+        $metadata->addPropertyConstraint('name', new Unique());
+        $metadata->addPropertyConstraint('price', new GreaterThan(array ('value' => 0,)));
+        $metadata->addPropertyConstraint('image_url', new Length(array ('max' => 255,)));
+        $metadata->addPropertyConstraint('image_url', new Url());
+        $metadata->addPropertyConstraint('image_url', new NotBlank());
+        $metadata->addPropertyConstraint('product_url', new Length(array ('max' => 255,)));
+        $metadata->addPropertyConstraint('product_url', new Url());
+        $metadata->addPropertyConstraint('product_url', new NotBlank());
+        $metadata->addPropertyConstraint('description', new Type(array ('type' => 'string',)));
+    }
+
+    /**
+     * Validates the object and all objects related to this table.
+     *
+     * @see        getValidationFailures()
+     * @param      object $validator A Validator class instance
+     * @return     boolean Whether all objects pass validation.
+     */
+    public function validate(ValidatorInterface $validator = null)
+    {
+        if (null === $validator) {
+            if(class_exists('Symfony\\Component\\Validator\\Validator\\LegacyValidator')){
+                $validator = new LegacyValidator(
+                            new ExecutionContextFactory(new DefaultTranslator()),
+                            new ClassMetaDataFactory(new StaticMethodLoader()),
+                            new ConstraintValidatorFactory()
+                );
+            }else{
+                $validator = new Validator(
+                            new ClassMetadataFactory(new StaticMethodLoader()),
+                            new ConstraintValidatorFactory(),
+                            new DefaultTranslator()
+                );
+            }
+        }
+
+        $failureMap = new ConstraintViolationList();
+
+        if (!$this->alreadyInValidation) {
+            $this->alreadyInValidation = true;
+            $retval = null;
+
+
+            $retval = $validator->validate($this);
+            if (count($retval) > 0) {
+                $failureMap->addAll($retval);
+            }
+
+            if (null !== $this->collProductReviews) {
+                foreach ($this->collProductReviews as $referrerFK) {
+                    if (method_exists($referrerFK, 'validate')) {
+                        if (!$referrerFK->validate($validator)) {
+                            $failureMap->addAll($referrerFK->getValidationFailures());
+                        }
+                    }
+                }
+            }
+
+            $this->alreadyInValidation = false;
+        }
+
+        $this->validationFailures = $failureMap;
+
+        return (Boolean) (!(count($this->validationFailures) > 0));
+
+    }
+
+    /**
+     * Gets any ConstraintViolation objects that resulted from last call to validate().
+     *
+     *
+     * @return     object ConstraintViolationList
+     * @see        validate()
+     */
+    public function getValidationFailures()
+    {
+        return $this->validationFailures;
     }
 
     /**

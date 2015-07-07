@@ -38,4 +38,16 @@ class Notification {
         Session::set(self::MESSAGE_PARAM, $message);
         Session::set(self::MESSAGE_TYPE_PARAM, $type);
     }
+
+    public static function add($message, $type) {
+
+        $messages = Session::get(self::MESSAGE_PARAM, array());
+        if (! is_array($message)) {
+            $messages = array($message);
+        }
+        array_push($messages, $message);
+
+        Session::set(self::MESSAGE_PARAM, $messages);
+        Session::set(self::MESSAGE_TYPE_PARAM, $type);
+    }
 }

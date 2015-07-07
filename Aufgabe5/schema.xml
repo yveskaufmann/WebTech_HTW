@@ -45,6 +45,27 @@
             <index-column name="name"/>
             <index-column name="product_url" size="255"/>
         </index>
+
+        <behavior name="validate">
+            <parameter name="name_limit" value="{column: name, validator: Length, options: {max: 255}}" />
+            <parameter name="name_required" value="{column: name, validator: NotBlank}" />
+            <parameter name="name_is_string" value="{column: name, validator: Type, options: {type: string}}" />
+            <parameter name="name_is_unique" value="{column: name, validator: Unique}" />
+
+            <!-- <parameter name="price_is_number" value="{column: price, validator: Type, options: {type: number}}" /> -->
+            <parameter name="price_is_positive" value="{column: price, validator: GreaterThan, options: {value: 0}}" />
+
+            <parameter name="image_url_limit" value="{column: image_url, validator: Length, options: {max: 255}}" />
+            <parameter name="image_url_is_url" value="{column: image_url, validator: Url}" />
+            <parameter name="image_url_is_required" value="{column: image_url, validator: NotBlank}" />
+
+            <parameter name="product_url_limit" value="{column: product_url, validator: Length, options: {max: 255}}" />
+            <parameter name="product_url_is_url" value="{column: product_url, validator: Url}" />
+            <parameter name="product_url_is_required" value="{column: product_url, validator: NotBlank}" />
+
+            <parameter name="description_is_string" value="{column: description, validator: Type, options: {type: string}}" />
+        </behavior>
+
     </table>
 
     <table name="ProductBoard" phpName="ProductBoard">

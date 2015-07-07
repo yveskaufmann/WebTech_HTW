@@ -10,6 +10,7 @@ use Splendr\App\Model\Product;
 use Splendr\App\Model\ProductQuery;
 use Splendr\Core\Controller\FrontController;
 use Splendr\Core\Controller\HTTPErrorException;
+use Splendr\Core\Helper\Notification;
 use Splendr\Core\Helper\Params;
 use Splendr\Core\Helper\Request;
 use Splendr\Core\View\PageView;
@@ -17,8 +18,8 @@ use Splendr\Core\View\PageView;
 class ProductController {
 
     const PRODUCT_PARAM = 'product';
-
     const PRODUCTS_PARAM = 'products';
+    const QUERY_PARAM = 'query';
 
     public function index($page=1) {
         $products = ProductQuery::create()->allProducts($page);
@@ -40,32 +41,40 @@ class ProductController {
     }
 
     public function add() {
-
+        $view = new PageView('product/add', 'Product - add');
         if (Request::isGet()) {
-            $view = new PageView('product/add', 'Product - add');
             $view->render();
+            return;
         }
 
-        $requiredParams = array(
-            'name' => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-            'price' => FILTER_SANITIZE_NUMBER_FLOAT,
-            'product_url' => FILTER_SANITIZE_URL,
-            'image_url' => FILTER_SANITIZE_URL,
-            'description' => FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $name = Params::getPost('name', null, FILTER_SANITIZE_STRING);
 
-        foreach($requiredParams as $param) {
-            $requiredParams[$param] = Params::getPost($param, null, $requiredParams[$param]);
-        }
+        $price = Params::getPost('price', null, FILTER_SANITIZE_NUMBER_FLOAT);
+        $price = filter_var($price,FILTER_VALIDATE_FLOAT);
+
+        $product_url = Params::getPost('product_url', null, FILTER_SANITIZE_URL);
+        $product_url = filter_var($product_url,FILTER_VALIDATE_URL);
+
+        $image_url = Params::getPost('image_url', null, FILTER_SANITIZE_URL);
+        $image_url = filter_var($image_url,FILTER_VALIDATE_URL);
+        $description = Params::getPost('description', '', FILTER_SANITIZE_STRING);
 
         $product = new Product();
-        $product->setName($requiredParams['name']);
-        $product->setPrice($requiredParams['price']);
-        $product->setProductUrl($requiredParams['product_url']);
-        $product->setImageUrl($requiredParams['image_url']);
-        $product->setDescription($requiredParams['description']);
-        $product->save();
+        $product->setName($name);
+        $product->setPrice($price);
+        $product->setProductUrl($product_url);
+        $product->setImageUrl($image_url);
+        $product->setDescription($description);
 
-        FrontController::get()->runController(self::PRODUCTS_PARAM, 'index');
+        if (!$product->validate()) {
+            foreach ($product->getValidationFailures() as $failure) {
+                Notification::add($failure->getPropertyPath().": ".$failure->getMessage(), 'warning');
+            }
+            $view->render();
+        } else {
+            $product->save();
+            FrontController::get()->runController('product', 'index');
+        }
     }
 
     public function update($id) {
@@ -93,11 +102,12 @@ class ProductController {
         FrontController::get()->runController(self::PRODUCTS_PARAM, 'all_products');
     }
 
-    public function search($query) {
+    public function search($query='', $page=1) {
         $query = filter_var($query, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $products = ProductQuery::create()->searchProduct($query);
-        $view = new PageView('products/searchResult','Search - Result');
+        $products = ProductQuery::create()->searchProduct($query, $page);
+        $view = new PageView('product/search','Search - Result');
         $view->addData(self::PRODUCTS_PARAM, $products);
+        $view->addData(self::QUERY_PARAM, $query);
         $view->render();
     }
 }

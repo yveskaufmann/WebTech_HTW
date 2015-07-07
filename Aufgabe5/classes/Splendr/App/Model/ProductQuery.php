@@ -25,11 +25,13 @@ class ProductQuery extends BaseProductQuery {
      */
     public function searchProduct($query, $page=1, $hits_per_page=10) {
         $page = $this->normalizePage($page);
-        $query = '%' . $query .'%';
+        $query = trim($query);
+        $query = ($query !== '') ? '%'.$query.'%' : $query;
         return $this
-            ->where('name like ?', $query)
+            ->where('Product.name like ?', $query)
             ->_or()
-            ->where('product_url like ?', $query)
+            ->where('Product.product_url like ?', $query)
+            ->_and()
             ->orderByName()
             ->orderByProductUrl()
             ->paginate($page, $hits_per_page);
@@ -37,7 +39,9 @@ class ProductQuery extends BaseProductQuery {
 
     public function allProducts($page=1, $hits_per_page=10) {
         $page = $this->normalizePage($page);
-        return $this->paginate($page, $hits_per_page);
+        return $this
+            ->orderByName()
+            ->paginate($page, $hits_per_page);
     }
 
     private function normalizePage($page) {

@@ -13,7 +13,7 @@ use Splendr\Core\View\Template;
 class Pagination {
     const PAGINATION_PARAM = 'pagination';
     const BASE_URL_PARAM = 'baseURL';
-    const PAGE_PLACEHOLDER = '{page}';
+    const PAGE_PLACEHOLDER = '${page}';
 
     /**
      * Renders the pagination navigation for

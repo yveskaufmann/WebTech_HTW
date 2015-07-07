@@ -174,6 +174,19 @@ class ProductTableMap extends TableMap
     } // buildRelations()
 
     /**
+     *
+     * Gets the list of behaviors registered for this table
+     *
+     * @return array Associative array (name => parameters) of behaviors
+     */
+    public function getBehaviors()
+    {
+        return array(
+            'validate' => array('name_limit' => array ('column' => 'name','validator' => 'Length','options' => array ('max' => 255,),), 'name_required' => array ('column' => 'name','validator' => 'NotBlank',), 'name_is_string' => array ('column' => 'name','validator' => 'Type','options' => array ('type' => 'string',),), 'name_is_unique' => array ('column' => 'name','validator' => 'Unique',), 'price_is_positive' => array ('column' => 'price','validator' => 'GreaterThan','options' => array ('value' => 0,),), 'image_url_limit' => array ('column' => 'image_url','validator' => 'Length','options' => array ('max' => 255,),), 'image_url_is_url' => array ('column' => 'image_url','validator' => 'Url',), 'image_url_is_required' => array ('column' => 'image_url','validator' => 'NotBlank',), 'product_url_limit' => array ('column' => 'product_url','validator' => 'Length','options' => array ('max' => 255,),), 'product_url_is_url' => array ('column' => 'product_url','validator' => 'Url',), 'product_url_is_required' => array ('column' => 'product_url','validator' => 'NotBlank',), 'description_is_string' => array ('column' => 'description','validator' => 'Type','options' => array ('type' => 'string',),), ),
+        );
+    } // getBehaviors()
+
+    /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.
      *
      * For tables with a single-column primary key, that simple pkey value will be returned.  For tables with
