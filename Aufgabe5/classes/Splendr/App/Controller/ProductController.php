@@ -31,7 +31,7 @@ class ProductController {
 
     public function show($id) {
         $id = filter_var($id, FILTER_SANITIZE_NUMBER_INT);
-        $product = ProductQuery::create()->get($id);
+        $product = ProductQuery::create()->findOneById($id);
         if ( is_null($product) ) {
             throw new HTTPErrorException('404');
         }
@@ -49,7 +49,7 @@ class ProductController {
 
         $name = Params::getPost('name', null, FILTER_SANITIZE_STRING);
 
-        $price = Params::getPost('price', null, FILTER_SANITIZE_NUMBER_FLOAT);
+        $price = Params::getPost('price', null, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $price = filter_var($price,FILTER_VALIDATE_FLOAT);
 
         $product_url = Params::getPost('product_url', null, FILTER_SANITIZE_URL);
@@ -57,19 +57,19 @@ class ProductController {
 
         $image_url = Params::getPost('image_url', null, FILTER_SANITIZE_URL);
         $image_url = filter_var($image_url,FILTER_VALIDATE_URL);
-        $description = Params::getPost('description', '', FILTER_SANITIZE_STRING);
 
         $product = new Product();
         $product->setName($name);
         $product->setPrice($price);
         $product->setProductUrl($product_url);
         $product->setImageUrl($image_url);
-        $product->setDescription($description);
+
 
         if (!$product->validate()) {
             foreach ($product->getValidationFailures() as $failure) {
                 Notification::add($failure->getPropertyPath().": ".$failure->getMessage(), 'warning');
             }
+            $view->addData(self::PRODUCT_PARAM, $product);
             $view->render();
         } else {
             $product->save();
@@ -78,28 +78,72 @@ class ProductController {
     }
 
     public function update($id) {
-        $product = ProductQuery::create()->get($id);
+        $product = ProductQuery::create()->findOneById($id);
+
         if ( is_null($product) ) {
             throw new HTTPErrorException('404');
         }
 
-        $view = new PageView('product/update', 'Product - '.$product->getName());
+        $view = new PageView('product/update', 'Product - Update');
         $view->addData(self::PRODUCT_PARAM, $product);
+
+        if (Request::isGet()) {
+            $view->render();
+            return;
+        }
+
+        $price = Params::getPost('price', null, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+        $price = filter_var($price,FILTER_VALIDATE_FLOAT);
+
+        $product_url = Params::getPost('product_url', null, FILTER_SANITIZE_URL);
+        $product_url = filter_var($product_url,FILTER_VALIDATE_URL);
+
+        $image_url = Params::getPost('image_url', null, FILTER_SANITIZE_URL);
+        $image_url = filter_var($image_url,FILTER_VALIDATE_URL);
+
+        $product->setPrice($price);
+        $product->setProductUrl($product_url);
+        $product->setImageUrl($image_url);
+
+
+        if (!$product->validate()) {
+            /**
+             * Because we need the name validation only while saving
+             * we must filter out the specific validation rule.
+             */
+            foreach ($product->getValidationFailures() as $failure) {
+                if ($failure->getPropertyPath() == 'name') {
+                    $valid = true;
+                    continue;
+                } else {
+                    $valid = false;
+                }
+                Notification::add($failure->getPropertyPath().": ".$failure->getMessage(), 'warning');
+            }
+        }
+
+        if (! $valid ) {
+            $view->render();
+        } else {
+            $product->save();
+            FrontController::get()->runController('product', 'index');
+        }
+
     }
 
     public function delete() {
         $id = Params::getPost('product_id', null, FILTER_SANITIZE_NUMBER_INT);
 
-        if (!is_numeric($id)) {
+        if (!$id) {
             throw new HTTPErrorException('404');
         }
 
-        $product = ProductQuery::create()->get($id);
+        $product = ProductQuery::create()->findOneById($id);
         if (!is_null($product)) {
             $product->delete();
         }
 
-        FrontController::get()->runController(self::PRODUCTS_PARAM, 'all_products');
+        FrontController::get()->runController('product', 'index');
     }
 
     public function search($query='', $page=1) {

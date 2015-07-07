@@ -46,7 +46,7 @@ class Params {
      * @param null $options
      * @return string
      */
-    public static function getPost($name, $defaultValue=null, $filter, $options=null) {
+    public static function getPost($name, $defaultValue=null, $filter=null, $options=null) {
         return self::get($name, $defaultValue, $_POST, $filter, $options);
     }
 
@@ -67,7 +67,10 @@ class Params {
 
         if (isset($scope[$name])) {
             $value = $scope[$name];
-            return filter_var($value, $filter, $options);
+            if (! is_null($filter)) {
+                $value = filter_var($value, $filter, $options);
+            }
+            return $value;
         }
 
         return $defaultValue;

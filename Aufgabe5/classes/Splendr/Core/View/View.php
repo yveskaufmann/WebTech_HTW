@@ -43,7 +43,7 @@ class View implements IView {
      */
     protected function renderTemplate($data) {
         ob_start();
-        require_once $this->getPathToTemplate();
+        include $this->getPathToTemplate();
         $content = ob_get_contents();
         ob_end_clean();
         return $content;

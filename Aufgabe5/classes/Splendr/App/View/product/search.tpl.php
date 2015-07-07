@@ -10,7 +10,6 @@
 ?>
 
 <div class="container">
-
     <div class="row">
         <div class="col-md-8">
             <form id="search_form" class="form" action="<?= URL::getControllerURL('product', 'search', '${query}') ?>" method="GET" role="search accept-charset="UTF-8">

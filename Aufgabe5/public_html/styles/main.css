@@ -17,8 +17,29 @@ form > p.bg-warning {
 #search-dp {
     min-width: 280px;
     overflow:hidden;
-    background-color:rgba(255,255,255,.8);
+    background-color: #ffffff !important;
     padding-left: 3px;
+}
+
+.product img {
+    height: 128px !important;
+
+}
+
+footer {
+    background-color: #222;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+footer hr {
+    color: #262626;
+}
+
+footer .container {
+    width: 100%;
 }
 
 /* =============Login-View ==================================================== */
@@ -27,13 +48,13 @@ form > p.bg-warning {
     min-width: 250px;
     padding: 14px 14px 0;
     overflow:hidden;
-    background-color:rgba(255,255,255,.8);
+    background-color: #ffffff !important;
 }
 #login-dp .help-block{
     font-size:12px
 }
 #login-dp .bottom{
-    background-color:rgba(255,255,255,.8);
+    background-color:rgb(255,255,255);
     border-top:1px solid #ddd;
     clear:both;
     padding:14px;

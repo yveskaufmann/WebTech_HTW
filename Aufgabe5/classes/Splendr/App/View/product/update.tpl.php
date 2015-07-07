@@ -15,17 +15,17 @@
 
     <div class="row">
        <div class="col-sm-12 col-sm-offset-6">
-           <h2>Add Product</h2>
+           <h2>Update Product</h2>
        </div>
     </div>
 
     <div class="row">
         <div class="col-sm-12">
-        <form class="form-horizontal" method="POST" action="<?= URL::getControllerURL('product', 'add') ?>">
+        <form class="form-horizontal" method="POST" action="<?= URL::getControllerURL('product', 'update', $product->getId()) ?>">
             <div class="form-group">
                 <label for="product_name" class="col-sm-2 control-label">Produkt-Name</label>
                 <div class="col-sm-10">
-                    <input type="text" name="name" class="form-control" id="product_name" placeholder="Produkt-Name" value="<?= $product->getName() ?>">
+                    <input type="text" name="name" class="form-control" id="product_name" placeholder="Produkt-Name" readonly="readonly"  value="<?= $product->getName() ?>">
                 </div>
             </div>
             <div class="form-group">
@@ -48,7 +48,7 @@
             </div>
             <div class="form-group">
                 <div class="pull-right">
-                    <button type="submit" class="btn btn-primary">Add Product</button>
+                    <button type="submit" class="btn btn-primary">Update Product</button>
                 </div>
             </div>
         </form>
