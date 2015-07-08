@@ -12,3 +12,4 @@ use \Splendr\Core\Controller\FrontController;
 
 Session::init();
 FrontController::get()->run();
+

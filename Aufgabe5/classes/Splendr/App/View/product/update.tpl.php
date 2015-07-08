@@ -46,10 +46,8 @@
                     <input type="url" name="image_url" class="form-control" id="product_image" placeholder="Product Image" value="<?= $product->getImageUrl() ?>">
                 </div>
             </div>
-            <div class="form-group">
-                <div class="pull-right">
-                    <button type="submit" class="btn btn-primary">Update Product</button>
-                </div>
+            <div class="form-group pull-right">
+                <button type="submit" class="btn btn-primary">Update Product</button>
             </div>
         </form>
         </div>

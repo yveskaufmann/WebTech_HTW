@@ -14,7 +14,7 @@
                 <label for="message">Message</label>
                 <textarea rows="5" name="message" type="text" class="form-control" placeholder="Your message"></textarea>
             </div>
-            <div class="pull-right">
+            <div class="form-group pull-right">
                 <button type="submit" class="btn btn-primary">Send</button>
             </div>
         </form>

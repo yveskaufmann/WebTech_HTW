@@ -8,6 +8,7 @@ use Splendr\App\Model\PollAnswerQuery;
 use Splendr\App\Model\PollQuery;
 use Splendr\App\Model\Product;
 use Splendr\App\Model\ProductQuery;
+use Splendr\App\Service\AmazonProductScrapper;
 use Splendr\Core\Controller\FrontController;
 use Splendr\Core\Controller\HTTPErrorException;
 use Splendr\Core\Helper\Notification;
@@ -20,6 +21,8 @@ class ProductController {
     const PRODUCT_PARAM = 'product';
     const PRODUCTS_PARAM = 'products';
     const QUERY_PARAM = 'query';
+    const QUERY_BY_URL_MODE_PARAM='isAddByURLMode';
+    const URL_PARAM='product_url';
 
     public function index($page=1) {
         $products = ProductQuery::create()->allProducts($page);
@@ -52,7 +55,7 @@ class ProductController {
         $price = Params::getPost('price', null, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $price = filter_var($price,FILTER_VALIDATE_FLOAT);
 
-        $product_url = Params::getPost('product_url', null, FILTER_SANITIZE_URL);
+        $product_url = Params::getPost(self::URL_PARAM, null, FILTER_SANITIZE_URL);
         $product_url = filter_var($product_url,FILTER_VALIDATE_URL);
 
         $image_url = Params::getPost('image_url', null, FILTER_SANITIZE_URL);
@@ -70,6 +73,36 @@ class ProductController {
                 Notification::add($failure->getPropertyPath().": ".$failure->getMessage(), 'warning');
             }
             $view->addData(self::PRODUCT_PARAM, $product);
+            $view->render();
+        } else {
+            $product->save();
+            FrontController::get()->runController('product', 'index');
+        }
+    }
+
+    public function addByURL() {
+        $product = null;
+        $view = new PageView('product/add', 'Product - add');
+        $view->addData(self::QUERY_BY_URL_MODE_PARAM, true);
+
+        if (Request::isGet()) {
+            $view->render();
+            return;
+        }
+
+        $product_url = Params::getPost('product_url_add_by_url', null, FILTER_SANITIZE_URL);
+        $product_url = filter_var($product_url,FILTER_VALIDATE_URL);
+
+        $url_scraper = new AmazonProductScrapper();
+        if ($url_scraper->isURLSupported($product_url)) {
+            $product = $url_scraper->retrieveProductByURL($product_url);
+        }
+
+
+        if (is_null($product) || !$product->validate()) {
+            Notification::add('The add of a product by the specified url failed, please try another url.', 'warning');
+            $view->addData(self::URL_PARAM, $product_url);
+            $view->addData(self::PRODUCT_PARAM, new Product());
             $view->render();
         } else {
             $product->save();

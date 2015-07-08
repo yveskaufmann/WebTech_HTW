@@ -23,7 +23,7 @@ class ProductQuery extends BaseProductQuery {
      * @param int $hits_per_page the hits per page.
      * @return \Propel\Runtime\Util\PropelModelPager|Product[]
      */
-    public function searchProduct($query, $page=1, $hits_per_page=10) {
+    public function searchProduct($query, $page=1, $hits_per_page=6) {
         $page = $this->normalizePage($page);
         $query = trim($query);
         $query = ($query !== '') ? '%'.$query.'%' : $query;
@@ -37,7 +37,7 @@ class ProductQuery extends BaseProductQuery {
             ->paginate($page, $hits_per_page);
     }
 
-    public function allProducts($page=1, $hits_per_page=10) {
+    public function allProducts($page=1, $hits_per_page=6) {
         $page = $this->normalizePage($page);
         return $this
             ->orderByName()
