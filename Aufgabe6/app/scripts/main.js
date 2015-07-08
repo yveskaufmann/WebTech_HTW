@@ -1,59 +1,100 @@
-(function($, L) {
-    "use strict";
+(function ($, L) {
+	"use strict";
 
-    var global = this;
+	var window = this;
 
-    function LocateMe() {
-        this.locationURL = window.location.hash.slice(1);
-        this.locationURL = this.locationURL || null;
-        this.baseURL = 'http://localhost:9000/'
-        this.init();
+	function LocateMe() {
+		this.baseURL = 'http://localhost:9000/'
+		this.$map = $('#map');
+		this.$enterLocationView = $('.enterLocation');
+		this.$locateMeButton = $('.locateMeButton');
+		this.$locationLink = $('.locationLink');
+		this.$alert = $('.alert');
 
+		$(window).on('hashchange', function () {
+			this.start();
+		}.bind(this));
 
-    }
+		this.start();
+	}
 
-    LocateMe.prototype.init = function() {
-        $('.enterLocation').hide();
-        $('.locationLink').hide();
-        $('.showLocation').hide();
+	LocateMe.prototype.start = function () {
+		[this.$enterLocationView, this.$map, this.$locationLink, this.$alert].forEach(function(elm) {
+			elm.removeClass('hidden');
+			elm.hide();
+		})
 
-        if (!this.locationURL) {
-            $('.locateMeButton').click(this.retrieveCurrentLocation.bind(this));
-            $('.enterLocation').show();
-        } else {
-            var location = this.locationURL.split('|');
-            var map = L.map('map').setView(location[0], location[1], 13);
-            var marker = L.marker([location[0], location[1]]).addTo(map);
+		this.locationURL = window.location.hash;
+		this.locationURL = this.locationURL.slice(1) || null;
 
-            $('.showLocation').show();
-        }
+		if (!this.locationURL) {
+			this.initShowEnterLocationView();
+		} else {
+			this.initShowLocationView();
+		}
+	};
 
+	LocateMe.prototype.initShowEnterLocationView = function () {
+		this.$enterLocationView.show();
+		this.$locateMeButton
+			.unbind()
+			.click(this.retrieveCurrentLocation.bind(this));
+	};
 
-    };
+	LocateMe.prototype.initShowLocationView = function () {
+		var location = this.locationURL.split('|');
+		if (location.length !== 2 || !location.every(jQuery.isNumeric)) {
+			$('.alert').show();
+			return;
+		}
 
-    LocateMe.prototype.retrieveCurrentLocation = function() {
-        if (!navigator.geolocation) {
-            alert('Geolocation isn\'t supported by your browser.');
-        } else {
-            navigator.geolocation.getCurrentPosition(this.showLocationLink.bind(this));
-        }
-    };
+		if (this.map) {
+			this.map.remove();
+		}
 
-    LocateMe.prototype.showLocationLink = function(location) {
-        var url = this.baseURL + '#' + location.coords.latitude + '|' +  location.coords.longitude;
-        var $locationLink = $('.locationLink');
-        $('<a></a>')
-            .attr('href', url)
-            .text(url)
-            .click(function(event) {
-                global.location.href=url;
-            })
-            .appendTo($locationLink);
+		this.map = L.map(this.$map.get(0), {
+			zoom: '10',
+			maxZoom: 19,
+			minZoom: 8,
+			center: location,
+			layers: [
+				L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+					attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+				})
+			]
+		});
 
-        $locationLink.show();
-    };
+		L.marker(location)
+			.addTo(this.map)
+			.bindPopup('You stay here');
 
+		this.$map.show();
+		this.map.invalidateSize();
 
-    new LocateMe();
+	};
+
+	LocateMe.prototype.retrieveCurrentLocation = function () {
+		if (!navigator.geolocation) {
+			alert('Geolocation isn\'t supported by your browser.');
+		} else {
+			navigator.geolocation.getCurrentPosition(this.showLocationLink.bind(this));
+		}
+	};
+
+	LocateMe.prototype.showLocationLink = function (location) {
+		var url = this.baseURL + '#' + location.coords.latitude + '|' + location.coords.longitude;
+		this.$locationLink.empty().append(
+			$('<a></a>')
+				.attr('href', url)
+				.text(url)
+				.click(function (event) {
+					window.history.
+					window.location.href = url;
+				})
+		).show();
+	};
+
+	this.locateMe = new LocateMe();
+	this.locateMe.start();
 
 }).call(this, jQuery, L);
