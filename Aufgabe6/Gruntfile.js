@@ -78,7 +78,7 @@ module.exports = function (grunt) {
           middleware: function(connect) {
             return [
               connect.static('.tmp'),
-              connect().use('/bower_components', connect.static('./bower_components')),
+              connect().use('scripts/vendor', connect.static('./app/scripts/vendor')),
               connect.static(config.app)
             ];
           }
@@ -92,7 +92,7 @@ module.exports = function (grunt) {
             return [
               connect.static('.tmp'),
               connect.static('test'),
-              connect().use('/bower_components', connect.static('./bower_components')),
+              connect().use('scripts/vendor', connect.static('./app/scripts/vendor')),
               connect.static(config.app)
             ];
           }
@@ -164,8 +164,7 @@ module.exports = function (grunt) {
     wiredep: {
       app: {
         ignorePath: /^\/|\.\.\//,
-        src: ['<%= config.app %>/index.html'],
-        exclude: ['bower_components/bootstrap/dist/js/bootstrap.js']
+        src: ['<%= config.app %>/index.html']
       }
     },
 
@@ -200,7 +199,10 @@ module.exports = function (grunt) {
         assetsDirs: [
           '<%= config.dist %>',
           '<%= config.dist %>/images',
-          '<%= config.dist %>/styles'
+          '<%= config.dist %>/styles',
+		  '<%= config.dist %>/scripts/vendor'
+
+
         ]
       },
       html: ['<%= config.dist %>/{,*/}*.html'],
@@ -291,6 +293,7 @@ module.exports = function (grunt) {
             'images/{,*/}*.webp',
             '{,*/}*.html',
             'styles/fonts/{,*/}*.*'
+
           ]
         }, {
           src: 'node_modules/apache-server-configs/dist/.htaccess',
@@ -298,10 +301,17 @@ module.exports = function (grunt) {
         }, {
           expand: true,
           dot: true,
-          cwd: 'bower_components/bootstrap/dist',
+          cwd: '<%= config.app %>/scripts/vendor/bootstrap/dist',
           src: 'fonts/*',
           dest: '<%= config.dist %>'
-        }]
+        }, {
+			expand: true,
+			dot: true,
+			flatten:true,
+			cwd: '<%= config.app %>/scripts/vendor/leaflet/dist',
+			src: 'images/*',
+			dest: '<%= config.dist %>/styles/images'
+		}]
       },
       styles: {
         expand: true,

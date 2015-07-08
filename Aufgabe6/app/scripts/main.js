@@ -1,5 +1,5 @@
 (function ($, L) {
-	"use strict";
+	'use strit';
 
 	var window = this;
 
@@ -22,7 +22,7 @@
 		[this.$enterLocationView, this.$map, this.$locationLink, this.$alert].forEach(function(elm) {
 			elm.removeClass('hidden');
 			elm.hide();
-		})
+		});
 
 		this.locationURL = window.location.hash;
 		this.locationURL = this.locationURL.slice(1) || null;
@@ -51,15 +51,15 @@
 		if (this.map) {
 			this.map.remove();
 		}
-
+		L.Icon.Default.imagePath = 'styles/images';
 		this.map = L.map(this.$map.get(0), {
 			zoom: '10',
 			maxZoom: 19,
 			minZoom: 8,
 			center: location,
 			layers: [
-				L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-					attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+				L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+					attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
 				})
 			]
 		});
@@ -94,8 +94,7 @@
 			$('<a></a>')
 				.attr('href', url)
 				.text(url)
-				.click(function (event) {
-					window.history.
+				.click(function () {
 					window.location.href = url;
 				})
 		).show();
