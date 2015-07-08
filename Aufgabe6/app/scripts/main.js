@@ -4,7 +4,7 @@
 	var window = this;
 
 	function LocateMe() {
-		this.baseURL = 'http://localhost:9000/'
+
 		this.$map = $('#map');
 		this.$enterLocationView = $('.enterLocation');
 		this.$locateMeButton = $('.locateMeButton');
@@ -82,7 +82,14 @@
 	};
 
 	LocateMe.prototype.showLocationLink = function (location) {
-		var url = this.baseURL + '#' + location.coords.latitude + '|' + location.coords.longitude;
+
+		var baseURL = window.location.href;
+		var hashPos = baseURL.indexOf('#');
+		if ( hashPos > 0 ) {
+			baseURL = baseURL.slice(0, hashPos);
+		}
+
+		var url = baseURL + '#' + location.coords.latitude + '|' + location.coords.longitude;
 		this.$locationLink.empty().append(
 			$('<a></a>')
 				.attr('href', url)
