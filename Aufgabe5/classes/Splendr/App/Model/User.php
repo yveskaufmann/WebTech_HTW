@@ -85,4 +85,10 @@ class User extends BaseUser {
     public function isPasswordConfirmationMatchPassword() {
         return is_string($this->confirmPassword) &&  $this->confirmPassword === (string)$this->getPassword();
     }
+
+    function __toString() {
+        return $this->getFirstName().' '.$this->getLastName().'('.$this->getUsername().')';
+    }
+
+
 }

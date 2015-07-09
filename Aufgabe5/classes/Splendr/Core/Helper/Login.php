@@ -8,6 +8,10 @@
 
 namespace Splendr\Core\Helper;
 
+use Splendr\App\Model\User;
+use Splendr\App\Model\UserQuery;
+use Splendr\Core\Helper\Session;
+
 /*
  * Password Hashing With PBKDF2 (http://crackstation.net/hashing-security.htm).
  * Copyright (c) 2013, Taylor Hornby
@@ -155,6 +159,36 @@ function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output =
  */
 class Login {
 
+    const USER_SESSION_PARAM = 'LOGIN:current_user';
+    const USER_LAST_ACTION = 'LOGIN:lastActionTime';
+
+    /**
+     * Tries to login a user by a specified email address and his password.
+     *
+     * @param string $email the entered email of a potential user.
+     * @param string $password the entered password of a potential user.
+     * @return bool true if the login was successful.
+     */
+    public static function login($email, $password) {
+        if (!self::isCurrentUserLoggedIn()) {
+            $user = UserQuery::create()->findOneByEmail($email);
+            if ( !is_null($user) && validate_password($password, $user->getPassword())) {
+                Session::set(self::USER_SESSION_PARAM, $user);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Logout the current logged user.
+     */
+    public static function logout() {
+        if (self::isCurrentUserLoggedIn()) {
+            Session::destroy();
+        }
+    }
+
     /**
      * Encrypt the password by using Taylor Hornby  PBKDF2 Algorithm
      * (http://crackstation.net/hashing-security.htm).
@@ -165,4 +199,26 @@ class Login {
     public static function encryptPassword($password) {
         return create_hash($password);
     }
+
+    /**
+     * Checks if a user is already logged in.
+     */
+    public static function isCurrentUserLoggedIn() {
+        return Session::has(self::USER_SESSION_PARAM)
+        && Session::get(self::USER_SESSION_PARAM) instanceof User;
+    }
+
+    /**
+     * Retrieve the current logged user.
+     *
+     * @return User|null the logged user or null if there is no logged user.
+     */
+    public static function geCurrentLoggedUser() {
+        if (self::isCurrentUserLoggedIn()) {
+            return Session::get(self::USER_SESSION_PARAM);
+        }
+        return null;
+    }
+
+
 }

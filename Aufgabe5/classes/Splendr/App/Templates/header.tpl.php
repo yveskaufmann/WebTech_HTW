@@ -1,7 +1,8 @@
 <?php
-use Splendr\Core\Helper\Notification;
-use Splendr\Core\Helper\ViewUtil;
+    use Splendr\Core\Helper\Notification;
+    use Splendr\Core\Helper\ViewUtil;
     use Splendr\Core\Helper\URL;
+    use Splendr\Core\Helper\Login;
 ?>
 <!doctype html>
 <html class="no-js">
@@ -65,6 +66,7 @@ use Splendr\Core\Helper\ViewUtil;
 
 
                 <ul class="nav navbar-nav navbar-right">
+                    <? if (!Login::isCurrentUserLoggedIn()): ?>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>Login</b> <span class="caret"></span></a>
                         <ul id="login-dp" class="dropdown-menu">
@@ -77,14 +79,14 @@ use Splendr\Core\Helper\ViewUtil;
                                             <a href="#" class="btn btn-tw"><i class="fa fa-twitter"></i> Twitter</a>
                                         </div>
                                         or
-                                        <form class="form" role="form" method="post" action="login" accept-charset="UTF-8" id="login-nav">
+                                        <form class="form" role="form" method="post" action="<?= URL::getControllerURL('login','login') ?>" accept-charset="UTF-8" id="login-nav">
                                             <div class="form-group">
                                                 <label class="sr-only" for="exampleInputEmail2">Email address</label>
-                                                <input type="email" class="form-control" id="exampleInputEmail2" placeholder="Email address" required>
+                                                <input  type="email" name="email" class="form-control" id="exampleInputEmail2" placeholder="Email address" required>
                                             </div>
                                             <div class="form-group">
                                                 <label class="sr-only" for="exampleInputPassword2">Password</label>
-                                                <input type="password" class="form-control" id="exampleInputPassword2" placeholder="Password" required>
+                                                <input type="password" name="password" class="form-control" id="exampleInputPassword2" placeholder="Password" required>
                                                 <div class="help-block text-right"><a href="">Forget the password ?</a></div>
                                             </div>
                                             <div class="form-group">
@@ -104,6 +106,18 @@ use Splendr\Core\Helper\ViewUtil;
                             </li>
                         </ul>
                     </li>
+                    <? else:?>
+                    <li>
+                        <a href="#">
+                            <span class="glyphicon glyphicon-user">
+                                <?= Login::geCurrentLoggedUser()->__toString() ?>
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?= URL::getControllerURL('login', 'logout') ?>">Logout</a>
+                    </li>
+                    <?endif;?>
                 </ul>
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->

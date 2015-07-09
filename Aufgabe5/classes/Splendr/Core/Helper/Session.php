@@ -77,6 +77,7 @@ class Session {
     }
 
     public static function init() {
+
         if ( self::$sessionNotYetCreated ) {
             session_start();
             self::$sessionNotYetCreated = false;

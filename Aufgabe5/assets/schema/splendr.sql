@@ -14,12 +14,11 @@ CREATE TABLE `User`
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `username` VARCHAR(255) NOT NULL,
     `email` TEXT(320) NOT NULL,
-    `password` CHAR(32) NOT NULL,
-    `salt` CHAR(32) NOT NULL,
+    `password` CHAR(64) NOT NULL,
     `first_name` VARCHAR(255) NOT NULL,
     `last_name` VARCHAR(255) NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE INDEX `User_u_314afd` (`username`, `email`(255))
+    UNIQUE INDEX `User_u_7e364b` (`email`(255), `username`)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------

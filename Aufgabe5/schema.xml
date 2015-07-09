@@ -8,7 +8,7 @@
         <column name="id" phpName="Id"  type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
         <column name="username" type="VARCHAR" size="255" required="true"  />
         <column name="email" type="LONGVARCHAR" size="320" required="true"/>
-        <column name="password" type="CHAR" size="32" required="true"/>
+        <column name="password" type="CHAR" size="64" required="true"/>
         <column name="first_name" type="VARCHAR" size="255" required="true" />
         <column name="last_name" type="VARCHAR" size="255" required="true" />
         <unique>

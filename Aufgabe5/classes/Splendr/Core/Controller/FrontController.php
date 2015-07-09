@@ -12,6 +12,7 @@ use Splendr\Core\Helper\URL;
 use ReflectionClass;
 use InvalidArgumentException;
 use Splendr\Core\View\ErrorView;
+use Splendr\Core\Helper\Request;
 
 /**
  *
@@ -107,8 +108,7 @@ class FrontController implements IFrontController {
     public function runController($controller, $action = self::DEFAULT_ACTION, $params = array(), $redirect=true) {
         $url = URL::getControllerURL($controller, $action, $params);
         if ($redirect) {
-            header('location: '.$url);
-            exit;
+            Request::redirectTo($url);
         }
         $this->configureByRequestUri($url);
         $this->run();
