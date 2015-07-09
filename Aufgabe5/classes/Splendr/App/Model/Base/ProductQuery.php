@@ -25,14 +25,12 @@ use Splendr\App\Model\Map\ProductTableMap;
  * @method     ChildProductQuery orderByPrice($order = Criteria::ASC) Order by the price column
  * @method     ChildProductQuery orderByImageUrl($order = Criteria::ASC) Order by the image_url column
  * @method     ChildProductQuery orderByProductUrl($order = Criteria::ASC) Order by the product_url column
- * @method     ChildProductQuery orderByDescription($order = Criteria::ASC) Order by the description column
  *
  * @method     ChildProductQuery groupById() Group by the id column
  * @method     ChildProductQuery groupByName() Group by the name column
  * @method     ChildProductQuery groupByPrice() Group by the price column
  * @method     ChildProductQuery groupByImageUrl() Group by the image_url column
  * @method     ChildProductQuery groupByProductUrl() Group by the product_url column
- * @method     ChildProductQuery groupByDescription() Group by the description column
  *
  * @method     ChildProductQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildProductQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -51,8 +49,7 @@ use Splendr\App\Model\Map\ProductTableMap;
  * @method     ChildProduct findOneByName(string $name) Return the first ChildProduct filtered by the name column
  * @method     ChildProduct findOneByPrice(string $price) Return the first ChildProduct filtered by the price column
  * @method     ChildProduct findOneByImageUrl(string $image_url) Return the first ChildProduct filtered by the image_url column
- * @method     ChildProduct findOneByProductUrl(string $product_url) Return the first ChildProduct filtered by the product_url column
- * @method     ChildProduct findOneByDescription(string $description) Return the first ChildProduct filtered by the description column *
+ * @method     ChildProduct findOneByProductUrl(string $product_url) Return the first ChildProduct filtered by the product_url column *
 
  * @method     ChildProduct requirePk($key, ConnectionInterface $con = null) Return the ChildProduct by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildProduct requireOne(ConnectionInterface $con = null) Return the first ChildProduct matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -62,7 +59,6 @@ use Splendr\App\Model\Map\ProductTableMap;
  * @method     ChildProduct requireOneByPrice(string $price) Return the first ChildProduct filtered by the price column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildProduct requireOneByImageUrl(string $image_url) Return the first ChildProduct filtered by the image_url column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildProduct requireOneByProductUrl(string $product_url) Return the first ChildProduct filtered by the product_url column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildProduct requireOneByDescription(string $description) Return the first ChildProduct filtered by the description column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildProduct[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildProduct objects based on current ModelCriteria
  * @method     ChildProduct[]|ObjectCollection findById(int $id) Return ChildProduct objects filtered by the id column
@@ -70,7 +66,6 @@ use Splendr\App\Model\Map\ProductTableMap;
  * @method     ChildProduct[]|ObjectCollection findByPrice(string $price) Return ChildProduct objects filtered by the price column
  * @method     ChildProduct[]|ObjectCollection findByImageUrl(string $image_url) Return ChildProduct objects filtered by the image_url column
  * @method     ChildProduct[]|ObjectCollection findByProductUrl(string $product_url) Return ChildProduct objects filtered by the product_url column
- * @method     ChildProduct[]|ObjectCollection findByDescription(string $description) Return ChildProduct objects filtered by the description column
  * @method     ChildProduct[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -163,7 +158,7 @@ abstract class ProductQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT id, name, price, image_url, product_url, description FROM Product WHERE id = :p0';
+        $sql = 'SELECT id, name, price, image_url, product_url FROM Product WHERE id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -420,35 +415,6 @@ abstract class ProductQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(ProductTableMap::COL_PRODUCT_URL, $productUrl, $comparison);
-    }
-
-    /**
-     * Filter the query on the description column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByDescription('fooValue');   // WHERE description = 'fooValue'
-     * $query->filterByDescription('%fooValue%'); // WHERE description LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $description The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildProductQuery The current query, for fluid interface
-     */
-    public function filterByDescription($description = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($description)) {
-                $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $description)) {
-                $description = str_replace('*', '%', $description);
-                $comparison = Criteria::LIKE;
-            }
-        }
-
-        return $this->addUsingAlias(ProductTableMap::COL_DESCRIPTION, $description, $comparison);
     }
 
     /**

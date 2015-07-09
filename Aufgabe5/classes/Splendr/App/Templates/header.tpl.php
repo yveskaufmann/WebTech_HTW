@@ -1,5 +1,6 @@
 <?php
-    use Splendr\Core\Helper\ViewUtil;
+use Splendr\Core\Helper\Notification;
+use Splendr\Core\Helper\ViewUtil;
     use Splendr\Core\Helper\URL;
 ?>
 <!doctype html>
@@ -97,7 +98,7 @@
                                         </form>
                                     </div>
                                     <div class="bottom text-center">
-                                        New here ? <a href="#register"><b>Join Us</b></a>
+                                        New here ? <a href="<?= URL::getControllerURL('login', 'register') ?>"><b>Join Us</b></a>
                                     </div>
                                 </div>
                             </li>
@@ -109,3 +110,4 @@
     </nav>
     <?php } ?>
     <div class="container">
+        <?php Notification::show(); ?>

@@ -24,7 +24,6 @@ use Splendr\App\Model\Map\UserTableMap;
  * @method     ChildUserQuery orderByUsername($order = Criteria::ASC) Order by the username column
  * @method     ChildUserQuery orderByEmail($order = Criteria::ASC) Order by the email column
  * @method     ChildUserQuery orderByPassword($order = Criteria::ASC) Order by the password column
- * @method     ChildUserQuery orderBySalt($order = Criteria::ASC) Order by the salt column
  * @method     ChildUserQuery orderByFirstName($order = Criteria::ASC) Order by the first_name column
  * @method     ChildUserQuery orderByLastName($order = Criteria::ASC) Order by the last_name column
  *
@@ -32,7 +31,6 @@ use Splendr\App\Model\Map\UserTableMap;
  * @method     ChildUserQuery groupByUsername() Group by the username column
  * @method     ChildUserQuery groupByEmail() Group by the email column
  * @method     ChildUserQuery groupByPassword() Group by the password column
- * @method     ChildUserQuery groupBySalt() Group by the salt column
  * @method     ChildUserQuery groupByFirstName() Group by the first_name column
  * @method     ChildUserQuery groupByLastName() Group by the last_name column
  *
@@ -61,7 +59,6 @@ use Splendr\App\Model\Map\UserTableMap;
  * @method     ChildUser findOneByUsername(string $username) Return the first ChildUser filtered by the username column
  * @method     ChildUser findOneByEmail(string $email) Return the first ChildUser filtered by the email column
  * @method     ChildUser findOneByPassword(string $password) Return the first ChildUser filtered by the password column
- * @method     ChildUser findOneBySalt(string $salt) Return the first ChildUser filtered by the salt column
  * @method     ChildUser findOneByFirstName(string $first_name) Return the first ChildUser filtered by the first_name column
  * @method     ChildUser findOneByLastName(string $last_name) Return the first ChildUser filtered by the last_name column *
 
@@ -72,7 +69,6 @@ use Splendr\App\Model\Map\UserTableMap;
  * @method     ChildUser requireOneByUsername(string $username) Return the first ChildUser filtered by the username column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneByEmail(string $email) Return the first ChildUser filtered by the email column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneByPassword(string $password) Return the first ChildUser filtered by the password column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUser requireOneBySalt(string $salt) Return the first ChildUser filtered by the salt column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneByFirstName(string $first_name) Return the first ChildUser filtered by the first_name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneByLastName(string $last_name) Return the first ChildUser filtered by the last_name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
@@ -81,7 +77,6 @@ use Splendr\App\Model\Map\UserTableMap;
  * @method     ChildUser[]|ObjectCollection findByUsername(string $username) Return ChildUser objects filtered by the username column
  * @method     ChildUser[]|ObjectCollection findByEmail(string $email) Return ChildUser objects filtered by the email column
  * @method     ChildUser[]|ObjectCollection findByPassword(string $password) Return ChildUser objects filtered by the password column
- * @method     ChildUser[]|ObjectCollection findBySalt(string $salt) Return ChildUser objects filtered by the salt column
  * @method     ChildUser[]|ObjectCollection findByFirstName(string $first_name) Return ChildUser objects filtered by the first_name column
  * @method     ChildUser[]|ObjectCollection findByLastName(string $last_name) Return ChildUser objects filtered by the last_name column
  * @method     ChildUser[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
@@ -176,7 +171,7 @@ abstract class UserQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT id, username, email, password, salt, first_name, last_name FROM User WHERE id = :p0';
+        $sql = 'SELECT id, username, email, password, first_name, last_name FROM User WHERE id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -392,35 +387,6 @@ abstract class UserQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(UserTableMap::COL_PASSWORD, $password, $comparison);
-    }
-
-    /**
-     * Filter the query on the salt column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterBySalt('fooValue');   // WHERE salt = 'fooValue'
-     * $query->filterBySalt('%fooValue%'); // WHERE salt LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $salt The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildUserQuery The current query, for fluid interface
-     */
-    public function filterBySalt($salt = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($salt)) {
-                $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $salt)) {
-                $salt = str_replace('*', '%', $salt);
-                $comparison = Criteria::LIKE;
-            }
-        }
-
-        return $this->addUsingAlias(UserTableMap::COL_SALT, $salt, $comparison);
     }
 
     /**

@@ -16,6 +16,7 @@ use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
+use Propel\Runtime\Validator\Constraints\Unique;
 use Splendr\App\Model\LoginAttempt as ChildLoginAttempt;
 use Splendr\App\Model\LoginAttemptQuery as ChildLoginAttemptQuery;
 use Splendr\App\Model\ProductBoard as ChildProductBoard;
@@ -25,6 +26,18 @@ use Splendr\App\Model\ProductReviewQuery as ChildProductReviewQuery;
 use Splendr\App\Model\User as ChildUser;
 use Splendr\App\Model\UserQuery as ChildUserQuery;
 use Splendr\App\Model\Map\UserTableMap;
+use Symfony\Component\Validator\ConstraintValidatorFactory;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\DefaultTranslator;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Context\ExecutionContextFactory;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+use Symfony\Component\Validator\Mapping\ClassMetadataFactory;
+use Symfony\Component\Validator\Mapping\Loader\StaticMethodLoader;
+use Symfony\Component\Validator\Validator\LegacyValidator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Base class that represents a row from the 'User' table.
@@ -92,12 +105,6 @@ abstract class User implements ActiveRecordInterface
     protected $password;
 
     /**
-     * The value for the salt field.
-     * @var        string
-     */
-    protected $salt;
-
-    /**
      * The value for the first_name field.
      * @var        string
      */
@@ -133,6 +140,23 @@ abstract class User implements ActiveRecordInterface
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    // validate behavior
+
+    /**
+     * Flag to prevent endless validation loop, if this object is referenced
+     * by another object which falls in this transaction.
+     * @var        boolean
+     */
+    protected $alreadyInValidation = false;
+
+    /**
+     * ConstraintViolationList object
+     *
+     * @see     http://api.symfony.com/2.0/Symfony/Component/Validator/ConstraintViolationList.html
+     * @var     ConstraintViolationList
+     */
+    protected $validationFailures;
 
     /**
      * An array of objects scheduled for deletion.
@@ -404,16 +428,6 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Get the [salt] column value.
-     *
-     * @return string
-     */
-    public function getSalt()
-    {
-        return $this->salt;
-    }
-
-    /**
      * Get the [first_name] column value.
      *
      * @return string
@@ -514,26 +528,6 @@ abstract class User implements ActiveRecordInterface
     } // setPassword()
 
     /**
-     * Set the value of [salt] column.
-     *
-     * @param string $v new value
-     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
-     */
-    public function setSalt($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->salt !== $v) {
-            $this->salt = $v;
-            $this->modifiedColumns[UserTableMap::COL_SALT] = true;
-        }
-
-        return $this;
-    } // setSalt()
-
-    /**
      * Set the value of [first_name] column.
      *
      * @param string $v new value
@@ -621,13 +615,10 @@ abstract class User implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserTableMap::translateFieldName('Password', TableMap::TYPE_PHPNAME, $indexType)];
             $this->password = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserTableMap::translateFieldName('Salt', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->salt = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserTableMap::translateFieldName('FirstName', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserTableMap::translateFieldName('FirstName', TableMap::TYPE_PHPNAME, $indexType)];
             $this->first_name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserTableMap::translateFieldName('LastName', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserTableMap::translateFieldName('LastName', TableMap::TYPE_PHPNAME, $indexType)];
             $this->last_name = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
@@ -637,7 +628,7 @@ abstract class User implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 7; // 7 = UserTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 6; // 6 = UserTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\Splendr\\App\\Model\\User'), 0, $e);
@@ -892,9 +883,6 @@ abstract class User implements ActiveRecordInterface
         if ($this->isColumnModified(UserTableMap::COL_PASSWORD)) {
             $modifiedColumns[':p' . $index++]  = 'password';
         }
-        if ($this->isColumnModified(UserTableMap::COL_SALT)) {
-            $modifiedColumns[':p' . $index++]  = 'salt';
-        }
         if ($this->isColumnModified(UserTableMap::COL_FIRST_NAME)) {
             $modifiedColumns[':p' . $index++]  = 'first_name';
         }
@@ -923,9 +911,6 @@ abstract class User implements ActiveRecordInterface
                         break;
                     case 'password':
                         $stmt->bindValue($identifier, $this->password, PDO::PARAM_STR);
-                        break;
-                    case 'salt':
-                        $stmt->bindValue($identifier, $this->salt, PDO::PARAM_STR);
                         break;
                     case 'first_name':
                         $stmt->bindValue($identifier, $this->first_name, PDO::PARAM_STR);
@@ -1008,12 +993,9 @@ abstract class User implements ActiveRecordInterface
                 return $this->getPassword();
                 break;
             case 4:
-                return $this->getSalt();
-                break;
-            case 5:
                 return $this->getFirstName();
                 break;
-            case 6:
+            case 5:
                 return $this->getLastName();
                 break;
             default:
@@ -1050,9 +1032,8 @@ abstract class User implements ActiveRecordInterface
             $keys[1] => $this->getUsername(),
             $keys[2] => $this->getEmail(),
             $keys[3] => $this->getPassword(),
-            $keys[4] => $this->getSalt(),
-            $keys[5] => $this->getFirstName(),
-            $keys[6] => $this->getLastName(),
+            $keys[4] => $this->getFirstName(),
+            $keys[5] => $this->getLastName(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1152,12 +1133,9 @@ abstract class User implements ActiveRecordInterface
                 $this->setPassword($value);
                 break;
             case 4:
-                $this->setSalt($value);
-                break;
-            case 5:
                 $this->setFirstName($value);
                 break;
-            case 6:
+            case 5:
                 $this->setLastName($value);
                 break;
         } // switch()
@@ -1199,13 +1177,10 @@ abstract class User implements ActiveRecordInterface
             $this->setPassword($arr[$keys[3]]);
         }
         if (array_key_exists($keys[4], $arr)) {
-            $this->setSalt($arr[$keys[4]]);
+            $this->setFirstName($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setFirstName($arr[$keys[5]]);
-        }
-        if (array_key_exists($keys[6], $arr)) {
-            $this->setLastName($arr[$keys[6]]);
+            $this->setLastName($arr[$keys[5]]);
         }
     }
 
@@ -1259,9 +1234,6 @@ abstract class User implements ActiveRecordInterface
         }
         if ($this->isColumnModified(UserTableMap::COL_PASSWORD)) {
             $criteria->add(UserTableMap::COL_PASSWORD, $this->password);
-        }
-        if ($this->isColumnModified(UserTableMap::COL_SALT)) {
-            $criteria->add(UserTableMap::COL_SALT, $this->salt);
         }
         if ($this->isColumnModified(UserTableMap::COL_FIRST_NAME)) {
             $criteria->add(UserTableMap::COL_FIRST_NAME, $this->first_name);
@@ -1358,7 +1330,6 @@ abstract class User implements ActiveRecordInterface
         $copyObj->setUsername($this->getUsername());
         $copyObj->setEmail($this->getEmail());
         $copyObj->setPassword($this->getPassword());
-        $copyObj->setSalt($this->getSalt());
         $copyObj->setFirstName($this->getFirstName());
         $copyObj->setLastName($this->getLastName());
 
@@ -1947,7 +1918,6 @@ abstract class User implements ActiveRecordInterface
         $this->username = null;
         $this->email = null;
         $this->password = null;
-        $this->salt = null;
         $this->first_name = null;
         $this->last_name = null;
         $this->alreadyInSave = false;
@@ -1996,6 +1966,107 @@ abstract class User implements ActiveRecordInterface
     public function __toString()
     {
         return (string) $this->exportTo(UserTableMap::DEFAULT_STRING_FORMAT);
+    }
+
+    // validate behavior
+
+    /**
+     * Configure validators constraints. The Validator object uses this method
+     * to perform object validation.
+     *
+     * @param ClassMetadata $metadata
+     */
+    static public function loadValidatorMetadata(ClassMetadata $metadata)
+    {
+        $metadata->addPropertyConstraint('username', new Length(array ('max' => 255,)));
+        $metadata->addPropertyConstraint('username', new NotBlank(array ('message' => 'Please enter a username.',)));
+        $metadata->addPropertyConstraint('username', new Unique(array ('message' => 'The entered username is already taken by another user.',)));
+        $metadata->addPropertyConstraint('email', new Length(array ('max' => 255,)));
+        $metadata->addPropertyConstraint('email', new Email(array ('message' => 'Please enter a valid {{ value }} email address.',)));
+        $metadata->addPropertyConstraint('email', new NotBlank(array ('message' => 'Please enter a email address.',)));
+        $metadata->addPropertyConstraint('email', new Unique(array ('message' => 'The entered email is already registered.',)));
+        $metadata->addPropertyConstraint('first_name', new Length(array ('max' => 255,)));
+        $metadata->addPropertyConstraint('first_name', new NotBlank(array ('message' => 'Please enter your first name.',)));
+        $metadata->addPropertyConstraint('last_name', new Length(array ('max' => 255,)));
+        $metadata->addPropertyConstraint('last_name', new NotBlank(array ('message' => 'Please enter your last name.',)));
+        $metadata->addPropertyConstraint('password', new Length(array ('min' => 8,)));
+    }
+
+    /**
+     * Validates the object and all objects related to this table.
+     *
+     * @see        getValidationFailures()
+     * @param      object $validator A Validator class instance
+     * @return     boolean Whether all objects pass validation.
+     */
+    public function validate(ValidatorInterface $validator = null)
+    {
+        if (null === $validator) {
+            if(class_exists('Symfony\\Component\\Validator\\Validator\\LegacyValidator')){
+                $validator = new LegacyValidator(
+                            new ExecutionContextFactory(new DefaultTranslator()),
+                            new ClassMetaDataFactory(new StaticMethodLoader()),
+                            new ConstraintValidatorFactory()
+                );
+            }else{
+                $validator = new Validator(
+                            new ClassMetadataFactory(new StaticMethodLoader()),
+                            new ConstraintValidatorFactory(),
+                            new DefaultTranslator()
+                );
+            }
+        }
+
+        $failureMap = new ConstraintViolationList();
+
+        if (!$this->alreadyInValidation) {
+            $this->alreadyInValidation = true;
+            $retval = null;
+
+
+            $retval = $validator->validate($this);
+            if (count($retval) > 0) {
+                $failureMap->addAll($retval);
+            }
+
+            if (null !== $this->collProductBoards) {
+                foreach ($this->collProductBoards as $referrerFK) {
+                    if (method_exists($referrerFK, 'validate')) {
+                        if (!$referrerFK->validate($validator)) {
+                            $failureMap->addAll($referrerFK->getValidationFailures());
+                        }
+                    }
+                }
+            }
+            if (null !== $this->collProductReviews) {
+                foreach ($this->collProductReviews as $referrerFK) {
+                    if (method_exists($referrerFK, 'validate')) {
+                        if (!$referrerFK->validate($validator)) {
+                            $failureMap->addAll($referrerFK->getValidationFailures());
+                        }
+                    }
+                }
+            }
+
+            $this->alreadyInValidation = false;
+        }
+
+        $this->validationFailures = $failureMap;
+
+        return (Boolean) (!(count($this->validationFailures) > 0));
+
+    }
+
+    /**
+     * Gets any ConstraintViolation objects that resulted from last call to validate().
+     *
+     *
+     * @return     object ConstraintViolationList
+     * @see        validate()
+     */
+    public function getValidationFailures()
+    {
+        return $this->validationFailures;
     }
 
     /**

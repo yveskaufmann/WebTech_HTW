@@ -9,13 +9,32 @@
         <column name="username" type="VARCHAR" size="255" required="true"  />
         <column name="email" type="LONGVARCHAR" size="320" required="true"/>
         <column name="password" type="CHAR" size="32" required="true"/>
-        <column name="salt" type="CHAR" size="32" required="true"/>
         <column name="first_name" type="VARCHAR" size="255" required="true" />
         <column name="last_name" type="VARCHAR" size="255" required="true" />
         <unique>
-            <unique-column name="username"/>
             <unique-column name="email" size="255" />
+            <unique-column name="username"/>
         </unique>
+
+        <behavior name="validate">
+            <parameter name="username_limit" value="{column: username, validator: Length, options: {max: 255}}" />
+            <parameter name="username_required" value="{column: username, validator: NotBlank, options: {message: Please enter a username.}}" />
+            <parameter name="username_is_unique" value="{column: username, validator: Unique, options: {message: The entered username is already taken by another user. }}" />
+
+            <parameter name="email_limit" value="{column: email, validator: Length, options: {max: 255}}" />
+            <parameter name="email_is_email" value="{column: email, validator: Email, options: {message: 'Please enter a valid {{ value }} email address.'}}" />
+            <parameter name="email_required" value="{column: email, validator: NotBlank, options: {message: Please enter a email address.}}" />
+            <parameter name="email_is_unique" value="{column: email, validator: Unique, options: {message: The entered email is already registered. }}" />
+
+            <parameter name="first_name_limit" value="{column: first_name, validator: Length, options: {max: 255}}" />
+            <parameter name="first_name_required" value="{column: first_name, validator: NotBlank, options: {message:  Please enter your first name.}}" />
+
+            <parameter name="last_name_limit" value="{column: last_name, validator: Length, options: {max: 255}}" />
+            <parameter name="last_name_required" value="{column: last_name, validator: NotBlank, options: {message:  Please enter your last name.}}" />
+
+            <parameter name="password_size" value="{column: password, validator: Length, options: {min: 8}}" />
+        </behavior>
+
     </table>
 
     <table name="LoginAttempt" phpName="LoginAttempt">

@@ -11,7 +11,6 @@ use Splendr\App\Model\Base\LoginAttempt as BaseLoginAttempt;
  * Class LoginAttempt
  * @package Splendr\App\Model
  */
-class LoginAttempt extends BaseLoginAttempt
-{
+class LoginAttempt extends BaseLoginAttempt {
 
 }

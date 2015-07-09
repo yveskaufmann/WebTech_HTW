@@ -59,7 +59,7 @@ class UserTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 7;
+    const NUM_COLUMNS = 6;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class UserTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 7;
+    const NUM_HYDRATE_COLUMNS = 6;
 
     /**
      * the column name for the id field
@@ -90,11 +90,6 @@ class UserTableMap extends TableMap
      * the column name for the password field
      */
     const COL_PASSWORD = 'User.password';
-
-    /**
-     * the column name for the salt field
-     */
-    const COL_SALT = 'User.salt';
 
     /**
      * the column name for the first_name field
@@ -118,11 +113,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('Id', 'Username', 'Email', 'Password', 'Salt', 'FirstName', 'LastName', ),
-        self::TYPE_CAMELNAME     => array('id', 'username', 'email', 'password', 'salt', 'firstName', 'lastName', ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_ID, UserTableMap::COL_USERNAME, UserTableMap::COL_EMAIL, UserTableMap::COL_PASSWORD, UserTableMap::COL_SALT, UserTableMap::COL_FIRST_NAME, UserTableMap::COL_LAST_NAME, ),
-        self::TYPE_FIELDNAME     => array('id', 'username', 'email', 'password', 'salt', 'first_name', 'last_name', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('Id', 'Username', 'Email', 'Password', 'FirstName', 'LastName', ),
+        self::TYPE_CAMELNAME     => array('id', 'username', 'email', 'password', 'firstName', 'lastName', ),
+        self::TYPE_COLNAME       => array(UserTableMap::COL_ID, UserTableMap::COL_USERNAME, UserTableMap::COL_EMAIL, UserTableMap::COL_PASSWORD, UserTableMap::COL_FIRST_NAME, UserTableMap::COL_LAST_NAME, ),
+        self::TYPE_FIELDNAME     => array('id', 'username', 'email', 'password', 'first_name', 'last_name', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -132,11 +127,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('Id' => 0, 'Username' => 1, 'Email' => 2, 'Password' => 3, 'Salt' => 4, 'FirstName' => 5, 'LastName' => 6, ),
-        self::TYPE_CAMELNAME     => array('id' => 0, 'username' => 1, 'email' => 2, 'password' => 3, 'salt' => 4, 'firstName' => 5, 'lastName' => 6, ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_ID => 0, UserTableMap::COL_USERNAME => 1, UserTableMap::COL_EMAIL => 2, UserTableMap::COL_PASSWORD => 3, UserTableMap::COL_SALT => 4, UserTableMap::COL_FIRST_NAME => 5, UserTableMap::COL_LAST_NAME => 6, ),
-        self::TYPE_FIELDNAME     => array('id' => 0, 'username' => 1, 'email' => 2, 'password' => 3, 'salt' => 4, 'first_name' => 5, 'last_name' => 6, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('Id' => 0, 'Username' => 1, 'Email' => 2, 'Password' => 3, 'FirstName' => 4, 'LastName' => 5, ),
+        self::TYPE_CAMELNAME     => array('id' => 0, 'username' => 1, 'email' => 2, 'password' => 3, 'firstName' => 4, 'lastName' => 5, ),
+        self::TYPE_COLNAME       => array(UserTableMap::COL_ID => 0, UserTableMap::COL_USERNAME => 1, UserTableMap::COL_EMAIL => 2, UserTableMap::COL_PASSWORD => 3, UserTableMap::COL_FIRST_NAME => 4, UserTableMap::COL_LAST_NAME => 5, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'username' => 1, 'email' => 2, 'password' => 3, 'first_name' => 4, 'last_name' => 5, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -160,7 +155,6 @@ class UserTableMap extends TableMap
         $this->addColumn('username', 'Username', 'VARCHAR', true, 255, null);
         $this->addColumn('email', 'Email', 'LONGVARCHAR', true, 320, null);
         $this->addColumn('password', 'Password', 'CHAR', true, 32, null);
-        $this->addColumn('salt', 'Salt', 'CHAR', true, 32, null);
         $this->addColumn('first_name', 'FirstName', 'VARCHAR', true, 255, null);
         $this->addColumn('last_name', 'LastName', 'VARCHAR', true, 255, null);
     } // initialize()
@@ -192,6 +186,19 @@ class UserTableMap extends TableMap
   ),
 ), null, null, 'ProductReviews', false);
     } // buildRelations()
+
+    /**
+     *
+     * Gets the list of behaviors registered for this table
+     *
+     * @return array Associative array (name => parameters) of behaviors
+     */
+    public function getBehaviors()
+    {
+        return array(
+            'validate' => array('username_limit' => array ('column' => 'username','validator' => 'Length','options' => array ('max' => 255,),), 'username_required' => array ('column' => 'username','validator' => 'NotBlank','options' => array ('message' => 'Please enter a username.',),), 'username_is_unique' => array ('column' => 'username','validator' => 'Unique','options' => array ('message' => 'The entered username is already taken by another user.',),), 'email_limit' => array ('column' => 'email','validator' => 'Length','options' => array ('max' => 255,),), 'email_is_email' => array ('column' => 'email','validator' => 'Email','options' => array ('message' => 'Please enter a valid {{ value }} email address.',),), 'email_required' => array ('column' => 'email','validator' => 'NotBlank','options' => array ('message' => 'Please enter a email address.',),), 'email_is_unique' => array ('column' => 'email','validator' => 'Unique','options' => array ('message' => 'The entered email is already registered.',),), 'first_name_limit' => array ('column' => 'first_name','validator' => 'Length','options' => array ('max' => 255,),), 'first_name_required' => array ('column' => 'first_name','validator' => 'NotBlank','options' => array ('message' => 'Please enter your first name.',),), 'last_name_limit' => array ('column' => 'last_name','validator' => 'Length','options' => array ('max' => 255,),), 'last_name_required' => array ('column' => 'last_name','validator' => 'NotBlank','options' => array ('message' => 'Please enter your last name.',),), 'password_size' => array ('column' => 'password','validator' => 'Length','options' => array ('min' => 8,),), ),
+        );
+    } // getBehaviors()
 
     /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.
@@ -338,7 +345,6 @@ class UserTableMap extends TableMap
             $criteria->addSelectColumn(UserTableMap::COL_USERNAME);
             $criteria->addSelectColumn(UserTableMap::COL_EMAIL);
             $criteria->addSelectColumn(UserTableMap::COL_PASSWORD);
-            $criteria->addSelectColumn(UserTableMap::COL_SALT);
             $criteria->addSelectColumn(UserTableMap::COL_FIRST_NAME);
             $criteria->addSelectColumn(UserTableMap::COL_LAST_NAME);
         } else {
@@ -346,7 +352,6 @@ class UserTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.username');
             $criteria->addSelectColumn($alias . '.email');
             $criteria->addSelectColumn($alias . '.password');
-            $criteria->addSelectColumn($alias . '.salt');
             $criteria->addSelectColumn($alias . '.first_name');
             $criteria->addSelectColumn($alias . '.last_name');
         }

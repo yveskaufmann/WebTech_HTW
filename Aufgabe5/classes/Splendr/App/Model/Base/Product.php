@@ -109,12 +109,6 @@ abstract class Product implements ActiveRecordInterface
     protected $product_url;
 
     /**
-     * The value for the description field.
-     * @var        string
-     */
-    protected $description;
-
-    /**
      * @var        ObjectCollection|ChildProductReview[] Collection to store aggregation of ChildProductReview objects.
      */
     protected $collProductReviews;
@@ -419,16 +413,6 @@ abstract class Product implements ActiveRecordInterface
     }
 
     /**
-     * Get the [description] column value.
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-        return $this->description;
-    }
-
-    /**
      * Set the value of [id] column.
      *
      * @param int $v new value
@@ -529,26 +513,6 @@ abstract class Product implements ActiveRecordInterface
     } // setProductUrl()
 
     /**
-     * Set the value of [description] column.
-     *
-     * @param string $v new value
-     * @return $this|\Splendr\App\Model\Product The current object (for fluent API support)
-     */
-    public function setDescription($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->description !== $v) {
-            $this->description = $v;
-            $this->modifiedColumns[ProductTableMap::COL_DESCRIPTION] = true;
-        }
-
-        return $this;
-    } // setDescription()
-
-    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -598,9 +562,6 @@ abstract class Product implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : ProductTableMap::translateFieldName('ProductUrl', TableMap::TYPE_PHPNAME, $indexType)];
             $this->product_url = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : ProductTableMap::translateFieldName('Description', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->description = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -609,7 +570,7 @@ abstract class Product implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 6; // 6 = ProductTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 5; // 5 = ProductTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\Splendr\\App\\Model\\Product'), 0, $e);
@@ -840,9 +801,6 @@ abstract class Product implements ActiveRecordInterface
         if ($this->isColumnModified(ProductTableMap::COL_PRODUCT_URL)) {
             $modifiedColumns[':p' . $index++]  = 'product_url';
         }
-        if ($this->isColumnModified(ProductTableMap::COL_DESCRIPTION)) {
-            $modifiedColumns[':p' . $index++]  = 'description';
-        }
 
         $sql = sprintf(
             'INSERT INTO Product (%s) VALUES (%s)',
@@ -868,9 +826,6 @@ abstract class Product implements ActiveRecordInterface
                         break;
                     case 'product_url':
                         $stmt->bindValue($identifier, $this->product_url, PDO::PARAM_STR);
-                        break;
-                    case 'description':
-                        $stmt->bindValue($identifier, $this->description, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -949,9 +904,6 @@ abstract class Product implements ActiveRecordInterface
             case 4:
                 return $this->getProductUrl();
                 break;
-            case 5:
-                return $this->getDescription();
-                break;
             default:
                 return null;
                 break;
@@ -987,7 +939,6 @@ abstract class Product implements ActiveRecordInterface
             $keys[2] => $this->getPrice(),
             $keys[3] => $this->getImageUrl(),
             $keys[4] => $this->getProductUrl(),
-            $keys[5] => $this->getDescription(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1059,9 +1010,6 @@ abstract class Product implements ActiveRecordInterface
             case 4:
                 $this->setProductUrl($value);
                 break;
-            case 5:
-                $this->setDescription($value);
-                break;
         } // switch()
 
         return $this;
@@ -1102,9 +1050,6 @@ abstract class Product implements ActiveRecordInterface
         }
         if (array_key_exists($keys[4], $arr)) {
             $this->setProductUrl($arr[$keys[4]]);
-        }
-        if (array_key_exists($keys[5], $arr)) {
-            $this->setDescription($arr[$keys[5]]);
         }
     }
 
@@ -1161,9 +1106,6 @@ abstract class Product implements ActiveRecordInterface
         }
         if ($this->isColumnModified(ProductTableMap::COL_PRODUCT_URL)) {
             $criteria->add(ProductTableMap::COL_PRODUCT_URL, $this->product_url);
-        }
-        if ($this->isColumnModified(ProductTableMap::COL_DESCRIPTION)) {
-            $criteria->add(ProductTableMap::COL_DESCRIPTION, $this->description);
         }
 
         return $criteria;
@@ -1255,7 +1197,6 @@ abstract class Product implements ActiveRecordInterface
         $copyObj->setPrice($this->getPrice());
         $copyObj->setImageUrl($this->getImageUrl());
         $copyObj->setProductUrl($this->getProductUrl());
-        $copyObj->setDescription($this->getDescription());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -1572,7 +1513,6 @@ abstract class Product implements ActiveRecordInterface
         $this->price = null;
         $this->image_url = null;
         $this->product_url = null;
-        $this->description = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1632,7 +1572,6 @@ abstract class Product implements ActiveRecordInterface
         $metadata->addPropertyConstraint('product_url', new Length(array ('max' => 255,)));
         $metadata->addPropertyConstraint('product_url', new Url());
         $metadata->addPropertyConstraint('product_url', new NotBlank());
-        $metadata->addPropertyConstraint('description', new Type(array ('type' => 'string',)));
     }
 
     /**

@@ -11,8 +11,6 @@
 
 <div class="container">
 
-    <?php Notification::show(); ?>
-
     <div class="row">
        <div class="col-sm-12 col-sm-offset-6">
            <h2>Update Product</h2>

@@ -53,7 +53,6 @@ CREATE TABLE `Product`
     `price` DECIMAL(10,2) NOT NULL,
     `image_url` VARCHAR(255) NOT NULL,
     `product_url` TEXT NOT NULL,
-    `description` TEXT NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE INDEX `Product_u_d94269` (`name`),
     INDEX `Product_i_8501d1` (`name`, `product_url`(255))
