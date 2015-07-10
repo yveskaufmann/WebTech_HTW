@@ -9,7 +9,6 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Collection;
-use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\LogicException;
@@ -19,11 +18,6 @@ use Propel\Runtime\Parser\AbstractParser;
 use Propel\Runtime\Validator\Constraints\Unique;
 use Splendr\App\Model\LoginAttempt as ChildLoginAttempt;
 use Splendr\App\Model\LoginAttemptQuery as ChildLoginAttemptQuery;
-use Splendr\App\Model\ProductBoard as ChildProductBoard;
-use Splendr\App\Model\ProductBoardQuery as ChildProductBoardQuery;
-use Splendr\App\Model\ProductReview as ChildProductReview;
-use Splendr\App\Model\ProductReviewQuery as ChildProductReviewQuery;
-use Splendr\App\Model\User as ChildUser;
 use Splendr\App\Model\UserQuery as ChildUserQuery;
 use Splendr\App\Model\Map\UserTableMap;
 use Symfony\Component\Validator\ConstraintValidatorFactory;
@@ -122,18 +116,6 @@ abstract class User implements ActiveRecordInterface
     protected $singleLoginAttempt;
 
     /**
-     * @var        ObjectCollection|ChildProductBoard[] Collection to store aggregation of ChildProductBoard objects.
-     */
-    protected $collProductBoards;
-    protected $collProductBoardsPartial;
-
-    /**
-     * @var        ObjectCollection|ChildProductReview[] Collection to store aggregation of ChildProductReview objects.
-     */
-    protected $collProductReviews;
-    protected $collProductReviewsPartial;
-
-    /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
      *
@@ -157,18 +139,6 @@ abstract class User implements ActiveRecordInterface
      * @var     ConstraintViolationList
      */
     protected $validationFailures;
-
-    /**
-     * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildProductBoard[]
-     */
-    protected $productBoardsScheduledForDeletion = null;
-
-    /**
-     * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildProductReview[]
-     */
-    protected $productReviewsScheduledForDeletion = null;
 
     /**
      * Initializes internal state of Splendr\App\Model\Base\User object.
@@ -691,10 +661,6 @@ abstract class User implements ActiveRecordInterface
 
             $this->singleLoginAttempt = null;
 
-            $this->collProductBoards = null;
-
-            $this->collProductReviews = null;
-
         } // if (deep)
     }
 
@@ -808,40 +774,6 @@ abstract class User implements ActiveRecordInterface
             if ($this->singleLoginAttempt !== null) {
                 if (!$this->singleLoginAttempt->isDeleted() && ($this->singleLoginAttempt->isNew() || $this->singleLoginAttempt->isModified())) {
                     $affectedRows += $this->singleLoginAttempt->save($con);
-                }
-            }
-
-            if ($this->productBoardsScheduledForDeletion !== null) {
-                if (!$this->productBoardsScheduledForDeletion->isEmpty()) {
-                    \Splendr\App\Model\ProductBoardQuery::create()
-                        ->filterByPrimaryKeys($this->productBoardsScheduledForDeletion->getPrimaryKeys(false))
-                        ->delete($con);
-                    $this->productBoardsScheduledForDeletion = null;
-                }
-            }
-
-            if ($this->collProductBoards !== null) {
-                foreach ($this->collProductBoards as $referrerFK) {
-                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
-                        $affectedRows += $referrerFK->save($con);
-                    }
-                }
-            }
-
-            if ($this->productReviewsScheduledForDeletion !== null) {
-                if (!$this->productReviewsScheduledForDeletion->isEmpty()) {
-                    \Splendr\App\Model\ProductReviewQuery::create()
-                        ->filterByPrimaryKeys($this->productReviewsScheduledForDeletion->getPrimaryKeys(false))
-                        ->delete($con);
-                    $this->productReviewsScheduledForDeletion = null;
-                }
-            }
-
-            if ($this->collProductReviews !== null) {
-                foreach ($this->collProductReviews as $referrerFK) {
-                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
-                        $affectedRows += $referrerFK->save($con);
-                    }
                 }
             }
 
@@ -1055,36 +987,6 @@ abstract class User implements ActiveRecordInterface
                 }
 
                 $result[$key] = $this->singleLoginAttempt->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
-            }
-            if (null !== $this->collProductBoards) {
-
-                switch ($keyType) {
-                    case TableMap::TYPE_CAMELNAME:
-                        $key = 'productBoards';
-                        break;
-                    case TableMap::TYPE_FIELDNAME:
-                        $key = 'ProductBoards';
-                        break;
-                    default:
-                        $key = 'ProductBoards';
-                }
-
-                $result[$key] = $this->collProductBoards->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
-            }
-            if (null !== $this->collProductReviews) {
-
-                switch ($keyType) {
-                    case TableMap::TYPE_CAMELNAME:
-                        $key = 'productReviews';
-                        break;
-                    case TableMap::TYPE_FIELDNAME:
-                        $key = 'Product_Reviews';
-                        break;
-                    default:
-                        $key = 'ProductReviews';
-                }
-
-                $result[$key] = $this->collProductReviews->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -1343,18 +1245,6 @@ abstract class User implements ActiveRecordInterface
                 $copyObj->setLoginAttempt($relObj->copy($deepCopy));
             }
 
-            foreach ($this->getProductBoards() as $relObj) {
-                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addProductBoard($relObj->copy($deepCopy));
-                }
-            }
-
-            foreach ($this->getProductReviews() as $relObj) {
-                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addProductReview($relObj->copy($deepCopy));
-                }
-            }
-
         } // if ($deepCopy)
 
         if ($makeNew) {
@@ -1396,12 +1286,6 @@ abstract class User implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
-        if ('ProductBoard' == $relationName) {
-            return $this->initProductBoards();
-        }
-        if ('ProductReview' == $relationName) {
-            return $this->initProductReviews();
-        }
     }
 
     /**
@@ -1441,473 +1325,6 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Clears out the collProductBoards collection
-     *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return void
-     * @see        addProductBoards()
-     */
-    public function clearProductBoards()
-    {
-        $this->collProductBoards = null; // important to set this to NULL since that means it is uninitialized
-    }
-
-    /**
-     * Reset is the collProductBoards collection loaded partially.
-     */
-    public function resetPartialProductBoards($v = true)
-    {
-        $this->collProductBoardsPartial = $v;
-    }
-
-    /**
-     * Initializes the collProductBoards collection.
-     *
-     * By default this just sets the collProductBoards collection to an empty array (like clearcollProductBoards());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @param      boolean $overrideExisting If set to true, the method call initializes
-     *                                        the collection even if it is not empty
-     *
-     * @return void
-     */
-    public function initProductBoards($overrideExisting = true)
-    {
-        if (null !== $this->collProductBoards && !$overrideExisting) {
-            return;
-        }
-        $this->collProductBoards = new ObjectCollection();
-        $this->collProductBoards->setModel('\Splendr\App\Model\ProductBoard');
-    }
-
-    /**
-     * Gets an array of ChildProductBoard objects which contain a foreign key that references this object.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildProductBoard[] List of ChildProductBoard objects
-     * @throws PropelException
-     */
-    public function getProductBoards(Criteria $criteria = null, ConnectionInterface $con = null)
-    {
-        $partial = $this->collProductBoardsPartial && !$this->isNew();
-        if (null === $this->collProductBoards || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collProductBoards) {
-                // return empty collection
-                $this->initProductBoards();
-            } else {
-                $collProductBoards = ChildProductBoardQuery::create(null, $criteria)
-                    ->filterByUser($this)
-                    ->find($con);
-
-                if (null !== $criteria) {
-                    if (false !== $this->collProductBoardsPartial && count($collProductBoards)) {
-                        $this->initProductBoards(false);
-
-                        foreach ($collProductBoards as $obj) {
-                            if (false == $this->collProductBoards->contains($obj)) {
-                                $this->collProductBoards->append($obj);
-                            }
-                        }
-
-                        $this->collProductBoardsPartial = true;
-                    }
-
-                    return $collProductBoards;
-                }
-
-                if ($partial && $this->collProductBoards) {
-                    foreach ($this->collProductBoards as $obj) {
-                        if ($obj->isNew()) {
-                            $collProductBoards[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collProductBoards = $collProductBoards;
-                $this->collProductBoardsPartial = false;
-            }
-        }
-
-        return $this->collProductBoards;
-    }
-
-    /**
-     * Sets a collection of ChildProductBoard objects related by a one-to-many relationship
-     * to the current object.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param      Collection $productBoards A Propel collection.
-     * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function setProductBoards(Collection $productBoards, ConnectionInterface $con = null)
-    {
-        /** @var ChildProductBoard[] $productBoardsToDelete */
-        $productBoardsToDelete = $this->getProductBoards(new Criteria(), $con)->diff($productBoards);
-
-
-        //since at least one column in the foreign key is at the same time a PK
-        //we can not just set a PK to NULL in the lines below. We have to store
-        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
-        $this->productBoardsScheduledForDeletion = clone $productBoardsToDelete;
-
-        foreach ($productBoardsToDelete as $productBoardRemoved) {
-            $productBoardRemoved->setUser(null);
-        }
-
-        $this->collProductBoards = null;
-        foreach ($productBoards as $productBoard) {
-            $this->addProductBoard($productBoard);
-        }
-
-        $this->collProductBoards = $productBoards;
-        $this->collProductBoardsPartial = false;
-
-        return $this;
-    }
-
-    /**
-     * Returns the number of related ProductBoard objects.
-     *
-     * @param      Criteria $criteria
-     * @param      boolean $distinct
-     * @param      ConnectionInterface $con
-     * @return int             Count of related ProductBoard objects.
-     * @throws PropelException
-     */
-    public function countProductBoards(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
-    {
-        $partial = $this->collProductBoardsPartial && !$this->isNew();
-        if (null === $this->collProductBoards || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collProductBoards) {
-                return 0;
-            }
-
-            if ($partial && !$criteria) {
-                return count($this->getProductBoards());
-            }
-
-            $query = ChildProductBoardQuery::create(null, $criteria);
-            if ($distinct) {
-                $query->distinct();
-            }
-
-            return $query
-                ->filterByUser($this)
-                ->count($con);
-        }
-
-        return count($this->collProductBoards);
-    }
-
-    /**
-     * Method called to associate a ChildProductBoard object to this object
-     * through the ChildProductBoard foreign key attribute.
-     *
-     * @param  ChildProductBoard $l ChildProductBoard
-     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
-     */
-    public function addProductBoard(ChildProductBoard $l)
-    {
-        if ($this->collProductBoards === null) {
-            $this->initProductBoards();
-            $this->collProductBoardsPartial = true;
-        }
-
-        if (!$this->collProductBoards->contains($l)) {
-            $this->doAddProductBoard($l);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param ChildProductBoard $productBoard The ChildProductBoard object to add.
-     */
-    protected function doAddProductBoard(ChildProductBoard $productBoard)
-    {
-        $this->collProductBoards[]= $productBoard;
-        $productBoard->setUser($this);
-    }
-
-    /**
-     * @param  ChildProductBoard $productBoard The ChildProductBoard object to remove.
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function removeProductBoard(ChildProductBoard $productBoard)
-    {
-        if ($this->getProductBoards()->contains($productBoard)) {
-            $pos = $this->collProductBoards->search($productBoard);
-            $this->collProductBoards->remove($pos);
-            if (null === $this->productBoardsScheduledForDeletion) {
-                $this->productBoardsScheduledForDeletion = clone $this->collProductBoards;
-                $this->productBoardsScheduledForDeletion->clear();
-            }
-            $this->productBoardsScheduledForDeletion[]= clone $productBoard;
-            $productBoard->setUser(null);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Clears out the collProductReviews collection
-     *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return void
-     * @see        addProductReviews()
-     */
-    public function clearProductReviews()
-    {
-        $this->collProductReviews = null; // important to set this to NULL since that means it is uninitialized
-    }
-
-    /**
-     * Reset is the collProductReviews collection loaded partially.
-     */
-    public function resetPartialProductReviews($v = true)
-    {
-        $this->collProductReviewsPartial = $v;
-    }
-
-    /**
-     * Initializes the collProductReviews collection.
-     *
-     * By default this just sets the collProductReviews collection to an empty array (like clearcollProductReviews());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @param      boolean $overrideExisting If set to true, the method call initializes
-     *                                        the collection even if it is not empty
-     *
-     * @return void
-     */
-    public function initProductReviews($overrideExisting = true)
-    {
-        if (null !== $this->collProductReviews && !$overrideExisting) {
-            return;
-        }
-        $this->collProductReviews = new ObjectCollection();
-        $this->collProductReviews->setModel('\Splendr\App\Model\ProductReview');
-    }
-
-    /**
-     * Gets an array of ChildProductReview objects which contain a foreign key that references this object.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildUser is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildProductReview[] List of ChildProductReview objects
-     * @throws PropelException
-     */
-    public function getProductReviews(Criteria $criteria = null, ConnectionInterface $con = null)
-    {
-        $partial = $this->collProductReviewsPartial && !$this->isNew();
-        if (null === $this->collProductReviews || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collProductReviews) {
-                // return empty collection
-                $this->initProductReviews();
-            } else {
-                $collProductReviews = ChildProductReviewQuery::create(null, $criteria)
-                    ->filterByUser($this)
-                    ->find($con);
-
-                if (null !== $criteria) {
-                    if (false !== $this->collProductReviewsPartial && count($collProductReviews)) {
-                        $this->initProductReviews(false);
-
-                        foreach ($collProductReviews as $obj) {
-                            if (false == $this->collProductReviews->contains($obj)) {
-                                $this->collProductReviews->append($obj);
-                            }
-                        }
-
-                        $this->collProductReviewsPartial = true;
-                    }
-
-                    return $collProductReviews;
-                }
-
-                if ($partial && $this->collProductReviews) {
-                    foreach ($this->collProductReviews as $obj) {
-                        if ($obj->isNew()) {
-                            $collProductReviews[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collProductReviews = $collProductReviews;
-                $this->collProductReviewsPartial = false;
-            }
-        }
-
-        return $this->collProductReviews;
-    }
-
-    /**
-     * Sets a collection of ChildProductReview objects related by a one-to-many relationship
-     * to the current object.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param      Collection $productReviews A Propel collection.
-     * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function setProductReviews(Collection $productReviews, ConnectionInterface $con = null)
-    {
-        /** @var ChildProductReview[] $productReviewsToDelete */
-        $productReviewsToDelete = $this->getProductReviews(new Criteria(), $con)->diff($productReviews);
-
-
-        //since at least one column in the foreign key is at the same time a PK
-        //we can not just set a PK to NULL in the lines below. We have to store
-        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
-        $this->productReviewsScheduledForDeletion = clone $productReviewsToDelete;
-
-        foreach ($productReviewsToDelete as $productReviewRemoved) {
-            $productReviewRemoved->setUser(null);
-        }
-
-        $this->collProductReviews = null;
-        foreach ($productReviews as $productReview) {
-            $this->addProductReview($productReview);
-        }
-
-        $this->collProductReviews = $productReviews;
-        $this->collProductReviewsPartial = false;
-
-        return $this;
-    }
-
-    /**
-     * Returns the number of related ProductReview objects.
-     *
-     * @param      Criteria $criteria
-     * @param      boolean $distinct
-     * @param      ConnectionInterface $con
-     * @return int             Count of related ProductReview objects.
-     * @throws PropelException
-     */
-    public function countProductReviews(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
-    {
-        $partial = $this->collProductReviewsPartial && !$this->isNew();
-        if (null === $this->collProductReviews || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collProductReviews) {
-                return 0;
-            }
-
-            if ($partial && !$criteria) {
-                return count($this->getProductReviews());
-            }
-
-            $query = ChildProductReviewQuery::create(null, $criteria);
-            if ($distinct) {
-                $query->distinct();
-            }
-
-            return $query
-                ->filterByUser($this)
-                ->count($con);
-        }
-
-        return count($this->collProductReviews);
-    }
-
-    /**
-     * Method called to associate a ChildProductReview object to this object
-     * through the ChildProductReview foreign key attribute.
-     *
-     * @param  ChildProductReview $l ChildProductReview
-     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
-     */
-    public function addProductReview(ChildProductReview $l)
-    {
-        if ($this->collProductReviews === null) {
-            $this->initProductReviews();
-            $this->collProductReviewsPartial = true;
-        }
-
-        if (!$this->collProductReviews->contains($l)) {
-            $this->doAddProductReview($l);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param ChildProductReview $productReview The ChildProductReview object to add.
-     */
-    protected function doAddProductReview(ChildProductReview $productReview)
-    {
-        $this->collProductReviews[]= $productReview;
-        $productReview->setUser($this);
-    }
-
-    /**
-     * @param  ChildProductReview $productReview The ChildProductReview object to remove.
-     * @return $this|ChildUser The current object (for fluent API support)
-     */
-    public function removeProductReview(ChildProductReview $productReview)
-    {
-        if ($this->getProductReviews()->contains($productReview)) {
-            $pos = $this->collProductReviews->search($productReview);
-            $this->collProductReviews->remove($pos);
-            if (null === $this->productReviewsScheduledForDeletion) {
-                $this->productReviewsScheduledForDeletion = clone $this->collProductReviews;
-                $this->productReviewsScheduledForDeletion->clear();
-            }
-            $this->productReviewsScheduledForDeletion[]= clone $productReview;
-            $productReview->setUser(null);
-        }
-
-        return $this;
-    }
-
-
-    /**
-     * If this collection has already been initialized with
-     * an identical criteria, it returns the collection.
-     * Otherwise if this User is new, it will return
-     * an empty collection; or if this User has previously
-     * been saved, it will retrieve related ProductReviews from storage.
-     *
-     * This method is protected by default in order to keep the public
-     * api reasonable.  You can provide public methods for those you
-     * actually need in User.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildProductReview[] List of ChildProductReview objects
-     */
-    public function getProductReviewsJoinProduct(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
-    {
-        $query = ChildProductReviewQuery::create(null, $criteria);
-        $query->joinWith('Product', $joinBehavior);
-
-        return $this->getProductReviews($query, $con);
-    }
-
-    /**
      * Clears the current object, sets all attributes to their default values and removes
      * outgoing references as well as back-references (from other objects to this one. Results probably in a database
      * change of those foreign objects when you call `save` there).
@@ -1941,21 +1358,9 @@ abstract class User implements ActiveRecordInterface
             if ($this->singleLoginAttempt) {
                 $this->singleLoginAttempt->clearAllReferences($deep);
             }
-            if ($this->collProductBoards) {
-                foreach ($this->collProductBoards as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
-            if ($this->collProductReviews) {
-                foreach ($this->collProductReviews as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
         } // if ($deep)
 
         $this->singleLoginAttempt = null;
-        $this->collProductBoards = null;
-        $this->collProductReviews = null;
     }
 
     /**
@@ -2029,24 +1434,6 @@ abstract class User implements ActiveRecordInterface
                 $failureMap->addAll($retval);
             }
 
-            if (null !== $this->collProductBoards) {
-                foreach ($this->collProductBoards as $referrerFK) {
-                    if (method_exists($referrerFK, 'validate')) {
-                        if (!$referrerFK->validate($validator)) {
-                            $failureMap->addAll($referrerFK->getValidationFailures());
-                        }
-                    }
-                }
-            }
-            if (null !== $this->collProductReviews) {
-                foreach ($this->collProductReviews as $referrerFK) {
-                    if (method_exists($referrerFK, 'validate')) {
-                        if (!$referrerFK->validate($validator)) {
-                            $failureMap->addAll($referrerFK->getValidationFailures());
-                        }
-                    }
-                }
-            }
 
             $this->alreadyInValidation = false;
         }

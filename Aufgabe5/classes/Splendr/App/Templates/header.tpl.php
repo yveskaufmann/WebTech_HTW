@@ -40,9 +40,22 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="nav navbar-nav">
-                    <li><a href="<?= URL::getControllerURL('product', 'index') ?>">Product Board</a></li>
-                    <li><a href="<?= URL::getControllerURL('product', 'add') ?>">Add Product</a></li>
-                    <li><a href="<?= URL::getControllerURL('boards', 'add') ?>">Add Product Board</a></li>
+                    <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>Product</b> <span class="caret"></span></a>
+                        <ul id="product-dp" class="dropdown-menu">
+                        <li><a href="<?= URL::getControllerURL('product', 'index') ?>">Show all</a></li>
+                        <li><a href="<?= URL::getControllerURL('product', 'add') ?>">Add</a></li>
+                        </ul>
+                    </li>
+                    <? if (Login::isCurrentUserLoggedIn()): ?>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>ProductBoards</b> <span class="caret"></span></a>
+                        <ul id="board-dp" class="dropdown-menu">
+                            <li><a href="<?= URL::getControllerURL('board', 'index') ?>">Show all</a></li>
+                            <li><a href="<?= URL::getControllerURL('board', 'add') ?>">Add</a></li>
+                        </ul>
+                    </li>
+                    <? endif; ?>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown">

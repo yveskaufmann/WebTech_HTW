@@ -59,7 +59,7 @@ class ProductTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 5;
+    const NUM_COLUMNS = 6;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class ProductTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 5;
+    const NUM_HYDRATE_COLUMNS = 6;
 
     /**
      * the column name for the id field
@@ -97,6 +97,11 @@ class ProductTableMap extends TableMap
     const COL_PRODUCT_URL = 'Product.product_url';
 
     /**
+     * the column name for the board field
+     */
+    const COL_BOARD = 'Product.board';
+
+    /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -108,11 +113,11 @@ class ProductTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('Id', 'Name', 'Price', 'ImageUrl', 'ProductUrl', ),
-        self::TYPE_CAMELNAME     => array('id', 'name', 'price', 'imageUrl', 'productUrl', ),
-        self::TYPE_COLNAME       => array(ProductTableMap::COL_ID, ProductTableMap::COL_NAME, ProductTableMap::COL_PRICE, ProductTableMap::COL_IMAGE_URL, ProductTableMap::COL_PRODUCT_URL, ),
-        self::TYPE_FIELDNAME     => array('id', 'name', 'price', 'image_url', 'product_url', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
+        self::TYPE_PHPNAME       => array('Id', 'Name', 'Price', 'ImageUrl', 'ProductUrl', 'Board', ),
+        self::TYPE_CAMELNAME     => array('id', 'name', 'price', 'imageUrl', 'productUrl', 'board', ),
+        self::TYPE_COLNAME       => array(ProductTableMap::COL_ID, ProductTableMap::COL_NAME, ProductTableMap::COL_PRICE, ProductTableMap::COL_IMAGE_URL, ProductTableMap::COL_PRODUCT_URL, ProductTableMap::COL_BOARD, ),
+        self::TYPE_FIELDNAME     => array('id', 'name', 'price', 'image_url', 'product_url', 'board', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -122,11 +127,11 @@ class ProductTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('Id' => 0, 'Name' => 1, 'Price' => 2, 'ImageUrl' => 3, 'ProductUrl' => 4, ),
-        self::TYPE_CAMELNAME     => array('id' => 0, 'name' => 1, 'price' => 2, 'imageUrl' => 3, 'productUrl' => 4, ),
-        self::TYPE_COLNAME       => array(ProductTableMap::COL_ID => 0, ProductTableMap::COL_NAME => 1, ProductTableMap::COL_PRICE => 2, ProductTableMap::COL_IMAGE_URL => 3, ProductTableMap::COL_PRODUCT_URL => 4, ),
-        self::TYPE_FIELDNAME     => array('id' => 0, 'name' => 1, 'price' => 2, 'image_url' => 3, 'product_url' => 4, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
+        self::TYPE_PHPNAME       => array('Id' => 0, 'Name' => 1, 'Price' => 2, 'ImageUrl' => 3, 'ProductUrl' => 4, 'Board' => 5, ),
+        self::TYPE_CAMELNAME     => array('id' => 0, 'name' => 1, 'price' => 2, 'imageUrl' => 3, 'productUrl' => 4, 'board' => 5, ),
+        self::TYPE_COLNAME       => array(ProductTableMap::COL_ID => 0, ProductTableMap::COL_NAME => 1, ProductTableMap::COL_PRICE => 2, ProductTableMap::COL_IMAGE_URL => 3, ProductTableMap::COL_PRODUCT_URL => 4, ProductTableMap::COL_BOARD => 5, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'name' => 1, 'price' => 2, 'image_url' => 3, 'product_url' => 4, 'board' => 5, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -151,6 +156,7 @@ class ProductTableMap extends TableMap
         $this->addColumn('price', 'Price', 'NUMERIC', true, 10, null);
         $this->addColumn('image_url', 'ImageUrl', 'VARCHAR', true, 255, null);
         $this->addColumn('product_url', 'ProductUrl', 'LONGVARCHAR', true, null, null);
+        $this->addForeignKey('board', 'Board', 'INTEGER', 'ProductBoard', 'id', false, null, null);
     } // initialize()
 
     /**
@@ -158,13 +164,13 @@ class ProductTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('ProductReview', '\\Splendr\\App\\Model\\ProductReview', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('ProductBoard', '\\Splendr\\App\\Model\\ProductBoard', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
-    0 => ':product_id',
+    0 => ':board',
     1 => ':id',
   ),
-), null, null, 'ProductReviews', false);
+), null, null, null, false);
     } // buildRelations()
 
     /**
@@ -326,12 +332,14 @@ class ProductTableMap extends TableMap
             $criteria->addSelectColumn(ProductTableMap::COL_PRICE);
             $criteria->addSelectColumn(ProductTableMap::COL_IMAGE_URL);
             $criteria->addSelectColumn(ProductTableMap::COL_PRODUCT_URL);
+            $criteria->addSelectColumn(ProductTableMap::COL_BOARD);
         } else {
             $criteria->addSelectColumn($alias . '.id');
             $criteria->addSelectColumn($alias . '.name');
             $criteria->addSelectColumn($alias . '.price');
             $criteria->addSelectColumn($alias . '.image_url');
             $criteria->addSelectColumn($alias . '.product_url');
+            $criteria->addSelectColumn($alias . '.board');
         }
     }
 

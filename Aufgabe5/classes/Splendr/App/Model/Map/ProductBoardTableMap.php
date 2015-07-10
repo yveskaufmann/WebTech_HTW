@@ -59,7 +59,7 @@ class ProductBoardTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 4;
+    const NUM_COLUMNS = 3;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class ProductBoardTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 4;
+    const NUM_HYDRATE_COLUMNS = 3;
 
     /**
      * the column name for the id field
@@ -87,11 +87,6 @@ class ProductBoardTableMap extends TableMap
     const COL_IMAGE_URL = 'ProductBoard.image_url';
 
     /**
-     * the column name for the user_id field
-     */
-    const COL_USER_ID = 'ProductBoard.user_id';
-
-    /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -103,11 +98,11 @@ class ProductBoardTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('Id', 'Name', 'ImageUrl', 'UserId', ),
-        self::TYPE_CAMELNAME     => array('id', 'name', 'imageUrl', 'userId', ),
-        self::TYPE_COLNAME       => array(ProductBoardTableMap::COL_ID, ProductBoardTableMap::COL_NAME, ProductBoardTableMap::COL_IMAGE_URL, ProductBoardTableMap::COL_USER_ID, ),
-        self::TYPE_FIELDNAME     => array('id', 'name', 'image_url', 'user_id', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, )
+        self::TYPE_PHPNAME       => array('Id', 'Name', 'ImageUrl', ),
+        self::TYPE_CAMELNAME     => array('id', 'name', 'imageUrl', ),
+        self::TYPE_COLNAME       => array(ProductBoardTableMap::COL_ID, ProductBoardTableMap::COL_NAME, ProductBoardTableMap::COL_IMAGE_URL, ),
+        self::TYPE_FIELDNAME     => array('id', 'name', 'image_url', ),
+        self::TYPE_NUM           => array(0, 1, 2, )
     );
 
     /**
@@ -117,11 +112,11 @@ class ProductBoardTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('Id' => 0, 'Name' => 1, 'ImageUrl' => 2, 'UserId' => 3, ),
-        self::TYPE_CAMELNAME     => array('id' => 0, 'name' => 1, 'imageUrl' => 2, 'userId' => 3, ),
-        self::TYPE_COLNAME       => array(ProductBoardTableMap::COL_ID => 0, ProductBoardTableMap::COL_NAME => 1, ProductBoardTableMap::COL_IMAGE_URL => 2, ProductBoardTableMap::COL_USER_ID => 3, ),
-        self::TYPE_FIELDNAME     => array('id' => 0, 'name' => 1, 'image_url' => 2, 'user_id' => 3, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, )
+        self::TYPE_PHPNAME       => array('Id' => 0, 'Name' => 1, 'ImageUrl' => 2, ),
+        self::TYPE_CAMELNAME     => array('id' => 0, 'name' => 1, 'imageUrl' => 2, ),
+        self::TYPE_COLNAME       => array(ProductBoardTableMap::COL_ID => 0, ProductBoardTableMap::COL_NAME => 1, ProductBoardTableMap::COL_IMAGE_URL => 2, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'name' => 1, 'image_url' => 2, ),
+        self::TYPE_NUM           => array(0, 1, 2, )
     );
 
     /**
@@ -144,7 +139,6 @@ class ProductBoardTableMap extends TableMap
         $this->addPrimaryKey('id', 'Id', 'INTEGER', true, null, null);
         $this->addColumn('name', 'Name', 'VARCHAR', true, 255, null);
         $this->addColumn('image_url', 'ImageUrl', 'LONGVARCHAR', true, null, null);
-        $this->addForeignPrimaryKey('user_id', 'UserId', 'INTEGER' , 'User', 'id', true, null, null);
     } // initialize()
 
     /**
@@ -152,67 +146,27 @@ class ProductBoardTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('User', '\\Splendr\\App\\Model\\User', RelationMap::MANY_TO_ONE, array (
+        $this->addRelation('Product', '\\Splendr\\App\\Model\\Product', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
-    0 => ':user_id',
+    0 => ':board',
     1 => ':id',
   ),
-), null, null, null, false);
+), null, null, 'Products', false);
     } // buildRelations()
 
     /**
-     * Adds an object to the instance pool.
      *
-     * Propel keeps cached copies of objects in an instance pool when they are retrieved
-     * from the database. In some cases you may need to explicitly add objects
-     * to the cache in order to ensure that the same objects are always returned by find*()
-     * and findPk*() calls.
+     * Gets the list of behaviors registered for this table
      *
-     * @param \Splendr\App\Model\ProductBoard $obj A \Splendr\App\Model\ProductBoard object.
-     * @param string $key             (optional) key to use for instance map (for performance boost if key was already calculated externally).
+     * @return array Associative array (name => parameters) of behaviors
      */
-    public static function addInstanceToPool($obj, $key = null)
+    public function getBehaviors()
     {
-        if (Propel::isInstancePoolingEnabled()) {
-            if (null === $key) {
-                $key = serialize(array((string) $obj->getId(), (string) $obj->getUserId()));
-            } // if key === null
-            self::$instances[$key] = $obj;
-        }
-    }
-
-    /**
-     * Removes an object from the instance pool.
-     *
-     * Propel keeps cached copies of objects in an instance pool when they are retrieved
-     * from the database.  In some cases -- especially when you override doDelete
-     * methods in your stub classes -- you may need to explicitly remove objects
-     * from the cache in order to prevent returning objects that no longer exist.
-     *
-     * @param mixed $value A \Splendr\App\Model\ProductBoard object or a primary key value.
-     */
-    public static function removeInstanceFromPool($value)
-    {
-        if (Propel::isInstancePoolingEnabled() && null !== $value) {
-            if (is_object($value) && $value instanceof \Splendr\App\Model\ProductBoard) {
-                $key = serialize(array((string) $value->getId(), (string) $value->getUserId()));
-
-            } elseif (is_array($value) && count($value) === 2) {
-                // assume we've been passed a primary key";
-                $key = serialize(array((string) $value[0], (string) $value[1]));
-            } elseif ($value instanceof Criteria) {
-                self::$instances = [];
-
-                return;
-            } else {
-                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or \Splendr\App\Model\ProductBoard object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value, true)));
-                throw $e;
-            }
-
-            unset(self::$instances[$key]);
-        }
-    }
+        return array(
+            'validate' => array('name_limit' => array ('column' => 'name','validator' => 'Length','options' => array ('max' => 255,),), 'name_required' => array ('column' => 'name','validator' => 'NotBlank',), 'name_is_string' => array ('column' => 'name','validator' => 'Type','options' => array ('type' => 'string',),), 'name_is_unique' => array ('column' => 'name','validator' => 'Unique',), 'image_url_limit' => array ('column' => 'image_url','validator' => 'Length','options' => array ('max' => 255,),), 'image_url_is_url' => array ('column' => 'image_url','validator' => 'Url',), 'image_url_is_required' => array ('column' => 'image_url','validator' => 'NotBlank',), ),
+        );
+    } // getBehaviors()
 
     /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.
@@ -230,11 +184,11 @@ class ProductBoardTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 3 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return serialize(array((string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)], (string) $row[TableMap::TYPE_NUM == $indexType ? 3 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]));
+        return (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
     }
 
     /**
@@ -251,20 +205,11 @@ class ProductBoardTableMap extends TableMap
      */
     public static function getPrimaryKeyFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-            $pks = [];
-
-        $pks[] = (int) $row[
+        return (int) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 0 + $offset
                 : self::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)
         ];
-        $pks[] = (int) $row[
-            $indexType == TableMap::TYPE_NUM
-                ? 3 + $offset
-                : self::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)
-        ];
-
-        return $pks;
     }
 
     /**
@@ -367,12 +312,10 @@ class ProductBoardTableMap extends TableMap
             $criteria->addSelectColumn(ProductBoardTableMap::COL_ID);
             $criteria->addSelectColumn(ProductBoardTableMap::COL_NAME);
             $criteria->addSelectColumn(ProductBoardTableMap::COL_IMAGE_URL);
-            $criteria->addSelectColumn(ProductBoardTableMap::COL_USER_ID);
         } else {
             $criteria->addSelectColumn($alias . '.id');
             $criteria->addSelectColumn($alias . '.name');
             $criteria->addSelectColumn($alias . '.image_url');
-            $criteria->addSelectColumn($alias . '.user_id');
         }
     }
 
@@ -424,17 +367,7 @@ class ProductBoardTableMap extends TableMap
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
             $criteria = new Criteria(ProductBoardTableMap::DATABASE_NAME);
-            // primary key is composite; we therefore, expect
-            // the primary key passed to be an array of pkey values
-            if (count($values) == count($values, COUNT_RECURSIVE)) {
-                // array is not multi-dimensional
-                $values = array($values);
-            }
-            foreach ($values as $value) {
-                $criterion = $criteria->getNewCriterion(ProductBoardTableMap::COL_ID, $value[0]);
-                $criterion->addAnd($criteria->getNewCriterion(ProductBoardTableMap::COL_USER_ID, $value[1]));
-                $criteria->addOr($criterion);
-            }
+            $criteria->add(ProductBoardTableMap::COL_ID, (array) $values, Criteria::IN);
         }
 
         $query = ProductBoardQuery::create()->mergeWith($criteria);

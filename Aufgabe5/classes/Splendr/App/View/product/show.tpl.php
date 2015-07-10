@@ -11,7 +11,7 @@
             <img height="240" src="<?= $product->getImageUrl() ?>" alt="<?= 'image of '.$product->getName() ?>">
         </a>
         <div class="caption">
-            <h4 class="pull-right">$<?= $product->getPrice() ?></h4>
+            <h4 class="pull-right">EUR <?= $product->getPrice() ?></h4>
             <h4><a href="<?= $product->getProductUrl() ?>"><?= $product->getName() ?></a></h4>
         </div>
         <div class="text-right">

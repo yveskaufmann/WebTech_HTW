@@ -9,7 +9,6 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Collection;
-use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\LogicException;
@@ -17,10 +16,9 @@ use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
 use Propel\Runtime\Validator\Constraints\Unique;
-use Splendr\App\Model\Product as ChildProduct;
+use Splendr\App\Model\ProductBoard as ChildProductBoard;
+use Splendr\App\Model\ProductBoardQuery as ChildProductBoardQuery;
 use Splendr\App\Model\ProductQuery as ChildProductQuery;
-use Splendr\App\Model\ProductReview as ChildProductReview;
-use Splendr\App\Model\ProductReviewQuery as ChildProductReviewQuery;
 use Splendr\App\Model\Map\ProductTableMap;
 use Symfony\Component\Validator\ConstraintValidatorFactory;
 use Symfony\Component\Validator\ConstraintViolationList;
@@ -109,10 +107,15 @@ abstract class Product implements ActiveRecordInterface
     protected $product_url;
 
     /**
-     * @var        ObjectCollection|ChildProductReview[] Collection to store aggregation of ChildProductReview objects.
+     * The value for the board field.
+     * @var        int
      */
-    protected $collProductReviews;
-    protected $collProductReviewsPartial;
+    protected $board;
+
+    /**
+     * @var        ChildProductBoard
+     */
+    protected $aProductBoard;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -138,12 +141,6 @@ abstract class Product implements ActiveRecordInterface
      * @var     ConstraintViolationList
      */
     protected $validationFailures;
-
-    /**
-     * An array of objects scheduled for deletion.
-     * @var ObjectCollection|ChildProductReview[]
-     */
-    protected $productReviewsScheduledForDeletion = null;
 
     /**
      * Initializes internal state of Splendr\App\Model\Base\Product object.
@@ -413,6 +410,16 @@ abstract class Product implements ActiveRecordInterface
     }
 
     /**
+     * Get the [board] column value.
+     *
+     * @return int
+     */
+    public function getBoard()
+    {
+        return $this->board;
+    }
+
+    /**
      * Set the value of [id] column.
      *
      * @param int $v new value
@@ -513,6 +520,30 @@ abstract class Product implements ActiveRecordInterface
     } // setProductUrl()
 
     /**
+     * Set the value of [board] column.
+     *
+     * @param int $v new value
+     * @return $this|\Splendr\App\Model\Product The current object (for fluent API support)
+     */
+    public function setBoard($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->board !== $v) {
+            $this->board = $v;
+            $this->modifiedColumns[ProductTableMap::COL_BOARD] = true;
+        }
+
+        if ($this->aProductBoard !== null && $this->aProductBoard->getId() !== $v) {
+            $this->aProductBoard = null;
+        }
+
+        return $this;
+    } // setBoard()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -562,6 +593,9 @@ abstract class Product implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : ProductTableMap::translateFieldName('ProductUrl', TableMap::TYPE_PHPNAME, $indexType)];
             $this->product_url = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : ProductTableMap::translateFieldName('Board', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->board = (null !== $col) ? (int) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -570,7 +604,7 @@ abstract class Product implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 5; // 5 = ProductTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 6; // 6 = ProductTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\Splendr\\App\\Model\\Product'), 0, $e);
@@ -592,6 +626,9 @@ abstract class Product implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
+        if ($this->aProductBoard !== null && $this->board !== $this->aProductBoard->getId()) {
+            $this->aProductBoard = null;
+        }
     } // ensureConsistency
 
     /**
@@ -631,8 +668,7 @@ abstract class Product implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->collProductReviews = null;
-
+            $this->aProductBoard = null;
         } // if (deep)
     }
 
@@ -732,6 +768,18 @@ abstract class Product implements ActiveRecordInterface
         if (!$this->alreadyInSave) {
             $this->alreadyInSave = true;
 
+            // We call the save method on the following object(s) if they
+            // were passed to this object by their corresponding set
+            // method.  This object relates to these object(s) by a
+            // foreign key reference.
+
+            if ($this->aProductBoard !== null) {
+                if ($this->aProductBoard->isModified() || $this->aProductBoard->isNew()) {
+                    $affectedRows += $this->aProductBoard->save($con);
+                }
+                $this->setProductBoard($this->aProductBoard);
+            }
+
             if ($this->isNew() || $this->isModified()) {
                 // persist changes
                 if ($this->isNew()) {
@@ -741,23 +789,6 @@ abstract class Product implements ActiveRecordInterface
                     $affectedRows += $this->doUpdate($con);
                 }
                 $this->resetModified();
-            }
-
-            if ($this->productReviewsScheduledForDeletion !== null) {
-                if (!$this->productReviewsScheduledForDeletion->isEmpty()) {
-                    \Splendr\App\Model\ProductReviewQuery::create()
-                        ->filterByPrimaryKeys($this->productReviewsScheduledForDeletion->getPrimaryKeys(false))
-                        ->delete($con);
-                    $this->productReviewsScheduledForDeletion = null;
-                }
-            }
-
-            if ($this->collProductReviews !== null) {
-                foreach ($this->collProductReviews as $referrerFK) {
-                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
-                        $affectedRows += $referrerFK->save($con);
-                    }
-                }
             }
 
             $this->alreadyInSave = false;
@@ -801,6 +832,9 @@ abstract class Product implements ActiveRecordInterface
         if ($this->isColumnModified(ProductTableMap::COL_PRODUCT_URL)) {
             $modifiedColumns[':p' . $index++]  = 'product_url';
         }
+        if ($this->isColumnModified(ProductTableMap::COL_BOARD)) {
+            $modifiedColumns[':p' . $index++]  = 'board';
+        }
 
         $sql = sprintf(
             'INSERT INTO Product (%s) VALUES (%s)',
@@ -826,6 +860,9 @@ abstract class Product implements ActiveRecordInterface
                         break;
                     case 'product_url':
                         $stmt->bindValue($identifier, $this->product_url, PDO::PARAM_STR);
+                        break;
+                    case 'board':
+                        $stmt->bindValue($identifier, $this->board, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -904,6 +941,9 @@ abstract class Product implements ActiveRecordInterface
             case 4:
                 return $this->getProductUrl();
                 break;
+            case 5:
+                return $this->getBoard();
+                break;
             default:
                 return null;
                 break;
@@ -939,6 +979,7 @@ abstract class Product implements ActiveRecordInterface
             $keys[2] => $this->getPrice(),
             $keys[3] => $this->getImageUrl(),
             $keys[4] => $this->getProductUrl(),
+            $keys[5] => $this->getBoard(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -946,20 +987,20 @@ abstract class Product implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->collProductReviews) {
+            if (null !== $this->aProductBoard) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'productReviews';
+                        $key = 'productBoard';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'Product_Reviews';
+                        $key = 'ProductBoard';
                         break;
                     default:
-                        $key = 'ProductReviews';
+                        $key = 'ProductBoard';
                 }
 
-                $result[$key] = $this->collProductReviews->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+                $result[$key] = $this->aProductBoard->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
         }
 
@@ -1010,6 +1051,9 @@ abstract class Product implements ActiveRecordInterface
             case 4:
                 $this->setProductUrl($value);
                 break;
+            case 5:
+                $this->setBoard($value);
+                break;
         } // switch()
 
         return $this;
@@ -1050,6 +1094,9 @@ abstract class Product implements ActiveRecordInterface
         }
         if (array_key_exists($keys[4], $arr)) {
             $this->setProductUrl($arr[$keys[4]]);
+        }
+        if (array_key_exists($keys[5], $arr)) {
+            $this->setBoard($arr[$keys[5]]);
         }
     }
 
@@ -1106,6 +1153,9 @@ abstract class Product implements ActiveRecordInterface
         }
         if ($this->isColumnModified(ProductTableMap::COL_PRODUCT_URL)) {
             $criteria->add(ProductTableMap::COL_PRODUCT_URL, $this->product_url);
+        }
+        if ($this->isColumnModified(ProductTableMap::COL_BOARD)) {
+            $criteria->add(ProductTableMap::COL_BOARD, $this->board);
         }
 
         return $criteria;
@@ -1197,20 +1247,7 @@ abstract class Product implements ActiveRecordInterface
         $copyObj->setPrice($this->getPrice());
         $copyObj->setImageUrl($this->getImageUrl());
         $copyObj->setProductUrl($this->getProductUrl());
-
-        if ($deepCopy) {
-            // important: temporarily setNew(false) because this affects the behavior of
-            // the getter/setter methods for fkey referrer objects.
-            $copyObj->setNew(false);
-
-            foreach ($this->getProductReviews() as $relObj) {
-                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
-                    $copyObj->addProductReview($relObj->copy($deepCopy));
-                }
-            }
-
-        } // if ($deepCopy)
-
+        $copyObj->setBoard($this->getBoard());
         if ($makeNew) {
             $copyObj->setNew(true);
             $copyObj->setId(NULL); // this is a auto-increment column, so set to default value
@@ -1239,266 +1276,55 @@ abstract class Product implements ActiveRecordInterface
         return $copyObj;
     }
 
-
     /**
-     * Initializes a collection based on the name of a relation.
-     * Avoids crafting an 'init[$relationName]s' method name
-     * that wouldn't work when StandardEnglishPluralizer is used.
+     * Declares an association between this object and a ChildProductBoard object.
      *
-     * @param      string $relationName The name of the relation to initialize
-     * @return void
-     */
-    public function initRelation($relationName)
-    {
-        if ('ProductReview' == $relationName) {
-            return $this->initProductReviews();
-        }
-    }
-
-    /**
-     * Clears out the collProductReviews collection
-     *
-     * This does not modify the database; however, it will remove any associated objects, causing
-     * them to be refetched by subsequent calls to accessor method.
-     *
-     * @return void
-     * @see        addProductReviews()
-     */
-    public function clearProductReviews()
-    {
-        $this->collProductReviews = null; // important to set this to NULL since that means it is uninitialized
-    }
-
-    /**
-     * Reset is the collProductReviews collection loaded partially.
-     */
-    public function resetPartialProductReviews($v = true)
-    {
-        $this->collProductReviewsPartial = $v;
-    }
-
-    /**
-     * Initializes the collProductReviews collection.
-     *
-     * By default this just sets the collProductReviews collection to an empty array (like clearcollProductReviews());
-     * however, you may wish to override this method in your stub class to provide setting appropriate
-     * to your application -- for example, setting the initial array to the values stored in database.
-     *
-     * @param      boolean $overrideExisting If set to true, the method call initializes
-     *                                        the collection even if it is not empty
-     *
-     * @return void
-     */
-    public function initProductReviews($overrideExisting = true)
-    {
-        if (null !== $this->collProductReviews && !$overrideExisting) {
-            return;
-        }
-        $this->collProductReviews = new ObjectCollection();
-        $this->collProductReviews->setModel('\Splendr\App\Model\ProductReview');
-    }
-
-    /**
-     * Gets an array of ChildProductReview objects which contain a foreign key that references this object.
-     *
-     * If the $criteria is not null, it is used to always fetch the results from the database.
-     * Otherwise the results are fetched from the database the first time, then cached.
-     * Next time the same method is called without $criteria, the cached collection is returned.
-     * If this ChildProduct is new, it will return
-     * an empty collection or the current collection; the criteria is ignored on a new object.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @return ObjectCollection|ChildProductReview[] List of ChildProductReview objects
-     * @throws PropelException
-     */
-    public function getProductReviews(Criteria $criteria = null, ConnectionInterface $con = null)
-    {
-        $partial = $this->collProductReviewsPartial && !$this->isNew();
-        if (null === $this->collProductReviews || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collProductReviews) {
-                // return empty collection
-                $this->initProductReviews();
-            } else {
-                $collProductReviews = ChildProductReviewQuery::create(null, $criteria)
-                    ->filterByProduct($this)
-                    ->find($con);
-
-                if (null !== $criteria) {
-                    if (false !== $this->collProductReviewsPartial && count($collProductReviews)) {
-                        $this->initProductReviews(false);
-
-                        foreach ($collProductReviews as $obj) {
-                            if (false == $this->collProductReviews->contains($obj)) {
-                                $this->collProductReviews->append($obj);
-                            }
-                        }
-
-                        $this->collProductReviewsPartial = true;
-                    }
-
-                    return $collProductReviews;
-                }
-
-                if ($partial && $this->collProductReviews) {
-                    foreach ($this->collProductReviews as $obj) {
-                        if ($obj->isNew()) {
-                            $collProductReviews[] = $obj;
-                        }
-                    }
-                }
-
-                $this->collProductReviews = $collProductReviews;
-                $this->collProductReviewsPartial = false;
-            }
-        }
-
-        return $this->collProductReviews;
-    }
-
-    /**
-     * Sets a collection of ChildProductReview objects related by a one-to-many relationship
-     * to the current object.
-     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
-     * and new objects from the given Propel collection.
-     *
-     * @param      Collection $productReviews A Propel collection.
-     * @param      ConnectionInterface $con Optional connection object
-     * @return $this|ChildProduct The current object (for fluent API support)
-     */
-    public function setProductReviews(Collection $productReviews, ConnectionInterface $con = null)
-    {
-        /** @var ChildProductReview[] $productReviewsToDelete */
-        $productReviewsToDelete = $this->getProductReviews(new Criteria(), $con)->diff($productReviews);
-
-
-        //since at least one column in the foreign key is at the same time a PK
-        //we can not just set a PK to NULL in the lines below. We have to store
-        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
-        $this->productReviewsScheduledForDeletion = clone $productReviewsToDelete;
-
-        foreach ($productReviewsToDelete as $productReviewRemoved) {
-            $productReviewRemoved->setProduct(null);
-        }
-
-        $this->collProductReviews = null;
-        foreach ($productReviews as $productReview) {
-            $this->addProductReview($productReview);
-        }
-
-        $this->collProductReviews = $productReviews;
-        $this->collProductReviewsPartial = false;
-
-        return $this;
-    }
-
-    /**
-     * Returns the number of related ProductReview objects.
-     *
-     * @param      Criteria $criteria
-     * @param      boolean $distinct
-     * @param      ConnectionInterface $con
-     * @return int             Count of related ProductReview objects.
-     * @throws PropelException
-     */
-    public function countProductReviews(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
-    {
-        $partial = $this->collProductReviewsPartial && !$this->isNew();
-        if (null === $this->collProductReviews || null !== $criteria || $partial) {
-            if ($this->isNew() && null === $this->collProductReviews) {
-                return 0;
-            }
-
-            if ($partial && !$criteria) {
-                return count($this->getProductReviews());
-            }
-
-            $query = ChildProductReviewQuery::create(null, $criteria);
-            if ($distinct) {
-                $query->distinct();
-            }
-
-            return $query
-                ->filterByProduct($this)
-                ->count($con);
-        }
-
-        return count($this->collProductReviews);
-    }
-
-    /**
-     * Method called to associate a ChildProductReview object to this object
-     * through the ChildProductReview foreign key attribute.
-     *
-     * @param  ChildProductReview $l ChildProductReview
+     * @param  ChildProductBoard $v
      * @return $this|\Splendr\App\Model\Product The current object (for fluent API support)
+     * @throws PropelException
      */
-    public function addProductReview(ChildProductReview $l)
+    public function setProductBoard(ChildProductBoard $v = null)
     {
-        if ($this->collProductReviews === null) {
-            $this->initProductReviews();
-            $this->collProductReviewsPartial = true;
+        if ($v === null) {
+            $this->setBoard(NULL);
+        } else {
+            $this->setBoard($v->getId());
         }
 
-        if (!$this->collProductReviews->contains($l)) {
-            $this->doAddProductReview($l);
+        $this->aProductBoard = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildProductBoard object, it will not be re-added.
+        if ($v !== null) {
+            $v->addProduct($this);
         }
 
-        return $this;
-    }
-
-    /**
-     * @param ChildProductReview $productReview The ChildProductReview object to add.
-     */
-    protected function doAddProductReview(ChildProductReview $productReview)
-    {
-        $this->collProductReviews[]= $productReview;
-        $productReview->setProduct($this);
-    }
-
-    /**
-     * @param  ChildProductReview $productReview The ChildProductReview object to remove.
-     * @return $this|ChildProduct The current object (for fluent API support)
-     */
-    public function removeProductReview(ChildProductReview $productReview)
-    {
-        if ($this->getProductReviews()->contains($productReview)) {
-            $pos = $this->collProductReviews->search($productReview);
-            $this->collProductReviews->remove($pos);
-            if (null === $this->productReviewsScheduledForDeletion) {
-                $this->productReviewsScheduledForDeletion = clone $this->collProductReviews;
-                $this->productReviewsScheduledForDeletion->clear();
-            }
-            $this->productReviewsScheduledForDeletion[]= clone $productReview;
-            $productReview->setProduct(null);
-        }
 
         return $this;
     }
 
 
     /**
-     * If this collection has already been initialized with
-     * an identical criteria, it returns the collection.
-     * Otherwise if this Product is new, it will return
-     * an empty collection; or if this Product has previously
-     * been saved, it will retrieve related ProductReviews from storage.
+     * Get the associated ChildProductBoard object
      *
-     * This method is protected by default in order to keep the public
-     * api reasonable.  You can provide public methods for those you
-     * actually need in Product.
-     *
-     * @param      Criteria $criteria optional Criteria object to narrow the query
-     * @param      ConnectionInterface $con optional connection object
-     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
-     * @return ObjectCollection|ChildProductReview[] List of ChildProductReview objects
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildProductBoard The associated ChildProductBoard object.
+     * @throws PropelException
      */
-    public function getProductReviewsJoinUser(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    public function getProductBoard(ConnectionInterface $con = null)
     {
-        $query = ChildProductReviewQuery::create(null, $criteria);
-        $query->joinWith('User', $joinBehavior);
+        if ($this->aProductBoard === null && ($this->board !== null)) {
+            $this->aProductBoard = ChildProductBoardQuery::create()->findPk($this->board, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aProductBoard->addProducts($this);
+             */
+        }
 
-        return $this->getProductReviews($query, $con);
+        return $this->aProductBoard;
     }
 
     /**
@@ -1508,11 +1334,15 @@ abstract class Product implements ActiveRecordInterface
      */
     public function clear()
     {
+        if (null !== $this->aProductBoard) {
+            $this->aProductBoard->removeProduct($this);
+        }
         $this->id = null;
         $this->name = null;
         $this->price = null;
         $this->image_url = null;
         $this->product_url = null;
+        $this->board = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1531,14 +1361,9 @@ abstract class Product implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
-            if ($this->collProductReviews) {
-                foreach ($this->collProductReviews as $o) {
-                    $o->clearAllReferences($deep);
-                }
-            }
         } // if ($deep)
 
-        $this->collProductReviews = null;
+        $this->aProductBoard = null;
     }
 
     /**
@@ -1605,21 +1430,23 @@ abstract class Product implements ActiveRecordInterface
             $this->alreadyInValidation = true;
             $retval = null;
 
+            // We call the validate method on the following object(s) if they
+            // were passed to this object by their corresponding set
+            // method.  This object relates to these object(s) by a
+            // foreign key reference.
+
+            // If validate() method exists, the validate-behavior is configured for related object
+            if (method_exists($this->aProductBoard, 'validate')) {
+                if (!$this->aProductBoard->validate($validator)) {
+                    $failureMap->addAll($this->aProductBoard->getValidationFailures());
+                }
+            }
 
             $retval = $validator->validate($this);
             if (count($retval) > 0) {
                 $failureMap->addAll($retval);
             }
 
-            if (null !== $this->collProductReviews) {
-                foreach ($this->collProductReviews as $referrerFK) {
-                    if (method_exists($referrerFK, 'validate')) {
-                        if (!$referrerFK->validate($validator)) {
-                            $failureMap->addAll($referrerFK->getValidationFailures());
-                        }
-                    }
-                }
-            }
 
             $this->alreadyInValidation = false;
         }

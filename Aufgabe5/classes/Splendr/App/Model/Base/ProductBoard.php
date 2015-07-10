@@ -9,16 +9,32 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Collection;
+use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
+use Propel\Runtime\Validator\Constraints\Unique;
+use Splendr\App\Model\Product as ChildProduct;
+use Splendr\App\Model\ProductBoard as ChildProductBoard;
 use Splendr\App\Model\ProductBoardQuery as ChildProductBoardQuery;
-use Splendr\App\Model\User as ChildUser;
-use Splendr\App\Model\UserQuery as ChildUserQuery;
+use Splendr\App\Model\ProductQuery as ChildProductQuery;
 use Splendr\App\Model\Map\ProductBoardTableMap;
+use Symfony\Component\Validator\ConstraintValidatorFactory;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\DefaultTranslator;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Type;
+use Symfony\Component\Validator\Constraints\Url;
+use Symfony\Component\Validator\Context\ExecutionContextFactory;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+use Symfony\Component\Validator\Mapping\ClassMetadataFactory;
+use Symfony\Component\Validator\Mapping\Loader\StaticMethodLoader;
+use Symfony\Component\Validator\Validator\LegacyValidator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Base class that represents a row from the 'ProductBoard' table.
@@ -80,15 +96,10 @@ abstract class ProductBoard implements ActiveRecordInterface
     protected $image_url;
 
     /**
-     * The value for the user_id field.
-     * @var        int
+     * @var        ObjectCollection|ChildProduct[] Collection to store aggregation of ChildProduct objects.
      */
-    protected $user_id;
-
-    /**
-     * @var        ChildUser
-     */
-    protected $aUser;
+    protected $collProducts;
+    protected $collProductsPartial;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -97,6 +108,29 @@ abstract class ProductBoard implements ActiveRecordInterface
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    // validate behavior
+
+    /**
+     * Flag to prevent endless validation loop, if this object is referenced
+     * by another object which falls in this transaction.
+     * @var        boolean
+     */
+    protected $alreadyInValidation = false;
+
+    /**
+     * ConstraintViolationList object
+     *
+     * @see     http://api.symfony.com/2.0/Symfony/Component/Validator/ConstraintViolationList.html
+     * @var     ConstraintViolationList
+     */
+    protected $validationFailures;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildProduct[]
+     */
+    protected $productsScheduledForDeletion = null;
 
     /**
      * Initializes internal state of Splendr\App\Model\Base\ProductBoard object.
@@ -346,16 +380,6 @@ abstract class ProductBoard implements ActiveRecordInterface
     }
 
     /**
-     * Get the [user_id] column value.
-     *
-     * @return int
-     */
-    public function getUserId()
-    {
-        return $this->user_id;
-    }
-
-    /**
      * Set the value of [id] column.
      *
      * @param int $v new value
@@ -416,30 +440,6 @@ abstract class ProductBoard implements ActiveRecordInterface
     } // setImageUrl()
 
     /**
-     * Set the value of [user_id] column.
-     *
-     * @param int $v new value
-     * @return $this|\Splendr\App\Model\ProductBoard The current object (for fluent API support)
-     */
-    public function setUserId($v)
-    {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
-
-        if ($this->user_id !== $v) {
-            $this->user_id = $v;
-            $this->modifiedColumns[ProductBoardTableMap::COL_USER_ID] = true;
-        }
-
-        if ($this->aUser !== null && $this->aUser->getId() !== $v) {
-            $this->aUser = null;
-        }
-
-        return $this;
-    } // setUserId()
-
-    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -483,9 +483,6 @@ abstract class ProductBoard implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : ProductBoardTableMap::translateFieldName('ImageUrl', TableMap::TYPE_PHPNAME, $indexType)];
             $this->image_url = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : ProductBoardTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->user_id = (null !== $col) ? (int) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -494,7 +491,7 @@ abstract class ProductBoard implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 4; // 4 = ProductBoardTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 3; // 3 = ProductBoardTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\Splendr\\App\\Model\\ProductBoard'), 0, $e);
@@ -516,9 +513,6 @@ abstract class ProductBoard implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aUser !== null && $this->user_id !== $this->aUser->getId()) {
-            $this->aUser = null;
-        }
     } // ensureConsistency
 
     /**
@@ -558,7 +552,8 @@ abstract class ProductBoard implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aUser = null;
+            $this->collProducts = null;
+
         } // if (deep)
     }
 
@@ -658,18 +653,6 @@ abstract class ProductBoard implements ActiveRecordInterface
         if (!$this->alreadyInSave) {
             $this->alreadyInSave = true;
 
-            // We call the save method on the following object(s) if they
-            // were passed to this object by their corresponding set
-            // method.  This object relates to these object(s) by a
-            // foreign key reference.
-
-            if ($this->aUser !== null) {
-                if ($this->aUser->isModified() || $this->aUser->isNew()) {
-                    $affectedRows += $this->aUser->save($con);
-                }
-                $this->setUser($this->aUser);
-            }
-
             if ($this->isNew() || $this->isModified()) {
                 // persist changes
                 if ($this->isNew()) {
@@ -679,6 +662,24 @@ abstract class ProductBoard implements ActiveRecordInterface
                     $affectedRows += $this->doUpdate($con);
                 }
                 $this->resetModified();
+            }
+
+            if ($this->productsScheduledForDeletion !== null) {
+                if (!$this->productsScheduledForDeletion->isEmpty()) {
+                    foreach ($this->productsScheduledForDeletion as $product) {
+                        // need to save related object because we set the relation to null
+                        $product->save($con);
+                    }
+                    $this->productsScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collProducts !== null) {
+                foreach ($this->collProducts as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
             }
 
             $this->alreadyInSave = false;
@@ -716,9 +717,6 @@ abstract class ProductBoard implements ActiveRecordInterface
         if ($this->isColumnModified(ProductBoardTableMap::COL_IMAGE_URL)) {
             $modifiedColumns[':p' . $index++]  = 'image_url';
         }
-        if ($this->isColumnModified(ProductBoardTableMap::COL_USER_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'user_id';
-        }
 
         $sql = sprintf(
             'INSERT INTO ProductBoard (%s) VALUES (%s)',
@@ -738,9 +736,6 @@ abstract class ProductBoard implements ActiveRecordInterface
                         break;
                     case 'image_url':
                         $stmt->bindValue($identifier, $this->image_url, PDO::PARAM_STR);
-                        break;
-                    case 'user_id':
-                        $stmt->bindValue($identifier, $this->user_id, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -813,9 +808,6 @@ abstract class ProductBoard implements ActiveRecordInterface
             case 2:
                 return $this->getImageUrl();
                 break;
-            case 3:
-                return $this->getUserId();
-                break;
             default:
                 return null;
                 break;
@@ -849,7 +841,6 @@ abstract class ProductBoard implements ActiveRecordInterface
             $keys[0] => $this->getId(),
             $keys[1] => $this->getName(),
             $keys[2] => $this->getImageUrl(),
-            $keys[3] => $this->getUserId(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -857,20 +848,20 @@ abstract class ProductBoard implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aUser) {
+            if (null !== $this->collProducts) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'user';
+                        $key = 'products';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'User';
+                        $key = 'Products';
                         break;
                     default:
-                        $key = 'User';
+                        $key = 'Products';
                 }
 
-                $result[$key] = $this->aUser->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+                $result[$key] = $this->collProducts->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -915,9 +906,6 @@ abstract class ProductBoard implements ActiveRecordInterface
             case 2:
                 $this->setImageUrl($value);
                 break;
-            case 3:
-                $this->setUserId($value);
-                break;
         } // switch()
 
         return $this;
@@ -952,9 +940,6 @@ abstract class ProductBoard implements ActiveRecordInterface
         }
         if (array_key_exists($keys[2], $arr)) {
             $this->setImageUrl($arr[$keys[2]]);
-        }
-        if (array_key_exists($keys[3], $arr)) {
-            $this->setUserId($arr[$keys[3]]);
         }
     }
 
@@ -1006,9 +991,6 @@ abstract class ProductBoard implements ActiveRecordInterface
         if ($this->isColumnModified(ProductBoardTableMap::COL_IMAGE_URL)) {
             $criteria->add(ProductBoardTableMap::COL_IMAGE_URL, $this->image_url);
         }
-        if ($this->isColumnModified(ProductBoardTableMap::COL_USER_ID)) {
-            $criteria->add(ProductBoardTableMap::COL_USER_ID, $this->user_id);
-        }
 
         return $criteria;
     }
@@ -1027,7 +1009,6 @@ abstract class ProductBoard implements ActiveRecordInterface
     {
         $criteria = ChildProductBoardQuery::create();
         $criteria->add(ProductBoardTableMap::COL_ID, $this->id);
-        $criteria->add(ProductBoardTableMap::COL_USER_ID, $this->user_id);
 
         return $criteria;
     }
@@ -1040,18 +1021,10 @@ abstract class ProductBoard implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getId() &&
-            null !== $this->getUserId();
+        $validPk = null !== $this->getId();
 
-        $validPrimaryKeyFKs = 1;
+        $validPrimaryKeyFKs = 0;
         $primaryKeyFKs = [];
-
-        //relation ProductBoard_fk_29554a to table User
-        if ($this->aUser && $hash = spl_object_hash($this->aUser)) {
-            $primaryKeyFKs[] = $hash;
-        } else {
-            $validPrimaryKeyFKs = false;
-        }
 
         if ($validPk) {
             return crc32(json_encode($this->getPrimaryKey(), JSON_UNESCAPED_UNICODE));
@@ -1063,29 +1036,23 @@ abstract class ProductBoard implements ActiveRecordInterface
     }
 
     /**
-     * Returns the composite primary key for this object.
-     * The array elements will be in same order as specified in XML.
-     * @return array
+     * Returns the primary key for this object (row).
+     * @return int
      */
     public function getPrimaryKey()
     {
-        $pks = array();
-        $pks[0] = $this->getId();
-        $pks[1] = $this->getUserId();
-
-        return $pks;
+        return $this->getId();
     }
 
     /**
-     * Set the [composite] primary key.
+     * Generic method to set the primary key (id column).
      *
-     * @param      array $keys The elements of the composite key (order must match the order in XML file).
+     * @param       int $key Primary key.
      * @return void
      */
-    public function setPrimaryKey($keys)
+    public function setPrimaryKey($key)
     {
-        $this->setId($keys[0]);
-        $this->setUserId($keys[1]);
+        $this->setId($key);
     }
 
     /**
@@ -1094,7 +1061,7 @@ abstract class ProductBoard implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return (null === $this->getId()) && (null === $this->getUserId());
+        return null === $this->getId();
     }
 
     /**
@@ -1112,7 +1079,20 @@ abstract class ProductBoard implements ActiveRecordInterface
     {
         $copyObj->setName($this->getName());
         $copyObj->setImageUrl($this->getImageUrl());
-        $copyObj->setUserId($this->getUserId());
+
+        if ($deepCopy) {
+            // important: temporarily setNew(false) because this affects the behavior of
+            // the getter/setter methods for fkey referrer objects.
+            $copyObj->setNew(false);
+
+            foreach ($this->getProducts() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addProduct($relObj->copy($deepCopy));
+                }
+            }
+
+        } // if ($deepCopy)
+
         if ($makeNew) {
             $copyObj->setNew(true);
             $copyObj->setId(NULL); // this is a auto-increment column, so set to default value
@@ -1141,55 +1121,238 @@ abstract class ProductBoard implements ActiveRecordInterface
         return $copyObj;
     }
 
+
     /**
-     * Declares an association between this object and a ChildUser object.
+     * Initializes a collection based on the name of a relation.
+     * Avoids crafting an 'init[$relationName]s' method name
+     * that wouldn't work when StandardEnglishPluralizer is used.
      *
-     * @param  ChildUser $v
-     * @return $this|\Splendr\App\Model\ProductBoard The current object (for fluent API support)
+     * @param      string $relationName The name of the relation to initialize
+     * @return void
+     */
+    public function initRelation($relationName)
+    {
+        if ('Product' == $relationName) {
+            return $this->initProducts();
+        }
+    }
+
+    /**
+     * Clears out the collProducts collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addProducts()
+     */
+    public function clearProducts()
+    {
+        $this->collProducts = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Reset is the collProducts collection loaded partially.
+     */
+    public function resetPartialProducts($v = true)
+    {
+        $this->collProductsPartial = $v;
+    }
+
+    /**
+     * Initializes the collProducts collection.
+     *
+     * By default this just sets the collProducts collection to an empty array (like clearcollProducts());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param      boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initProducts($overrideExisting = true)
+    {
+        if (null !== $this->collProducts && !$overrideExisting) {
+            return;
+        }
+        $this->collProducts = new ObjectCollection();
+        $this->collProducts->setModel('\Splendr\App\Model\Product');
+    }
+
+    /**
+     * Gets an array of ChildProduct objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildProductBoard is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @return ObjectCollection|ChildProduct[] List of ChildProduct objects
      * @throws PropelException
      */
-    public function setUser(ChildUser $v = null)
+    public function getProducts(Criteria $criteria = null, ConnectionInterface $con = null)
     {
-        if ($v === null) {
-            $this->setUserId(NULL);
-        } else {
-            $this->setUserId($v->getId());
+        $partial = $this->collProductsPartial && !$this->isNew();
+        if (null === $this->collProducts || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collProducts) {
+                // return empty collection
+                $this->initProducts();
+            } else {
+                $collProducts = ChildProductQuery::create(null, $criteria)
+                    ->filterByProductBoard($this)
+                    ->find($con);
+
+                if (null !== $criteria) {
+                    if (false !== $this->collProductsPartial && count($collProducts)) {
+                        $this->initProducts(false);
+
+                        foreach ($collProducts as $obj) {
+                            if (false == $this->collProducts->contains($obj)) {
+                                $this->collProducts->append($obj);
+                            }
+                        }
+
+                        $this->collProductsPartial = true;
+                    }
+
+                    return $collProducts;
+                }
+
+                if ($partial && $this->collProducts) {
+                    foreach ($this->collProducts as $obj) {
+                        if ($obj->isNew()) {
+                            $collProducts[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collProducts = $collProducts;
+                $this->collProductsPartial = false;
+            }
         }
 
-        $this->aUser = $v;
+        return $this->collProducts;
+    }
 
-        // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildUser object, it will not be re-added.
-        if ($v !== null) {
-            $v->addProductBoard($this);
+    /**
+     * Sets a collection of ChildProduct objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param      Collection $products A Propel collection.
+     * @param      ConnectionInterface $con Optional connection object
+     * @return $this|ChildProductBoard The current object (for fluent API support)
+     */
+    public function setProducts(Collection $products, ConnectionInterface $con = null)
+    {
+        /** @var ChildProduct[] $productsToDelete */
+        $productsToDelete = $this->getProducts(new Criteria(), $con)->diff($products);
+
+
+        $this->productsScheduledForDeletion = $productsToDelete;
+
+        foreach ($productsToDelete as $productRemoved) {
+            $productRemoved->setProductBoard(null);
         }
 
+        $this->collProducts = null;
+        foreach ($products as $product) {
+            $this->addProduct($product);
+        }
+
+        $this->collProducts = $products;
+        $this->collProductsPartial = false;
 
         return $this;
     }
 
-
     /**
-     * Get the associated ChildUser object
+     * Returns the number of related Product objects.
      *
-     * @param  ConnectionInterface $con Optional Connection object.
-     * @return ChildUser The associated ChildUser object.
+     * @param      Criteria $criteria
+     * @param      boolean $distinct
+     * @param      ConnectionInterface $con
+     * @return int             Count of related Product objects.
      * @throws PropelException
      */
-    public function getUser(ConnectionInterface $con = null)
+    public function countProducts(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
     {
-        if ($this->aUser === null && ($this->user_id !== null)) {
-            $this->aUser = ChildUserQuery::create()->findPk($this->user_id, $con);
-            /* The following can be used additionally to
-                guarantee the related object contains a reference
-                to this object.  This level of coupling may, however, be
-                undesirable since it could result in an only partially populated collection
-                in the referenced object.
-                $this->aUser->addProductBoards($this);
-             */
+        $partial = $this->collProductsPartial && !$this->isNew();
+        if (null === $this->collProducts || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collProducts) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getProducts());
+            }
+
+            $query = ChildProductQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByProductBoard($this)
+                ->count($con);
         }
 
-        return $this->aUser;
+        return count($this->collProducts);
+    }
+
+    /**
+     * Method called to associate a ChildProduct object to this object
+     * through the ChildProduct foreign key attribute.
+     *
+     * @param  ChildProduct $l ChildProduct
+     * @return $this|\Splendr\App\Model\ProductBoard The current object (for fluent API support)
+     */
+    public function addProduct(ChildProduct $l)
+    {
+        if ($this->collProducts === null) {
+            $this->initProducts();
+            $this->collProductsPartial = true;
+        }
+
+        if (!$this->collProducts->contains($l)) {
+            $this->doAddProduct($l);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ChildProduct $product The ChildProduct object to add.
+     */
+    protected function doAddProduct(ChildProduct $product)
+    {
+        $this->collProducts[]= $product;
+        $product->setProductBoard($this);
+    }
+
+    /**
+     * @param  ChildProduct $product The ChildProduct object to remove.
+     * @return $this|ChildProductBoard The current object (for fluent API support)
+     */
+    public function removeProduct(ChildProduct $product)
+    {
+        if ($this->getProducts()->contains($product)) {
+            $pos = $this->collProducts->search($product);
+            $this->collProducts->remove($pos);
+            if (null === $this->productsScheduledForDeletion) {
+                $this->productsScheduledForDeletion = clone $this->collProducts;
+                $this->productsScheduledForDeletion->clear();
+            }
+            $this->productsScheduledForDeletion[]= $product;
+            $product->setProductBoard(null);
+        }
+
+        return $this;
     }
 
     /**
@@ -1199,13 +1362,9 @@ abstract class ProductBoard implements ActiveRecordInterface
      */
     public function clear()
     {
-        if (null !== $this->aUser) {
-            $this->aUser->removeProductBoard($this);
-        }
         $this->id = null;
         $this->name = null;
         $this->image_url = null;
-        $this->user_id = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
@@ -1224,9 +1383,14 @@ abstract class ProductBoard implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
+            if ($this->collProducts) {
+                foreach ($this->collProducts as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
         } // if ($deep)
 
-        $this->aUser = null;
+        $this->collProducts = null;
     }
 
     /**
@@ -1237,6 +1401,93 @@ abstract class ProductBoard implements ActiveRecordInterface
     public function __toString()
     {
         return (string) $this->exportTo(ProductBoardTableMap::DEFAULT_STRING_FORMAT);
+    }
+
+    // validate behavior
+
+    /**
+     * Configure validators constraints. The Validator object uses this method
+     * to perform object validation.
+     *
+     * @param ClassMetadata $metadata
+     */
+    static public function loadValidatorMetadata(ClassMetadata $metadata)
+    {
+        $metadata->addPropertyConstraint('name', new Length(array ('max' => 255,)));
+        $metadata->addPropertyConstraint('name', new NotBlank());
+        $metadata->addPropertyConstraint('name', new Type(array ('type' => 'string',)));
+        $metadata->addPropertyConstraint('name', new Unique());
+        $metadata->addPropertyConstraint('image_url', new Length(array ('max' => 255,)));
+        $metadata->addPropertyConstraint('image_url', new Url());
+        $metadata->addPropertyConstraint('image_url', new NotBlank());
+    }
+
+    /**
+     * Validates the object and all objects related to this table.
+     *
+     * @see        getValidationFailures()
+     * @param      object $validator A Validator class instance
+     * @return     boolean Whether all objects pass validation.
+     */
+    public function validate(ValidatorInterface $validator = null)
+    {
+        if (null === $validator) {
+            if(class_exists('Symfony\\Component\\Validator\\Validator\\LegacyValidator')){
+                $validator = new LegacyValidator(
+                            new ExecutionContextFactory(new DefaultTranslator()),
+                            new ClassMetaDataFactory(new StaticMethodLoader()),
+                            new ConstraintValidatorFactory()
+                );
+            }else{
+                $validator = new Validator(
+                            new ClassMetadataFactory(new StaticMethodLoader()),
+                            new ConstraintValidatorFactory(),
+                            new DefaultTranslator()
+                );
+            }
+        }
+
+        $failureMap = new ConstraintViolationList();
+
+        if (!$this->alreadyInValidation) {
+            $this->alreadyInValidation = true;
+            $retval = null;
+
+
+            $retval = $validator->validate($this);
+            if (count($retval) > 0) {
+                $failureMap->addAll($retval);
+            }
+
+            if (null !== $this->collProducts) {
+                foreach ($this->collProducts as $referrerFK) {
+                    if (method_exists($referrerFK, 'validate')) {
+                        if (!$referrerFK->validate($validator)) {
+                            $failureMap->addAll($referrerFK->getValidationFailures());
+                        }
+                    }
+                }
+            }
+
+            $this->alreadyInValidation = false;
+        }
+
+        $this->validationFailures = $failureMap;
+
+        return (Boolean) (!(count($this->validationFailures) > 0));
+
+    }
+
+    /**
+     * Gets any ConstraintViolation objects that resulted from last call to validate().
+     *
+     *
+     * @return     object ConstraintViolationList
+     * @see        validate()
+     */
+    public function getValidationFailures()
+    {
+        return $this->validationFailures;
     }
 
     /**

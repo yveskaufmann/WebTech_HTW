@@ -16,7 +16,6 @@ use Splendr\Core\Helper\Login;
 use Splendr\Core\Helper\Notification;
 use Splendr\Core\Helper\Params;
 use Splendr\Core\Helper\Request;
-use Splendr\Core\Helper\URL;
 use Splendr\Core\View\PageView;
 
 class LoginController {

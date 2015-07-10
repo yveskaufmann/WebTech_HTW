@@ -5,16 +5,22 @@ namespace Splendr\App\Model;
 use Splendr\App\Model\Base\ProductBoardQuery as BaseProductBoardQuery;
 
 /**
- * Skeleton subclass for performing query and update operations on the 'ProductBoard' table.
- *
- *
- *
- * You should add additional methods to this class to meet the
- * application requirements.  This class will only be generated as
- * long as it does not already exist in the output directory.
- *
+ * Class ProductBoardQuery
+ * @package Splendr\App\Model
  */
 class ProductBoardQuery extends BaseProductBoardQuery
 {
+    public function allBoards($page=1, $hits_per_page=6) {
+        $page = $this->normalizePage($page);
+        return $this
+            ->orderByName()
+            ->paginate($page, $hits_per_page);
+    }
 
+    private function normalizePage($page) {
+        if ( $page < 0 ) {
+            return 1;
+        }
+        return $page;
+    }
 }

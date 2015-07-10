@@ -2,6 +2,7 @@
 
 namespace Splendr\App\Model;
 
+use Splendr\App\Controller\ProductController;
 use Splendr\App\Model\Base\Product as BaseProduct;
 
 /**

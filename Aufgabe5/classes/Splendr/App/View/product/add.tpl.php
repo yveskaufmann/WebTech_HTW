@@ -5,8 +5,11 @@
     use Splendr\App\Model\Product;
 
     $product = $this->getData(ProductController::PRODUCT_PARAM, new Product());
+    $currentBoard = $product->getProductBoard();
+    $boards = $this->getData(ProductController::PRODUCT_BOARDS_PARAM);
     $isAddByURL = $this->getData(ProductController::QUERY_BY_URL_MODE_PARAM);
     $productURL = ($isAddByURL) ? $this->getData(ProductController::URL_PARAM) : '';
+
 ?>
 
 <div class="container">
@@ -41,7 +44,7 @@
                             <div class="form-group">
                                 <label for="price" class="col-sm-2 control-label">Price</label>
                                 <div class="col-sm-10">
-                                    <input type="number" name="price" min="0.01" step="0.01" class="form-control" id="price" placeholder="Price" value="<?=$product->getPrice() ?>">
+                                    <input type="number" name="price" min="0.01" step="0.01" class="form-control" id="price" placeholder="Price in €" value="<?=$product->getPrice() ?>">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -54,6 +57,17 @@
                                 <label for="product_image" class="col-sm-2 control-label">Image URL</label>
                                 <div class="col-sm-10">
                                     <input type="url" name="image_url" class="form-control" id="product_image" placeholder="Product Image" value="<?= $product->getImageUrl() ?>">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="product_board" class="col-sm-2 control-label">Product Board</label>
+                                <div class="col-sm-10">
+                                    <select id="product_board" name="product_board" class="form-control">
+                                        <option value="-1">-</option>
+                                        <? foreach($boards as $board):?>
+                                        <option value="<?= $board->getId()?>"><?= $board->getName() ?> <?=$currentBoard->getId() == $board->getId() ? 'selected' : '' ?></option>
+                                        <? endforeach;?>
+                                    </select>
                                 </div>
                             </div>
                             <div class="form-group pull-right">
@@ -69,6 +83,17 @@
                         <label for="product_url_add_by_url" class="col-sm-2 control-label">Produkt URL</label>
                         <div class="col-sm-10">
                             <input type="url" name="product_url_add_by_url" class="form-control" id="product_url_add_by_url" placeholder="Produkt URL" value="<?= $productURL ?>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="product_board" class="col-sm-2 control-label">Product Board</label>
+                        <div class="col-sm-10">
+                            <select id="product_board" name="product_board" class="form-control">
+                                <option value="-1">-</option>
+                                <? foreach($boards as $board):?>
+                                    <option value="<?= $board->getId()?>" <?= $currentBoard !==null && $currentBoard->getId() == $board->getId() ? 'selected' : '' ?> ><?= $board->getName() ?></option>
+                                <? endforeach;?>
+                            </select>
                         </div>
                     </div>
                     <div class="form-group pull-right">

@@ -44,6 +44,14 @@ class ProductQuery extends BaseProductQuery {
             ->paginate($page, $hits_per_page);
     }
 
+    public function allProductsByBoard($boardId, $page=1, $hits_per_page=6) {
+        $page = $this->normalizePage($page);
+        return $this
+            ->orderByName()
+            ->filterByBoard($boardId)
+            ->paginate($page, $hits_per_page);
+    }
+
     private function normalizePage($page) {
         if ( $page < 0 ) {
             return 1;

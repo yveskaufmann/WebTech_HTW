@@ -11,6 +11,7 @@
         <column name="password" type="CHAR" size="64" required="true"/>
         <column name="first_name" type="VARCHAR" size="255" required="true" />
         <column name="last_name" type="VARCHAR" size="255" required="true" />
+
         <unique>
             <unique-column name="email" size="255" />
             <unique-column name="username"/>
@@ -56,6 +57,12 @@
         <column name="price" type="NUMERIC" size="10" scale="2" required="true"/>
         <column name="image_url" type="VARCHAR" size="255" required="true"/>
         <column name="product_url"  type="LONGVARCHAR" required="true" />
+        <column name="board" type="INTEGER" required="false" />
+
+        <foreign-key foreignTable="ProductBoard">
+            <reference local="board" foreign="id"/>
+        </foreign-key>
+
         <unique>
             <unique-column name="name"/>
         </unique>
@@ -88,27 +95,20 @@
         <column name="id" phpName="Id"  type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
         <column name="name" type="VARCHAR" size="255" required="true"/>
         <column name="image_url"  type="LONGVARCHAR" required="true" />
-        <column name="user_id" type="INTEGER" primaryKey="true" />
-        <foreign-key foreignTable="User">
-            <reference local="user_id" foreign="id" />
-        </foreign-key>
+
+        <unique>
+            <unique-column name="name"/>
+        </unique>
+
+        <behavior name="validate">
+            <parameter name="name_limit" value="{column: name, validator: Length, options: {max: 255}}" />
+            <parameter name="name_required" value="{column: name, validator: NotBlank}" />
+            <parameter name="name_is_string" value="{column: name, validator: Type, options: {type: string}}" />
+            <parameter name="name_is_unique" value="{column: name, validator: Unique}" />
+
+            <parameter name="image_url_limit" value="{column: image_url, validator: Length, options: {max: 255}}" />
+            <parameter name="image_url_is_url" value="{column: image_url, validator: Url}" />
+            <parameter name="image_url_is_required" value="{column: image_url, validator: NotBlank}" />
+        </behavior>
     </table>
-
-
-    <!--#######################################################################
-    #   Reviews
-    #########################################################################-->
-    <table name="Product_Review" phpName="ProductReview" >
-        <column name="product_id" type="INTEGER" primaryKey="true"/>
-        <column name="user_id" type="INTEGER" primaryKey="true" />
-        <column name="review" type="LONGVARCHAR" required="true"/>
-        <column name="points" type="INTEGER" required="true"/>
-        <foreign-key foreignTable="Product">
-            <reference local="product_id" foreign="id"/>
-        </foreign-key>
-        <foreign-key foreignTable="User">
-            <reference local="user_id" foreign="id"/>
-        </foreign-key>
-    </table>
-
 </database>

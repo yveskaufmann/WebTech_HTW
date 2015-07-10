@@ -52,9 +52,14 @@ CREATE TABLE `Product`
     `price` DECIMAL(10,2) NOT NULL,
     `image_url` VARCHAR(255) NOT NULL,
     `product_url` TEXT NOT NULL,
+    `board` INTEGER,
     PRIMARY KEY (`id`),
     UNIQUE INDEX `Product_u_d94269` (`name`),
-    INDEX `Product_i_8501d1` (`name`, `product_url`(255))
+    INDEX `Product_i_8501d1` (`name`, `product_url`(255)),
+    INDEX `Product_fi_d09c31` (`board`),
+    CONSTRAINT `Product_fk_d09c31`
+        FOREIGN KEY (`board`)
+        REFERENCES `ProductBoard` (`id`)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -68,34 +73,8 @@ CREATE TABLE `ProductBoard`
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(255) NOT NULL,
     `image_url` TEXT NOT NULL,
-    `user_id` INTEGER NOT NULL,
-    PRIMARY KEY (`id`,`user_id`),
-    INDEX `ProductBoard_fi_29554a` (`user_id`),
-    CONSTRAINT `ProductBoard_fk_29554a`
-        FOREIGN KEY (`user_id`)
-        REFERENCES `User` (`id`)
-) ENGINE=InnoDB;
-
--- ---------------------------------------------------------------------
--- Product_Review
--- ---------------------------------------------------------------------
-
-DROP TABLE IF EXISTS `Product_Review`;
-
-CREATE TABLE `Product_Review`
-(
-    `product_id` INTEGER NOT NULL,
-    `user_id` INTEGER NOT NULL,
-    `review` TEXT NOT NULL,
-    `points` INTEGER NOT NULL,
-    PRIMARY KEY (`product_id`,`user_id`),
-    INDEX `Product_Review_fi_29554a` (`user_id`),
-    CONSTRAINT `Product_Review_fk_0f5ed8`
-        FOREIGN KEY (`product_id`)
-        REFERENCES `Product` (`id`),
-    CONSTRAINT `Product_Review_fk_29554a`
-        FOREIGN KEY (`user_id`)
-        REFERENCES `User` (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `ProductBoard_u_d94269` (`name`)
 ) ENGINE=InnoDB;
 
 # This restores the fkey checks, after having unset them earlier
