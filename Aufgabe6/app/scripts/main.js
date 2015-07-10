@@ -38,7 +38,8 @@
 		this.$enterLocationView.show();
 		this.$locateMeButton
 			.unbind()
-			.click(this.retrieveCurrentLocation.bind(this));
+			.click(this.retrieveCurrentLocation.bind(this))
+		    .on('touchstart', this.retrieveCurrentLocation.bind(this));
 	};
 
 	LocateMe.prototype.initShowLocationView = function () {
