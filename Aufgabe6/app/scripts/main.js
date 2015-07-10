@@ -59,7 +59,7 @@
 			minZoom: 8,
 			center: location,
 			layers: [
-				L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+				L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 					attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
 				})
 			]
