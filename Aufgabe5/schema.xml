@@ -48,6 +48,16 @@
         </foreign-key>
     </table>
 
+    <table name="Accounts" phpName="Account">
+        <column name="id" type="INTEGER" primaryKey="true" />
+        <column name="enabled" type="INTEGER" defaultValue="0" required="true" />
+        <column name="activation_key" type="VARCHAR" size="128" defaultValue="0" required="true" />
+        <column name="expiration_date" type="TIMESTAMP" defaultExpr="CURRENT_TIMESTAMP" required="true" />
+        <foreign-key foreignTable="User">
+            <reference local="id" foreign="id"/>
+        </foreign-key>
+    </table>
+
     <!--#######################################################################
     #   Products
     #########################################################################-->

@@ -172,7 +172,7 @@ class Login {
     public static function login($email, $password) {
         if (!self::isCurrentUserLoggedIn()) {
             $user = UserQuery::create()->findOneByEmail($email);
-            if ( !is_null($user) && validate_password($password, $user->getPassword())) {
+            if ( !is_null($user) && $user->getAccount()->getEnabled() === 1 && validate_password($password, $user->getPassword())) {
                 Session::set(self::USER_SESSION_PARAM, $user);
                 return true;
             }
@@ -218,6 +218,12 @@ class Login {
             return Session::get(self::USER_SESSION_PARAM);
         }
         return null;
+    }
+
+    public static function generateActivationKey() {
+        $key = base64_encode(mcrypt_create_iv(64, MCRYPT_DEV_URANDOM));
+        $key = str_replace('/', '', $key);
+        return $key;
     }
 
 

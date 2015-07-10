@@ -9,14 +9,17 @@
 namespace Splendr\App\Controller;
 
 
+use Splendr\App\Model\Account;
 use Splendr\App\Model\User;
 use Splendr\Core\Controller\FrontController;
 use Splendr\Core\Controller\HTTPErrorException;
+use Splendr\Core\Helper\Email;
 use Splendr\Core\Helper\Login;
 use Splendr\Core\Helper\Notification;
 use Splendr\Core\Helper\Params;
 use Splendr\Core\Helper\Request;
 use Splendr\Core\View\PageView;
+use Splendr\App\Model\AccountQuery;
 
 class LoginController {
 
@@ -80,6 +83,12 @@ class LoginController {
         $user->setPassword($password);
         $user->setConfirmPassword($password_confirm);
 
+        $account = new Account();
+        $account->setEnabled(0);
+        $account->setActivationKey(Login::generateActivationKey());
+        $user->setAccount($account);
+
+
         if (!$user->validate()) {
             foreach ($user->getValidationFailures() as $failure) {
                 Notification::add($failure->getPropertyPath().": ".$failure->getMessage(), 'warning');
@@ -88,8 +97,21 @@ class LoginController {
             $view->render();
         } else {
             $user->save();
-            Notification::add('You can now login in your new account', 'info');
+            Email::sendUserActivationMessage($user->getEmail(), $user);
+            Notification::add('Please check your mail box in order to activate your account.', 'info');
             FrontController::get()->runController('product', 'index');
         }
+    }
+
+    public function activate($key) {
+        $account = AccountQuery::create()->findOneByActivationKey($key);
+        if (! is_null($account) && $account->getEnabled() === 0) {
+            $account->setEnabled(1);
+            $account->save();
+            Notification::add('Your account is now activated, now you can login.', 'info');
+            FrontController::get()->runController('Index', 'index');
+        }
+
+        throw new HTTPErrorException('404');
     }
 }

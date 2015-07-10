@@ -40,6 +40,24 @@ CREATE TABLE `LoginAttempt`
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
+-- Accounts
+-- ---------------------------------------------------------------------
+
+DROP TABLE IF EXISTS `Accounts`;
+
+CREATE TABLE `Accounts`
+(
+    `id` INTEGER NOT NULL,
+    `enabled` INTEGER DEFAULT 0 NOT NULL,
+    `activation_key` VARCHAR(128) DEFAULT '0' NOT NULL,
+    `expiration_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `Accounts_fk_ffc53a`
+        FOREIGN KEY (`id`)
+        REFERENCES `User` (`id`)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
 -- Product
 -- ---------------------------------------------------------------------
 

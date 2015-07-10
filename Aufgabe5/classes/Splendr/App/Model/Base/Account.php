@@ -2,6 +2,7 @@
 
 namespace Splendr\App\Model\Base;
 
+use \DateTime;
 use \Exception;
 use \PDO;
 use Propel\Runtime\Propel;
@@ -15,39 +16,25 @@ use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
-use Propel\Runtime\Validator\Constraints\Unique;
-use Splendr\App\Model\Account as ChildAccount;
+use Propel\Runtime\Util\PropelDateTime;
 use Splendr\App\Model\AccountQuery as ChildAccountQuery;
-use Splendr\App\Model\LoginAttempt as ChildLoginAttempt;
-use Splendr\App\Model\LoginAttemptQuery as ChildLoginAttemptQuery;
+use Splendr\App\Model\User as ChildUser;
 use Splendr\App\Model\UserQuery as ChildUserQuery;
-use Splendr\App\Model\Map\UserTableMap;
-use Symfony\Component\Validator\ConstraintValidatorFactory;
-use Symfony\Component\Validator\ConstraintViolationList;
-use Symfony\Component\Validator\DefaultTranslator;
-use Symfony\Component\Validator\Constraints\Email;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Context\ExecutionContextFactory;
-use Symfony\Component\Validator\Mapping\ClassMetadata;
-use Symfony\Component\Validator\Mapping\ClassMetadataFactory;
-use Symfony\Component\Validator\Mapping\Loader\StaticMethodLoader;
-use Symfony\Component\Validator\Validator\LegacyValidator;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Splendr\App\Model\Map\AccountTableMap;
 
 /**
- * Base class that represents a row from the 'User' table.
+ * Base class that represents a row from the 'Accounts' table.
  *
  *
  *
 * @package    propel.generator.Splendr.App.Model.Base
 */
-abstract class User implements ActiveRecordInterface
+abstract class Account implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\Splendr\\App\\Model\\Map\\UserTableMap';
+    const TABLE_MAP = '\\Splendr\\App\\Model\\Map\\AccountTableMap';
 
 
     /**
@@ -83,44 +70,30 @@ abstract class User implements ActiveRecordInterface
     protected $id;
 
     /**
-     * The value for the username field.
+     * The value for the enabled field.
+     * Note: this column has a database default value of: 0
+     * @var        int
+     */
+    protected $enabled;
+
+    /**
+     * The value for the activation_key field.
+     * Note: this column has a database default value of: '0'
      * @var        string
      */
-    protected $username;
+    protected $activation_key;
 
     /**
-     * The value for the email field.
-     * @var        string
+     * The value for the expiration_date field.
+     * Note: this column has a database default value of: (expression) CURRENT_TIMESTAMP
+     * @var        \DateTime
      */
-    protected $email;
+    protected $expiration_date;
 
     /**
-     * The value for the password field.
-     * @var        string
+     * @var        ChildUser
      */
-    protected $password;
-
-    /**
-     * The value for the first_name field.
-     * @var        string
-     */
-    protected $first_name;
-
-    /**
-     * The value for the last_name field.
-     * @var        string
-     */
-    protected $last_name;
-
-    /**
-     * @var        ChildLoginAttempt one-to-one related ChildLoginAttempt object
-     */
-    protected $singleLoginAttempt;
-
-    /**
-     * @var        ChildAccount one-to-one related ChildAccount object
-     */
-    protected $singleAccount;
+    protected $aUser;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -130,28 +103,25 @@ abstract class User implements ActiveRecordInterface
      */
     protected $alreadyInSave = false;
 
-    // validate behavior
-
     /**
-     * Flag to prevent endless validation loop, if this object is referenced
-     * by another object which falls in this transaction.
-     * @var        boolean
+     * Applies default values to this object.
+     * This method should be called from the object's constructor (or
+     * equivalent initialization method).
+     * @see __construct()
      */
-    protected $alreadyInValidation = false;
+    public function applyDefaultValues()
+    {
+        $this->enabled = 0;
+        $this->activation_key = '0';
+    }
 
     /**
-     * ConstraintViolationList object
-     *
-     * @see     http://api.symfony.com/2.0/Symfony/Component/Validator/ConstraintViolationList.html
-     * @var     ConstraintViolationList
-     */
-    protected $validationFailures;
-
-    /**
-     * Initializes internal state of Splendr\App\Model\Base\User object.
+     * Initializes internal state of Splendr\App\Model\Base\Account object.
+     * @see applyDefaults()
      */
     public function __construct()
     {
+        $this->applyDefaultValues();
     }
 
     /**
@@ -243,9 +213,9 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>User</code> instance.  If
-     * <code>obj</code> is an instance of <code>User</code>, delegates to
-     * <code>equals(User)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>Account</code> instance.  If
+     * <code>obj</code> is an instance of <code>Account</code>, delegates to
+     * <code>equals(Account)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -311,7 +281,7 @@ abstract class User implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|User The current object, for fluid interface
+     * @return $this|Account The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -375,60 +345,50 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
-     * Get the [username] column value.
+     * Get the [enabled] column value.
      *
-     * @return string
+     * @return int
      */
-    public function getUsername()
+    public function getEnabled()
     {
-        return $this->username;
+        return $this->enabled;
     }
 
     /**
-     * Get the [email] column value.
+     * Get the [activation_key] column value.
      *
      * @return string
      */
-    public function getEmail()
+    public function getActivationKey()
     {
-        return $this->email;
+        return $this->activation_key;
     }
 
     /**
-     * Get the [password] column value.
+     * Get the [optionally formatted] temporal [expiration_date] column value.
      *
-     * @return string
-     */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    /**
-     * Get the [first_name] column value.
      *
-     * @return string
-     */
-    public function getFirstName()
-    {
-        return $this->first_name;
-    }
-
-    /**
-     * Get the [last_name] column value.
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
      */
-    public function getLastName()
+    public function getExpirationDate($format = NULL)
     {
-        return $this->last_name;
+        if ($format === null) {
+            return $this->expiration_date;
+        } else {
+            return $this->expiration_date instanceof \DateTime ? $this->expiration_date->format($format) : null;
+        }
     }
 
     /**
      * Set the value of [id] column.
      *
      * @param int $v new value
-     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
+     * @return $this|\Splendr\App\Model\Account The current object (for fluent API support)
      */
     public function setId($v)
     {
@@ -438,111 +398,75 @@ abstract class User implements ActiveRecordInterface
 
         if ($this->id !== $v) {
             $this->id = $v;
-            $this->modifiedColumns[UserTableMap::COL_ID] = true;
+            $this->modifiedColumns[AccountTableMap::COL_ID] = true;
+        }
+
+        if ($this->aUser !== null && $this->aUser->getId() !== $v) {
+            $this->aUser = null;
         }
 
         return $this;
     } // setId()
 
     /**
-     * Set the value of [username] column.
+     * Set the value of [enabled] column.
      *
-     * @param string $v new value
-     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
+     * @param int $v new value
+     * @return $this|\Splendr\App\Model\Account The current object (for fluent API support)
      */
-    public function setUsername($v)
+    public function setEnabled($v)
     {
         if ($v !== null) {
-            $v = (string) $v;
+            $v = (int) $v;
         }
 
-        if ($this->username !== $v) {
-            $this->username = $v;
-            $this->modifiedColumns[UserTableMap::COL_USERNAME] = true;
+        if ($this->enabled !== $v) {
+            $this->enabled = $v;
+            $this->modifiedColumns[AccountTableMap::COL_ENABLED] = true;
         }
 
         return $this;
-    } // setUsername()
+    } // setEnabled()
 
     /**
-     * Set the value of [email] column.
+     * Set the value of [activation_key] column.
      *
      * @param string $v new value
-     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
+     * @return $this|\Splendr\App\Model\Account The current object (for fluent API support)
      */
-    public function setEmail($v)
+    public function setActivationKey($v)
     {
         if ($v !== null) {
             $v = (string) $v;
         }
 
-        if ($this->email !== $v) {
-            $this->email = $v;
-            $this->modifiedColumns[UserTableMap::COL_EMAIL] = true;
+        if ($this->activation_key !== $v) {
+            $this->activation_key = $v;
+            $this->modifiedColumns[AccountTableMap::COL_ACTIVATION_KEY] = true;
         }
 
         return $this;
-    } // setEmail()
+    } // setActivationKey()
 
     /**
-     * Set the value of [password] column.
+     * Sets the value of [expiration_date] column to a normalized version of the date/time value specified.
      *
-     * @param string $v new value
-     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
+     * @param  mixed $v string, integer (timestamp), or \DateTime value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\Splendr\App\Model\Account The current object (for fluent API support)
      */
-    public function setPassword($v)
+    public function setExpirationDate($v)
     {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->password !== $v) {
-            $this->password = $v;
-            $this->modifiedColumns[UserTableMap::COL_PASSWORD] = true;
-        }
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->expiration_date !== null || $dt !== null) {
+            if ($this->expiration_date === null || $dt === null || $dt->format("Y-m-d H:i:s") !== $this->expiration_date->format("Y-m-d H:i:s")) {
+                $this->expiration_date = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[AccountTableMap::COL_EXPIRATION_DATE] = true;
+            }
+        } // if either are not null
 
         return $this;
-    } // setPassword()
-
-    /**
-     * Set the value of [first_name] column.
-     *
-     * @param string $v new value
-     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
-     */
-    public function setFirstName($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->first_name !== $v) {
-            $this->first_name = $v;
-            $this->modifiedColumns[UserTableMap::COL_FIRST_NAME] = true;
-        }
-
-        return $this;
-    } // setFirstName()
-
-    /**
-     * Set the value of [last_name] column.
-     *
-     * @param string $v new value
-     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
-     */
-    public function setLastName($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->last_name !== $v) {
-            $this->last_name = $v;
-            $this->modifiedColumns[UserTableMap::COL_LAST_NAME] = true;
-        }
-
-        return $this;
-    } // setLastName()
+    } // setExpirationDate()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -554,6 +478,14 @@ abstract class User implements ActiveRecordInterface
      */
     public function hasOnlyDefaultValues()
     {
+            if ($this->enabled !== 0) {
+                return false;
+            }
+
+            if ($this->activation_key !== '0') {
+                return false;
+            }
+
         // otherwise, everything was equal, so return TRUE
         return true;
     } // hasOnlyDefaultValues()
@@ -580,23 +512,20 @@ abstract class User implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : AccountTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
             $this->id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserTableMap::translateFieldName('Username', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->username = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : AccountTableMap::translateFieldName('Enabled', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->enabled = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : UserTableMap::translateFieldName('Email', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->email = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : AccountTableMap::translateFieldName('ActivationKey', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->activation_key = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserTableMap::translateFieldName('Password', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->password = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserTableMap::translateFieldName('FirstName', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->first_name = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserTableMap::translateFieldName('LastName', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->last_name = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : AccountTableMap::translateFieldName('ExpirationDate', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
+            $this->expiration_date = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -605,10 +534,10 @@ abstract class User implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 6; // 6 = UserTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 4; // 4 = AccountTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException(sprintf('Error populating %s object', '\\Splendr\\App\\Model\\User'), 0, $e);
+            throw new PropelException(sprintf('Error populating %s object', '\\Splendr\\App\\Model\\Account'), 0, $e);
         }
     }
 
@@ -627,6 +556,9 @@ abstract class User implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
+        if ($this->aUser !== null && $this->id !== $this->aUser->getId()) {
+            $this->aUser = null;
+        }
     } // ensureConsistency
 
     /**
@@ -650,13 +582,13 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(AccountTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildUserQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildAccountQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -666,10 +598,7 @@ abstract class User implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->singleLoginAttempt = null;
-
-            $this->singleAccount = null;
-
+            $this->aUser = null;
         } // if (deep)
     }
 
@@ -679,8 +608,8 @@ abstract class User implements ActiveRecordInterface
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see User::setDeleted()
-     * @see User::isDeleted()
+     * @see Account::setDeleted()
+     * @see Account::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -689,11 +618,11 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(AccountTableMap::DATABASE_NAME);
         }
 
         $con->transaction(function () use ($con) {
-            $deleteQuery = ChildUserQuery::create()
+            $deleteQuery = ChildAccountQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -724,7 +653,7 @@ abstract class User implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(AccountTableMap::DATABASE_NAME);
         }
 
         return $con->transaction(function () use ($con) {
@@ -743,7 +672,7 @@ abstract class User implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                UserTableMap::addInstanceToPool($this);
+                AccountTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -769,6 +698,18 @@ abstract class User implements ActiveRecordInterface
         if (!$this->alreadyInSave) {
             $this->alreadyInSave = true;
 
+            // We call the save method on the following object(s) if they
+            // were passed to this object by their corresponding set
+            // method.  This object relates to these object(s) by a
+            // foreign key reference.
+
+            if ($this->aUser !== null) {
+                if ($this->aUser->isModified() || $this->aUser->isNew()) {
+                    $affectedRows += $this->aUser->save($con);
+                }
+                $this->setUser($this->aUser);
+            }
+
             if ($this->isNew() || $this->isModified()) {
                 // persist changes
                 if ($this->isNew()) {
@@ -778,18 +719,6 @@ abstract class User implements ActiveRecordInterface
                     $affectedRows += $this->doUpdate($con);
                 }
                 $this->resetModified();
-            }
-
-            if ($this->singleLoginAttempt !== null) {
-                if (!$this->singleLoginAttempt->isDeleted() && ($this->singleLoginAttempt->isNew() || $this->singleLoginAttempt->isModified())) {
-                    $affectedRows += $this->singleLoginAttempt->save($con);
-                }
-            }
-
-            if ($this->singleAccount !== null) {
-                if (!$this->singleAccount->isDeleted() && ($this->singleAccount->isNew() || $this->singleAccount->isModified())) {
-                    $affectedRows += $this->singleAccount->save($con);
-                }
             }
 
             $this->alreadyInSave = false;
@@ -812,33 +741,23 @@ abstract class User implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[UserTableMap::COL_ID] = true;
-        if (null !== $this->id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . UserTableMap::COL_ID . ')');
-        }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(UserTableMap::COL_ID)) {
+        if ($this->isColumnModified(AccountTableMap::COL_ID)) {
             $modifiedColumns[':p' . $index++]  = 'id';
         }
-        if ($this->isColumnModified(UserTableMap::COL_USERNAME)) {
-            $modifiedColumns[':p' . $index++]  = 'username';
+        if ($this->isColumnModified(AccountTableMap::COL_ENABLED)) {
+            $modifiedColumns[':p' . $index++]  = 'enabled';
         }
-        if ($this->isColumnModified(UserTableMap::COL_EMAIL)) {
-            $modifiedColumns[':p' . $index++]  = 'email';
+        if ($this->isColumnModified(AccountTableMap::COL_ACTIVATION_KEY)) {
+            $modifiedColumns[':p' . $index++]  = 'activation_key';
         }
-        if ($this->isColumnModified(UserTableMap::COL_PASSWORD)) {
-            $modifiedColumns[':p' . $index++]  = 'password';
-        }
-        if ($this->isColumnModified(UserTableMap::COL_FIRST_NAME)) {
-            $modifiedColumns[':p' . $index++]  = 'first_name';
-        }
-        if ($this->isColumnModified(UserTableMap::COL_LAST_NAME)) {
-            $modifiedColumns[':p' . $index++]  = 'last_name';
+        if ($this->isColumnModified(AccountTableMap::COL_EXPIRATION_DATE)) {
+            $modifiedColumns[':p' . $index++]  = 'expiration_date';
         }
 
         $sql = sprintf(
-            'INSERT INTO User (%s) VALUES (%s)',
+            'INSERT INTO Accounts (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -850,20 +769,14 @@ abstract class User implements ActiveRecordInterface
                     case 'id':
                         $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
                         break;
-                    case 'username':
-                        $stmt->bindValue($identifier, $this->username, PDO::PARAM_STR);
+                    case 'enabled':
+                        $stmt->bindValue($identifier, $this->enabled, PDO::PARAM_INT);
                         break;
-                    case 'email':
-                        $stmt->bindValue($identifier, $this->email, PDO::PARAM_STR);
+                    case 'activation_key':
+                        $stmt->bindValue($identifier, $this->activation_key, PDO::PARAM_STR);
                         break;
-                    case 'password':
-                        $stmt->bindValue($identifier, $this->password, PDO::PARAM_STR);
-                        break;
-                    case 'first_name':
-                        $stmt->bindValue($identifier, $this->first_name, PDO::PARAM_STR);
-                        break;
-                    case 'last_name':
-                        $stmt->bindValue($identifier, $this->last_name, PDO::PARAM_STR);
+                    case 'expiration_date':
+                        $stmt->bindValue($identifier, $this->expiration_date ? $this->expiration_date->format("Y-m-d H:i:s") : null, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -872,13 +785,6 @@ abstract class User implements ActiveRecordInterface
             Propel::log($e->getMessage(), Propel::LOG_ERR);
             throw new PropelException(sprintf('Unable to execute INSERT statement [%s]', $sql), 0, $e);
         }
-
-        try {
-            $pk = $con->lastInsertId();
-        } catch (Exception $e) {
-            throw new PropelException('Unable to get autoincrement id.', 0, $e);
-        }
-        $this->setId($pk);
 
         $this->setNew(false);
     }
@@ -911,7 +817,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = UserTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = AccountTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -931,19 +837,13 @@ abstract class User implements ActiveRecordInterface
                 return $this->getId();
                 break;
             case 1:
-                return $this->getUsername();
+                return $this->getEnabled();
                 break;
             case 2:
-                return $this->getEmail();
+                return $this->getActivationKey();
                 break;
             case 3:
-                return $this->getPassword();
-                break;
-            case 4:
-                return $this->getFirstName();
-                break;
-            case 5:
-                return $this->getLastName();
+                return $this->getExpirationDate();
                 break;
             default:
                 return null;
@@ -969,54 +869,45 @@ abstract class User implements ActiveRecordInterface
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
 
-        if (isset($alreadyDumpedObjects['User'][$this->hashCode()])) {
+        if (isset($alreadyDumpedObjects['Account'][$this->hashCode()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['User'][$this->hashCode()] = true;
-        $keys = UserTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['Account'][$this->hashCode()] = true;
+        $keys = AccountTableMap::getFieldNames($keyType);
         $result = array(
             $keys[0] => $this->getId(),
-            $keys[1] => $this->getUsername(),
-            $keys[2] => $this->getEmail(),
-            $keys[3] => $this->getPassword(),
-            $keys[4] => $this->getFirstName(),
-            $keys[5] => $this->getLastName(),
+            $keys[1] => $this->getEnabled(),
+            $keys[2] => $this->getActivationKey(),
+            $keys[3] => $this->getExpirationDate(),
         );
+
+        $utc = new \DateTimeZone('utc');
+        if ($result[$keys[3]] instanceof \DateTime) {
+            // When changing timezone we don't want to change existing instances
+            $dateTime = clone $result[$keys[3]];
+            $result[$keys[3]] = $dateTime->setTimezone($utc)->format('Y-m-d\TH:i:s\Z');
+        }
+
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
             $result[$key] = $virtualColumn;
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->singleLoginAttempt) {
+            if (null !== $this->aUser) {
 
                 switch ($keyType) {
                     case TableMap::TYPE_CAMELNAME:
-                        $key = 'loginAttempt';
+                        $key = 'user';
                         break;
                     case TableMap::TYPE_FIELDNAME:
-                        $key = 'LoginAttempt';
+                        $key = 'User';
                         break;
                     default:
-                        $key = 'LoginAttempt';
+                        $key = 'User';
                 }
 
-                $result[$key] = $this->singleLoginAttempt->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
-            }
-            if (null !== $this->singleAccount) {
-
-                switch ($keyType) {
-                    case TableMap::TYPE_CAMELNAME:
-                        $key = 'account';
-                        break;
-                    case TableMap::TYPE_FIELDNAME:
-                        $key = 'Accounts';
-                        break;
-                    default:
-                        $key = 'Account';
-                }
-
-                $result[$key] = $this->singleAccount->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
+                $result[$key] = $this->aUser->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
         }
 
@@ -1032,11 +923,11 @@ abstract class User implements ActiveRecordInterface
      *                one of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME
      *                TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM.
      *                Defaults to TableMap::TYPE_PHPNAME.
-     * @return $this|\Splendr\App\Model\User
+     * @return $this|\Splendr\App\Model\Account
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = UserTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = AccountTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -1047,7 +938,7 @@ abstract class User implements ActiveRecordInterface
      *
      * @param  int $pos position in xml schema
      * @param  mixed $value field value
-     * @return $this|\Splendr\App\Model\User
+     * @return $this|\Splendr\App\Model\Account
      */
     public function setByPosition($pos, $value)
     {
@@ -1056,19 +947,13 @@ abstract class User implements ActiveRecordInterface
                 $this->setId($value);
                 break;
             case 1:
-                $this->setUsername($value);
+                $this->setEnabled($value);
                 break;
             case 2:
-                $this->setEmail($value);
+                $this->setActivationKey($value);
                 break;
             case 3:
-                $this->setPassword($value);
-                break;
-            case 4:
-                $this->setFirstName($value);
-                break;
-            case 5:
-                $this->setLastName($value);
+                $this->setExpirationDate($value);
                 break;
         } // switch()
 
@@ -1094,25 +979,19 @@ abstract class User implements ActiveRecordInterface
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = UserTableMap::getFieldNames($keyType);
+        $keys = AccountTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
             $this->setId($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
-            $this->setUsername($arr[$keys[1]]);
+            $this->setEnabled($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setEmail($arr[$keys[2]]);
+            $this->setActivationKey($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setPassword($arr[$keys[3]]);
-        }
-        if (array_key_exists($keys[4], $arr)) {
-            $this->setFirstName($arr[$keys[4]]);
-        }
-        if (array_key_exists($keys[5], $arr)) {
-            $this->setLastName($arr[$keys[5]]);
+            $this->setExpirationDate($arr[$keys[3]]);
         }
     }
 
@@ -1133,7 +1012,7 @@ abstract class User implements ActiveRecordInterface
      * @param string $data The source data to import from
      * @param string $keyType The type of keys the array uses.
      *
-     * @return $this|\Splendr\App\Model\User The current object, for fluid interface
+     * @return $this|\Splendr\App\Model\Account The current object, for fluid interface
      */
     public function importFrom($parser, $data, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1153,25 +1032,19 @@ abstract class User implements ActiveRecordInterface
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(UserTableMap::DATABASE_NAME);
+        $criteria = new Criteria(AccountTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(UserTableMap::COL_ID)) {
-            $criteria->add(UserTableMap::COL_ID, $this->id);
+        if ($this->isColumnModified(AccountTableMap::COL_ID)) {
+            $criteria->add(AccountTableMap::COL_ID, $this->id);
         }
-        if ($this->isColumnModified(UserTableMap::COL_USERNAME)) {
-            $criteria->add(UserTableMap::COL_USERNAME, $this->username);
+        if ($this->isColumnModified(AccountTableMap::COL_ENABLED)) {
+            $criteria->add(AccountTableMap::COL_ENABLED, $this->enabled);
         }
-        if ($this->isColumnModified(UserTableMap::COL_EMAIL)) {
-            $criteria->add(UserTableMap::COL_EMAIL, $this->email);
+        if ($this->isColumnModified(AccountTableMap::COL_ACTIVATION_KEY)) {
+            $criteria->add(AccountTableMap::COL_ACTIVATION_KEY, $this->activation_key);
         }
-        if ($this->isColumnModified(UserTableMap::COL_PASSWORD)) {
-            $criteria->add(UserTableMap::COL_PASSWORD, $this->password);
-        }
-        if ($this->isColumnModified(UserTableMap::COL_FIRST_NAME)) {
-            $criteria->add(UserTableMap::COL_FIRST_NAME, $this->first_name);
-        }
-        if ($this->isColumnModified(UserTableMap::COL_LAST_NAME)) {
-            $criteria->add(UserTableMap::COL_LAST_NAME, $this->last_name);
+        if ($this->isColumnModified(AccountTableMap::COL_EXPIRATION_DATE)) {
+            $criteria->add(AccountTableMap::COL_EXPIRATION_DATE, $this->expiration_date);
         }
 
         return $criteria;
@@ -1189,8 +1062,8 @@ abstract class User implements ActiveRecordInterface
      */
     public function buildPkeyCriteria()
     {
-        $criteria = ChildUserQuery::create();
-        $criteria->add(UserTableMap::COL_ID, $this->id);
+        $criteria = ChildAccountQuery::create();
+        $criteria->add(AccountTableMap::COL_ID, $this->id);
 
         return $criteria;
     }
@@ -1205,8 +1078,15 @@ abstract class User implements ActiveRecordInterface
     {
         $validPk = null !== $this->getId();
 
-        $validPrimaryKeyFKs = 0;
+        $validPrimaryKeyFKs = 1;
         $primaryKeyFKs = [];
+
+        //relation Accounts_fk_ffc53a to table User
+        if ($this->aUser && $hash = spl_object_hash($this->aUser)) {
+            $primaryKeyFKs[] = $hash;
+        } else {
+            $validPrimaryKeyFKs = false;
+        }
 
         if ($validPk) {
             return crc32(json_encode($this->getPrimaryKey(), JSON_UNESCAPED_UNICODE));
@@ -1252,39 +1132,19 @@ abstract class User implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \Splendr\App\Model\User (or compatible) type.
+     * @param      object $copyObj An object of \Splendr\App\Model\Account (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setUsername($this->getUsername());
-        $copyObj->setEmail($this->getEmail());
-        $copyObj->setPassword($this->getPassword());
-        $copyObj->setFirstName($this->getFirstName());
-        $copyObj->setLastName($this->getLastName());
-
-        if ($deepCopy) {
-            // important: temporarily setNew(false) because this affects the behavior of
-            // the getter/setter methods for fkey referrer objects.
-            $copyObj->setNew(false);
-
-            $relObj = $this->getLoginAttempt();
-            if ($relObj) {
-                $copyObj->setLoginAttempt($relObj->copy($deepCopy));
-            }
-
-            $relObj = $this->getAccount();
-            if ($relObj) {
-                $copyObj->setAccount($relObj->copy($deepCopy));
-            }
-
-        } // if ($deepCopy)
-
+        $copyObj->setId($this->getId());
+        $copyObj->setEnabled($this->getEnabled());
+        $copyObj->setActivationKey($this->getActivationKey());
+        $copyObj->setExpirationDate($this->getExpirationDate());
         if ($makeNew) {
             $copyObj->setNew(true);
-            $copyObj->setId(NULL); // this is a auto-increment column, so set to default value
         }
     }
 
@@ -1297,7 +1157,7 @@ abstract class User implements ActiveRecordInterface
      * objects.
      *
      * @param  boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return \Splendr\App\Model\User Clone of current object.
+     * @return \Splendr\App\Model\Account Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1310,89 +1170,49 @@ abstract class User implements ActiveRecordInterface
         return $copyObj;
     }
 
-
     /**
-     * Initializes a collection based on the name of a relation.
-     * Avoids crafting an 'init[$relationName]s' method name
-     * that wouldn't work when StandardEnglishPluralizer is used.
+     * Declares an association between this object and a ChildUser object.
      *
-     * @param      string $relationName The name of the relation to initialize
-     * @return void
-     */
-    public function initRelation($relationName)
-    {
-    }
-
-    /**
-     * Gets a single ChildLoginAttempt object, which is related to this object by a one-to-one relationship.
-     *
-     * @param  ConnectionInterface $con optional connection object
-     * @return ChildLoginAttempt
+     * @param  ChildUser $v
+     * @return $this|\Splendr\App\Model\Account The current object (for fluent API support)
      * @throws PropelException
      */
-    public function getLoginAttempt(ConnectionInterface $con = null)
+    public function setUser(ChildUser $v = null)
     {
-
-        if ($this->singleLoginAttempt === null && !$this->isNew()) {
-            $this->singleLoginAttempt = ChildLoginAttemptQuery::create()->findPk($this->getPrimaryKey(), $con);
+        if ($v === null) {
+            $this->setId(NULL);
+        } else {
+            $this->setId($v->getId());
         }
 
-        return $this->singleLoginAttempt;
-    }
+        $this->aUser = $v;
 
-    /**
-     * Sets a single ChildLoginAttempt object as related to this object by a one-to-one relationship.
-     *
-     * @param  ChildLoginAttempt $v ChildLoginAttempt
-     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
-     * @throws PropelException
-     */
-    public function setLoginAttempt(ChildLoginAttempt $v = null)
-    {
-        $this->singleLoginAttempt = $v;
-
-        // Make sure that that the passed-in ChildLoginAttempt isn't already associated with this object
-        if ($v !== null && $v->getUser(null, false) === null) {
-            $v->setUser($this);
+        // Add binding for other direction of this 1:1 relationship.
+        if ($v !== null) {
+            $v->setAccount($this);
         }
+
 
         return $this;
     }
 
-    /**
-     * Gets a single ChildAccount object, which is related to this object by a one-to-one relationship.
-     *
-     * @param  ConnectionInterface $con optional connection object
-     * @return ChildAccount
-     * @throws PropelException
-     */
-    public function getAccount(ConnectionInterface $con = null)
-    {
-
-        if ($this->singleAccount === null && !$this->isNew()) {
-            $this->singleAccount = ChildAccountQuery::create()->findPk($this->getPrimaryKey(), $con);
-        }
-
-        return $this->singleAccount;
-    }
 
     /**
-     * Sets a single ChildAccount object as related to this object by a one-to-one relationship.
+     * Get the associated ChildUser object
      *
-     * @param  ChildAccount $v ChildAccount
-     * @return $this|\Splendr\App\Model\User The current object (for fluent API support)
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildUser The associated ChildUser object.
      * @throws PropelException
      */
-    public function setAccount(ChildAccount $v = null)
+    public function getUser(ConnectionInterface $con = null)
     {
-        $this->singleAccount = $v;
-
-        // Make sure that that the passed-in ChildAccount isn't already associated with this object
-        if ($v !== null && $v->getUser(null, false) === null) {
-            $v->setUser($this);
+        if ($this->aUser === null && ($this->id !== null)) {
+            $this->aUser = ChildUserQuery::create()->findPk($this->id, $con);
+            // Because this foreign key represents a one-to-one relationship, we will create a bi-directional association.
+            $this->aUser->setAccount($this);
         }
 
-        return $this;
+        return $this->aUser;
     }
 
     /**
@@ -1402,14 +1222,16 @@ abstract class User implements ActiveRecordInterface
      */
     public function clear()
     {
+        if (null !== $this->aUser) {
+            $this->aUser->removeAccount($this);
+        }
         $this->id = null;
-        $this->username = null;
-        $this->email = null;
-        $this->password = null;
-        $this->first_name = null;
-        $this->last_name = null;
+        $this->enabled = null;
+        $this->activation_key = null;
+        $this->expiration_date = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
+        $this->applyDefaultValues();
         $this->resetModified();
         $this->setNew(true);
         $this->setDeleted(false);
@@ -1426,16 +1248,9 @@ abstract class User implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
-            if ($this->singleLoginAttempt) {
-                $this->singleLoginAttempt->clearAllReferences($deep);
-            }
-            if ($this->singleAccount) {
-                $this->singleAccount->clearAllReferences($deep);
-            }
         } // if ($deep)
 
-        $this->singleLoginAttempt = null;
-        $this->singleAccount = null;
+        $this->aUser = null;
     }
 
     /**
@@ -1445,90 +1260,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function __toString()
     {
-        return (string) $this->exportTo(UserTableMap::DEFAULT_STRING_FORMAT);
-    }
-
-    // validate behavior
-
-    /**
-     * Configure validators constraints. The Validator object uses this method
-     * to perform object validation.
-     *
-     * @param ClassMetadata $metadata
-     */
-    static public function loadValidatorMetadata(ClassMetadata $metadata)
-    {
-        $metadata->addPropertyConstraint('username', new Length(array ('max' => 255,)));
-        $metadata->addPropertyConstraint('username', new NotBlank(array ('message' => 'Please enter a username.',)));
-        $metadata->addPropertyConstraint('username', new Unique(array ('message' => 'The entered username is already taken by another user.',)));
-        $metadata->addPropertyConstraint('email', new Length(array ('max' => 255,)));
-        $metadata->addPropertyConstraint('email', new Email(array ('message' => 'Please enter a valid {{ value }} email address.',)));
-        $metadata->addPropertyConstraint('email', new NotBlank(array ('message' => 'Please enter a email address.',)));
-        $metadata->addPropertyConstraint('email', new Unique(array ('message' => 'The entered email is already registered.',)));
-        $metadata->addPropertyConstraint('first_name', new Length(array ('max' => 255,)));
-        $metadata->addPropertyConstraint('first_name', new NotBlank(array ('message' => 'Please enter your first name.',)));
-        $metadata->addPropertyConstraint('last_name', new Length(array ('max' => 255,)));
-        $metadata->addPropertyConstraint('last_name', new NotBlank(array ('message' => 'Please enter your last name.',)));
-        $metadata->addPropertyConstraint('password', new Length(array ('min' => 8,)));
-    }
-
-    /**
-     * Validates the object and all objects related to this table.
-     *
-     * @see        getValidationFailures()
-     * @param      object $validator A Validator class instance
-     * @return     boolean Whether all objects pass validation.
-     */
-    public function validate(ValidatorInterface $validator = null)
-    {
-        if (null === $validator) {
-            if(class_exists('Symfony\\Component\\Validator\\Validator\\LegacyValidator')){
-                $validator = new LegacyValidator(
-                            new ExecutionContextFactory(new DefaultTranslator()),
-                            new ClassMetaDataFactory(new StaticMethodLoader()),
-                            new ConstraintValidatorFactory()
-                );
-            }else{
-                $validator = new Validator(
-                            new ClassMetadataFactory(new StaticMethodLoader()),
-                            new ConstraintValidatorFactory(),
-                            new DefaultTranslator()
-                );
-            }
-        }
-
-        $failureMap = new ConstraintViolationList();
-
-        if (!$this->alreadyInValidation) {
-            $this->alreadyInValidation = true;
-            $retval = null;
-
-
-            $retval = $validator->validate($this);
-            if (count($retval) > 0) {
-                $failureMap->addAll($retval);
-            }
-
-
-            $this->alreadyInValidation = false;
-        }
-
-        $this->validationFailures = $failureMap;
-
-        return (Boolean) (!(count($this->validationFailures) > 0));
-
-    }
-
-    /**
-     * Gets any ConstraintViolation objects that resulted from last call to validate().
-     *
-     *
-     * @return     object ConstraintViolationList
-     * @see        validate()
-     */
-    public function getValidationFailures()
-    {
-        return $this->validationFailures;
+        return (string) $this->exportTo(AccountTableMap::DEFAULT_STRING_FORMAT);
     }
 
     /**
