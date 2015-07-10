@@ -119,6 +119,10 @@ class BoardController {
 
         $board = ProductBoardQuery::create()->findOneById($id);
         if (!is_null($board)) {
+            foreach($board->getProducts() as $product) {
+                $product->setProductBoard(null);
+                $product->save();
+            }
             $board->delete();
         }
 

@@ -37,16 +37,16 @@ class AmazonProductScrapper implements ProductScraper {
         if (is_null($titleQuery) || is_null($imgQuery) || is_null($priceQuery)) return null;
 
         if ($titleQuery->length === 0) return null;
-        $title = $titleQuery[0]->firstChild->wholeText;
+        $title = $titleQuery->item(0)->firstChild->wholeText;
         $title = filter_var($title, FILTER_SANITIZE_SPECIAL_CHARS);
 
         if ($imgQuery->length === 0 ) return null;
-        $img = $imgQuery[0]->getAttribute('src');
+        $img = $imgQuery->item(0)->getAttribute('src');
         $img = filter_var($img, FILTER_SANITIZE_URL);
         $img = filter_var($img, FILTER_VALIDATE_URL);
 
         if ($priceQuery->length === 0) return null;
-        $price = $priceQuery[0]->firstChild->wholeText;
+        $price = $priceQuery->item(0)->firstChild->wholeText;
         $price = str_replace(',', '.', $price);
         $price = filter_var($price, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $price = filter_var($price, FILTER_VALIDATE_FLOAT );

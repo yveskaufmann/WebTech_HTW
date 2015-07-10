@@ -10,10 +10,10 @@
                     <h2 class="section-heading"><span class="glyphicon glyphicon-heart"></span> from the Splendr team!</h2>
                 </div>
                 <div class="col-lg-4 col-lg-offset-2 text-center">
-                    <p> <a href="<?= URL::getControllerURL('index', 'contact') ?>">Contact</a></p>
+                    <p> <a href="<?= URL::getControllerURL('Index', 'contact') ?>">Contact</a></p>
                 </div>
                 <div class="col-lg-4 text-center">
-                    <p><a href="<?= URL::getControllerURL('index', 'imprint') ?>">Imprint</a></p>
+                    <p><a href="<?= URL::getControllerURL('Index', 'imprint') ?>">Imprint</a></p>
                 </div>
             </div>
         </div>

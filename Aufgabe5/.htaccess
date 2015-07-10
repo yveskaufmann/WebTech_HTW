@@ -3,7 +3,7 @@ Options -Indexes
 
 RewriteEngine On
 # Enable me for the deploying on the studi server
-#RewriteBase /~s0544361/Aufgabe4
+#RewriteBase /~s0544361/Aufgabe5
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ ./index.php [L]

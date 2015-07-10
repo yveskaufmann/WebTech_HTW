@@ -1,11 +1,16 @@
 <?php
     use \Splendr\App\Controller\ProductController;
+    use Splendr\App\Model\ProductBoard;
     use \Splendr\Core\Helper\Notification;
     use Splendr\Core\Helper\URL;
     use Splendr\App\Model\Product;
 
     $product = $this->getData(ProductController::PRODUCT_PARAM, new Product());
     $currentBoard = $product->getProductBoard();
+    if ( is_null($currentBoard)) {
+        $currentBoard = new ProductBoard();
+    }
+
     $boards = $this->getData(ProductController::PRODUCT_BOARDS_PARAM);
     $isAddByURL = $this->getData(ProductController::QUERY_BY_URL_MODE_PARAM);
     $productURL = ($isAddByURL) ? $this->getData(ProductController::URL_PARAM) : '';
